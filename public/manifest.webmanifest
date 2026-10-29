@@ -1,0 +1,13 @@
+{
+  "name": "Jaka to melodia?",
+  "short_name": "Jaka to melodia?",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#0b0f2e",
+  "theme_color": "#0b0f2e",
+  "icons": [
+    { "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
