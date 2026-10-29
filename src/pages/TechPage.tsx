@@ -4,11 +4,13 @@ import { PresencePanel } from '../components/PresencePanel'
 import { Shell } from '../components/Shell'
 import { useBuzzes } from '../lib/buzzTest'
 import { usePresence } from '../lib/presence'
+import { useStationNames } from '../lib/stations'
 
 /** Panel ekipy od live (laptop z OBS / vMix na backstage'u). */
 export function TechPage() {
   usePresence('tech')
   const buzzes = useBuzzes()
+  const names = useStationNames()
   const [copied, setCopied] = useState(false)
 
   const streamUrl = `${location.origin}${location.pathname}#/stream`
@@ -44,7 +46,7 @@ export function TechPage() {
 
         <section className="card">
           <h2 className="card__title">Zgłoszenia (podgląd)</h2>
-          <BuzzOrder buzzes={buzzes} />
+          <BuzzOrder buzzes={buzzes} names={names} />
         </section>
       </div>
     </Shell>

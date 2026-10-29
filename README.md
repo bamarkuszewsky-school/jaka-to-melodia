@@ -20,7 +20,7 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 3. W terminalu WebStorma:
    ```bash
    npm install
-   
+   npm run dev
    ```
 4. Otwórz adres z terminala (zwykle `http://localhost:5173`).
 

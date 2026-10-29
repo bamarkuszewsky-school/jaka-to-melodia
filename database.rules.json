@@ -2,14 +2,12 @@
   "rules": {
     ".read": false,
     ".write": false,
-
     "obecnosc": {
       ".read": "auth != null",
       "$klucz": {
         ".write": "auth != null && ((auth.token.email === 'host@cyfroweszkoly.pl' && $klucz === 'host') || (auth.token.email === 'tablica@cyfroweszkoly.pl' && $klucz === 'tablica') || (auth.token.email === 'techsupport@cyfroweszkoly.pl' && ($klucz === 'tech' || $klucz === 'stream')) || (auth.token.email === 'zawodnik@cyfroweszkoly.pl' && ($klucz === 'stanowisko1' || $klucz === 'stanowisko2' || $klucz === 'stanowisko3')))"
       }
     },
-
     "test": {
       ".read": "auth != null",
       ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'",
@@ -20,10 +18,20 @@
         }
       }
     },
-
     "gra": {
       ".read": "auth != null",
-      ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'"
+      ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'",
+      "stanowiska": {
+        "$numer": {
+          ".validate": "$numer === '1' || $numer === '2' || $numer === '3'",
+          "nazwa": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
     }
   }
 }
