@@ -4,6 +4,7 @@ import { pressBuzz, useBuzzes } from '../lib/buzzTest'
 import { usePresence } from '../lib/presence'
 import { STANOWISKA, type Stanowisko } from '../lib/roles'
 import { useWakeLock } from '../lib/screen'
+import { hasClassName, stationLabel, useStationNames } from '../lib/stations'
 
 const STORAGE_KEY = 'jtm-stanowisko'
 
@@ -19,6 +20,7 @@ function readStanowisko(): Stanowisko | null {
 /** Widok zawodnika (iPad): wybór stanowiska, potem duży przycisk. */
 export function PlayerPage() {
   const [stanowisko, setStanowisko] = useState<Stanowisko | null>(readStanowisko)
+  const names = useStationNames()
   usePresence(stanowisko ? `stanowisko${stanowisko}` : null)
   useWakeLock()
 
@@ -40,7 +42,8 @@ export function PlayerPage() {
           <div className="station-picker">
             {STANOWISKA.map((s) => (
               <button key={s} type="button" className="station-pick" onClick={() => choose(s)}>
-                {s}
+                <span className="station-pick__num">{s}</span>
+                {hasClassName(names, s) && <span className="station-pick__class">{names[s]}</span>}
               </button>
             ))}
           </div>
@@ -50,13 +53,24 @@ export function PlayerPage() {
   }
 
   return (
-    <Shell title={`Stanowisko ${stanowisko}`} subtitle="Zawodnik" hideBarInFullscreen>
-      <Buzzer stanowisko={stanowisko} onChangeStation={() => choose(null)} />
+    <Shell
+      title={stationLabel(names, stanowisko)}
+      subtitle={hasClassName(names, stanowisko) ? `Stanowisko ${stanowisko}` : 'Zawodnik'}
+      hideBarInFullscreen
+    >
+      <Buzzer stanowisko={stanowisko} label={stationLabel(names, stanowisko)} onChangeStation={() => choose(null)} />
     </Shell>
   )
 }
 
-function Buzzer({ stanowisko, onChangeStation }: { stanowisko: Stanowisko; onChangeStation: () => void }) {
+interface BuzzerProps {
+  stanowisko: Stanowisko
+  /** Nazwa klasy (albo „Stanowisko N”) — duży napis nad przyciskiem. */
+  label: string
+  onChangeStation: () => void
+}
+
+function Buzzer({ stanowisko, label, onChangeStation }: BuzzerProps) {
   const buzzes = useBuzzes()
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -82,7 +96,10 @@ function Buzzer({ stanowisko, onChangeStation }: { stanowisko: Stanowisko; onCha
 
   return (
     <div className="buzzer-screen">
-      <p className={`buzzer-state ${pressed && myIndex === 0 ? 'is-first' : ''}`}>{state}</p>
+      <div className="buzzer-head">
+        <h1 className="buzzer-class">{label}</h1>
+        <p className={`buzzer-state ${pressed && myIndex === 0 ? 'is-first' : ''}`}>{state}</p>
+      </div>
       <button
         type="button"
         className={`buzzer ${pressed ? (myIndex === 0 ? 'buzzer--first' : 'buzzer--locked') : ''}`}

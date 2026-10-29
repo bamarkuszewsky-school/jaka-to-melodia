@@ -466,6 +466,47 @@ h3 {
   flex-wrap: wrap;
 }
 
+.card__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.station-names {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.station-name {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.station-name__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.station-name__num {
+  font-weight: 600;
+}
+
+.station-name__ipad {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.station-name__ipad.is-online {
+  color: var(--ok);
+}
+
+.station-names__hint {
+  min-height: 1.4em;
+}
+
 .card__title {
   font-size: 20px;
   font-weight: 700;
@@ -598,14 +639,34 @@ h3 {
 .station-pick {
   width: 160px;
   height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   border-radius: 32px;
   border: 1px solid var(--line);
   background: linear-gradient(160deg, var(--surface-2), var(--surface));
   color: var(--text);
   font-family: var(--font-display);
+  cursor: pointer;
+}
+
+.station-pick__num {
   font-size: 80px;
   font-weight: 800;
-  cursor: pointer;
+  line-height: 1;
+}
+
+.station-pick__class {
+  max-width: 100%;
+  padding: 0 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .station-pick:active {
@@ -623,6 +684,22 @@ h3 {
   -webkit-user-select: none;
 }
 
+.buzzer-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.buzzer-class {
+  font-size: clamp(40px, 8vw, 88px);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
 .buzzer-state {
   margin: 0;
   font-family: var(--font-display);
@@ -637,7 +714,7 @@ h3 {
 
 .buzzer {
   position: relative;
-  width: min(62vmin, 520px);
+  width: min(52vmin, 520px);
   aspect-ratio: 1;
   border-radius: 50%;
   border: 0;
@@ -754,10 +831,18 @@ h3 {
 }
 
 .board-station__num {
+  max-width: 100%;
   font-family: var(--font-display);
   font-size: clamp(64px, 9vw, 150px);
   font-weight: 800;
   line-height: 1;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Dłuższe nazwy klas (np. „Klasa 7A”) — mniejsza czcionka, żeby zmieściły się w kafelku */
+.board-station__num.is-long {
+  font-size: clamp(40px, 5vw, 88px);
 }
 
 .board-station__label {
@@ -838,6 +923,10 @@ h3 {
 /* ---------- Telefon / wąskie ekrany ---------- */
 
 @media (max-width: 640px) {
+  .station-names {
+    grid-template-columns: 1fr;
+  }
+
   .roles {
     grid-template-columns: 1fr;
   }

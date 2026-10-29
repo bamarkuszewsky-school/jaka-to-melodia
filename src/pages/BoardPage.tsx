@@ -3,6 +3,7 @@ import { useBuzzes } from '../lib/buzzTest'
 import { usePresence, usePresenceList } from '../lib/presence'
 import { STANOWISKA } from '../lib/roles'
 import { useWakeLock } from '../lib/screen'
+import { hasClassName, useStationNames } from '../lib/stations'
 
 /** Duży ekran dla widowni (tablica z Androidem). Tylko wyświetla. */
 export function BoardPage() {
@@ -10,6 +11,7 @@ export function BoardPage() {
   useWakeLock()
   const buzzes = useBuzzes()
   const online = usePresenceList()
+  const names = useStationNames()
 
   return (
     <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
@@ -25,7 +27,10 @@ export function BoardPage() {
             const isOnline = Boolean(online[`stanowisko${s}`])
             return (
               <div key={s} className={`board-station ${cls}`}>
-                <span className="board-station__num">{s}</span>
+                {/* Nazwa klasy zamiast numeru; numer tylko, gdy host jeszcze nie wpisał nazwy */}
+                <span className={`board-station__num ${names[s].trim().length > 4 ? 'is-long' : ''}`}>
+                  {hasClassName(names, s) ? names[s] : s}
+                </span>
                 <span className="board-station__label">{idx === 0 ? 'Pierwszy!' : isOnline ? 'Gotowy' : 'Czeka na iPada'}</span>
               </div>
             )
