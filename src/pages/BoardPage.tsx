@@ -1,5 +1,7 @@
+import { Round1Board } from '../components/board/Round1Board'
 import { Shell } from '../components/Shell'
 import { useBuzzes } from '../lib/buzzTest'
+import { useGame } from '../lib/game/state'
 import { usePresence, usePresenceList } from '../lib/presence'
 import { STANOWISKA } from '../lib/roles'
 import { useWakeLock } from '../lib/screen'
@@ -12,6 +14,16 @@ export function BoardPage() {
   const buzzes = useBuzzes()
   const online = usePresenceList()
   const names = useStationNames()
+  const game = useGame()
+
+  // Trwa runda 1 → plansza gry. Inaczej ekran oczekiwania z klasami (i test przycisków).
+  if (game.runda === 1 && game.runda1) {
+    return (
+      <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
+        <Round1Board game={game} names={names} />
+      </Shell>
+    )
+  }
 
   return (
     <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
