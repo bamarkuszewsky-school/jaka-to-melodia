@@ -6,5 +6,14 @@
     { "haslo": "Skoki",          "tytul": "Melodia testowa 3", "wykonawca": "Generator tonów", "plik": "test-r1-03.mp3", "start": 0 },
     { "haslo": "Dzwoneczki",     "tytul": "Melodia testowa 4", "wykonawca": "Generator tonów", "plik": "test-r1-04.mp3", "start": 0 },
     { "haslo": "Wolny marsz",    "tytul": "Melodia testowa 5", "wykonawca": "Generator tonów", "plik": "test-r1-05.mp3", "start": 0 }
+  ],
+  "runda2": [
+    { "haslo": "Echo",           "tytul": "Melodia testowa 6", "wykonawca": "Generator tonów", "plik": "test-r2-01.mp3", "start": 0 },
+    { "haslo": "Pozytywka",      "tytul": "Melodia testowa 7", "wykonawca": "Generator tonów", "plik": "test-r2-02.mp3", "start": 0 },
+    { "haslo": "Basy",           "tytul": "Melodia testowa 8", "wykonawca": "Generator tonów", "plik": "test-r2-03.mp3", "start": 0 }
+  ],
+  "dogrywka2": [
+    { "haslo": "Syrena",         "tytul": "Melodia testowa 9",  "wykonawca": "Generator tonów", "plik": "test-d2-01.mp3", "start": 0 },
+    { "haslo": "Kukułka",        "tytul": "Melodia testowa 10", "wykonawca": "Generator tonów", "plik": "test-d2-02.mp3", "start": 0 }
   ]
 }

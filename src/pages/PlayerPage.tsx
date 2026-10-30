@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Shell } from '../components/Shell'
 import { pressBuzz, useBuzzes } from '../lib/buzzTest'
 import { buzzIn } from '../lib/game/playerActions'
-import { ANSWER_MS, remaining, secondsLeft } from '../lib/game/rules'
+import { ANSWER_MS, currentChooser, remaining, secondsLeft } from '../lib/game/rules'
 import { useGame, useServerNow } from '../lib/game/state'
 import type { GameState, StationKey } from '../lib/game/types'
 import { usePresence } from '../lib/presence'
@@ -135,10 +135,13 @@ interface GameBuzzerProps {
 }
 
 function GameBuzzer({ me, stanowisko, label, game, names, onChangeStation }: GameBuzzerProps) {
-  const { pytanie, runda1, zgloszenie } = game
+  const { pytanie, zgloszenie } = game
+  const chooser = currentChooser(game)
   const [sending, setSending] = useState(false)
   const now = useServerNow(pytanie?.faza === 'odpowiedz')
 
+  const out = game.runda2?.odpada === me
+  const notPlaying = Boolean(pytanie?.poza?.[me])
   const blocked = Boolean(pytanie?.zablokowane?.[me])
   const canBuzz = pytanie?.faza === 'gra' && !blocked && !zgloszenie
 
@@ -158,9 +161,16 @@ function GameBuzzer({ me, stanowisko, label, game, names, onChangeStation }: Gam
   let variant: Variant = 'idle'
   let gold = false
 
-  if (!pytanie) {
-    state = runda1?.wybiera === me ? 'Wybierasz hasło!' : runda1?.wybiera ? `Hasło wybiera ${labelForKey(names, runda1.wybiera)}` : 'Czekaj na hasło'
-    gold = runda1?.wybiera === me
+  if (out) {
+    state = `Koniec gry — ${game.punkty[me]} pkt. Dziękujemy!`
+    variant = 'locked'
+  } else if (!pytanie) {
+    if (game.runda2?.odpada) state = 'Przechodzicie do rundy 3!'
+    else state = chooser === me ? 'Wybierasz hasło!' : chooser ? `Hasło wybiera ${labelForKey(names, chooser)}` : 'Czekaj na hasło'
+    gold = chooser === me || Boolean(game.runda2?.odpada)
+  } else if (notPlaying) {
+    state = 'Dogrywka — tym razem nie gracie'
+    variant = 'locked'
   } else if (pytanie.faza === 'wybrane') {
     state = blocked ? 'Zablokowany do końca piosenki' : 'Przygotuj się…'
     variant = blocked ? 'locked' : 'idle'

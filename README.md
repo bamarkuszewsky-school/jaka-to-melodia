@@ -4,7 +4,7 @@ Teleturniej muzyczny w przeglądarce: tablica dla widowni, panel hosta, przycisk
 
 Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Database**, logowanie ról przez **Firebase Authentication**, hosting na **GitHub Pages**.
 
-## Co już działa (wersja 0.3)
+## Co już działa (wersja 0.4)
 
 - Ekran startowy z wyborem roli: **Zawodnik, Host, Tech Support, Tablica**.
 - Logowanie hasłem — każda rola ma własne konto w Firebase.
@@ -14,6 +14,7 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 - Pełny ekran, blokada wygaszania ekranu (tam, gdzie przeglądarka pozwala).
 - **Nazwy klas na stanowiskach** — host wpisuje je w panelu, widać je wszędzie.
 - **Runda 1** według zasad TVP (punkty zamiast złotówek, 10 s na odpowiedź zamiast 5 s).
+- **Runda 2** z malejącą stawką, eliminacją i dogrywką.
 
 ## Runda 1 — jak to działa
 
@@ -27,6 +28,16 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 7. Jeśli przez 15 s nikt się nie zgłosi (albo wszyscy się pomylą) — host klika **Odsłoń tytuł**.
 
 Wartość punktów liczy serwer (czas od startu muzyki do zgłoszenia), więc opóźnienia Wi‑Fi nie zmieniają wyniku.
+
+## Runda 2 — jak to działa
+
+1. Po rundzie 1 host klika **Rozpocznij rundę 2** — punkty zostają, na tablicy 3 hasła.
+2. Pierwsze hasło wybiera klasa z **najmniejszą liczbą punktów** (potem — kto ostatnio odgadł).
+3. Wartość **maleje od 200 do 100 pkt** (co 10 pkt, co 1,5 s) — im szybciej, tym więcej.
+4. Zła odpowiedź: klasa zablokowana, a muzyka **gra dalej od miejsca zatrzymania** — pozostali walczą o aktualną, już niższą stawkę.
+5. Po 3 hasłach odpada klasa z najmniejszą liczbą punktów; host klika **Ogłoś wyniki na tablicy**.
+6. **Remis na ostatnim miejscu** → dogrywka (zasady rundy 2, bez punktów). Kategorię wybiera bezpieczna klasa, która sama nie gra. Kto odgadnie, przechodzi dalej. Hasła dogrywki są w liście `dogrywka2`.
+7. Gdyby zabrakło haseł dogrywki — „Rozstrzygnij ręcznie” w panelu hosta.
 
 ## Edycja: folder z pytaniami i muzyką
 
@@ -42,6 +53,12 @@ Wzór pliku jest w [`przyklad/pytania.json`](przyklad/pytania.json):
   "edycja": "Edycja 1",
   "runda1": [
     { "haslo": "Królowa popu", "tytul": "…", "wykonawca": "…", "plik": "e01-r1-01.mp3", "start": 0 }
+  ],
+  "runda2": [
+    { "haslo": "Filmowy hit", "tytul": "…", "wykonawca": "…", "plik": "e01-r2-01.mp3", "start": 0 }
+  ],
+  "dogrywka2": [
+    { "haslo": "Z bajki", "tytul": "…", "wykonawca": "…", "plik": "e01-d2-01.mp3", "start": 0 }
   ]
 }
 ```
@@ -53,7 +70,7 @@ Wzór pliku jest w [`przyklad/pytania.json`](przyklad/pytania.json):
 | `plik` | Nazwa pliku MP3 w tym samym folderze (najlepiej numer, np. `e01-r1-01.mp3`) |
 | `start` | Od której sekundy grać (0 = początek utworu; można pominąć) |
 
-W rundzie 1 musi być dokładnie 5 haseł. Po odświeżeniu strony host wybiera folder ponownie — stan gry i punkty zostają w bazie.
+Runda 1: dokładnie 5 haseł. Runda 2: dokładnie 3 hasła. Dogrywka: od 0 do 5 haseł (zalecane 2–3). Po odświeżeniu strony host wybiera folder ponownie — stan gry i punkty zostają w bazie.
 
 ## Uruchomienie u siebie (WebStorm)
 
@@ -115,7 +132,7 @@ Przydatne komendy:
 src/
   lib/        Firebase, role, logowanie, obecność urządzeń, pełny ekran, test przycisków
   lib/game/   Zasady i stan gry: punktacja, pytania, akcje hosta i zawodnika, odtwarzacz
-  components/ Rama widoków, ochrona tras, panele (host/, board/ — runda 1)
+  components/ Rama widoków, ochrona tras, panele (host/, board/ — rundy 1–2)
   pages/      Ekran startowy, logowanie i pięć widoków
 przyklad/pytania.json Wzór pliku z pytaniami (bez prawdziwych odpowiedzi)
 database.rules.json   Reguły dostępu do bazy (wklejane w konsoli Firebase)

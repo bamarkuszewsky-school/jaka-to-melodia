@@ -30,3 +30,26 @@ describe('parseQuestionSet', () => {
     expect(() => parseQuestionSet(raw)).toThrow('Runda 1, hasło 2: brakuje pola „tytul”.')
   })
 })
+
+describe('runda 2 i dogrywka w pytania.json', () => {
+  it('wczytuje 3 hasła rundy 2 i hasła dogrywki', () => {
+    const set = parseQuestionSet(example)
+    expect(set.runda2).toHaveLength(3)
+    expect(set.dogrywka2).toHaveLength(2)
+  })
+
+  it('plik bez rundy 2 nadal działa (runda 1 z wersji 0.3)', () => {
+    const raw = structuredClone(example)
+    delete raw.runda2
+    delete raw.dogrywka2
+    const set = parseQuestionSet(raw)
+    expect(set.runda2).toEqual([])
+    expect(set.dogrywka2).toEqual([])
+  })
+
+  it('runda 2 musi mieć dokładnie 3 hasła', () => {
+    const raw = structuredClone(example)
+    raw.runda2.push(raw.runda2[0])
+    expect(() => parseQuestionSet(raw)).toThrow('Runda 2 musi mieć dokładnie 3 hasła (jest 4).')
+  })
+})
