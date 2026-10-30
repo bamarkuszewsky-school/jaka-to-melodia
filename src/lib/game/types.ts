@@ -109,8 +109,15 @@ export interface Buzz {
   czas: number
 }
 
+/** Czołówka: kiedy host ją puścił (czas serwera) i ile trwa. */
+export interface IntroState {
+  start: number
+  dlugosc: number
+}
+
 export interface GameState {
   runda?: number
+  czolowka?: IntroState
   punkty: Record<StationKey, number>
   runda1?: RoundState
   runda2?: RoundState

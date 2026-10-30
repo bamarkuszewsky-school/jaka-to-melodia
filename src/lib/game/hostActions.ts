@@ -206,3 +206,12 @@ export function resetGame(): Promise<void> {
     punkty: { '1': 0, '2': 0, '3': 0 },
   })
 }
+
+/** Czołówka startuje — tablica i OBS liczą animację od tej chwili. */
+export function startIntro(dlugoscMs: number): Promise<void> {
+  return set(gra('czolowka'), { start: serverTimestamp(), dlugosc: Math.round(dlugoscMs) })
+}
+
+export function stopIntro(): Promise<void> {
+  return remove(gra('czolowka'))
+}

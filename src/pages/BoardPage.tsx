@@ -1,4 +1,5 @@
 import { RoundBoard } from '../components/board/RoundBoard'
+import { IntroOverlay } from '../components/intro/IntroOverlay'
 import { Shell } from '../components/Shell'
 import { useBuzzes } from '../lib/buzzTest'
 import { useGame } from '../lib/game/state'
@@ -21,12 +22,14 @@ export function BoardPage() {
     return (
       <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
         <RoundBoard game={game} names={names} />
+        <IntroOverlay czolowka={game.czolowka} />
       </Shell>
     )
   }
 
   return (
     <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
+      <IntroOverlay czolowka={game.czolowka} />
       <div className="board">
         <h1 className="board__title">
           Jaka to <span className="accent">melodia?</span>

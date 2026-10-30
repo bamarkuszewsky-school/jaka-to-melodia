@@ -1,7 +1,7 @@
 import { onValue, ref } from 'firebase/database'
 import { useEffect, useState } from 'react'
 import { db } from '../firebase'
-import type { Buzz, GameState, LiveQuestion, Question, QuestionSet, RoundState, StationKey, Tile } from './types'
+import type { Buzz, GameState, IntroState, LiveQuestion, Question, QuestionSet, RoundState, StationKey, Tile } from './types'
 
 const EMPTY: GameState = { punkty: { '1': 0, '2': 0, '3': 0 } }
 
@@ -29,6 +29,7 @@ export function useGame(): GameState {
         const pytanie = raw.pytanie as LiveQuestion | undefined
         setState({
           runda: typeof raw.runda === 'number' ? raw.runda : undefined,
+          czolowka: (raw.czolowka as IntroState | undefined) ?? undefined,
           punkty: { '1': punkty['1'] ?? 0, '2': punkty['2'] ?? 0, '3': punkty['3'] ?? 0 },
           runda1: toRound(raw.runda1),
           runda2: toRound(raw.runda2),
