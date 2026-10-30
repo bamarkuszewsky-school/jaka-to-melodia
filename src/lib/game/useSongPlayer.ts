@@ -3,7 +3,7 @@ import { SONG_MS } from './rules'
 
 /**
  * Odtwarzacz fragmentu na MacBooku hosta.
- * Gra od sekundy `start` dokładnie 15 s, potem sam się zatrzymuje i woła `onTimeout`.
+ * Gra od sekundy `start` łącznie 15 s (także po wznowieniu), potem sam się zatrzymuje i woła `onTimeout`.
  */
 export function useSongPlayer(onTimeout: () => void) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -41,16 +41,7 @@ export function useSongPlayer(onTimeout: () => void) {
     startRef.current = startSec
   }, [])
 
-  /** Gra od początku fragmentu. Wywoływać z kliknięcia (wymóg przeglądarek). */
-  const playFromStart = useCallback(async () => {
-    const audio = getAudio()
-    stopWatch()
-    if (audio.readyState < 1) {
-      await new Promise<void>((resolve) => audio.addEventListener('loadedmetadata', () => resolve(), { once: true }))
-    }
-    audio.currentTime = startRef.current
-    await audio.play()
-
+  const armWatch = (audio: HTMLAudioElement) => {
     const endAt = startRef.current + SONG_MS / 1000
     watchRef.current = window.setInterval(() => {
       if (audio.currentTime >= endAt || audio.ended) {
@@ -59,6 +50,32 @@ export function useSongPlayer(onTimeout: () => void) {
         timeoutRef.current()
       }
     }, 40)
+  }
+
+  const waitForMetadata = async (audio: HTMLAudioElement) => {
+    if (audio.readyState < 1) {
+      await new Promise<void>((resolve) => audio.addEventListener('loadedmetadata', () => resolve(), { once: true }))
+    }
+  }
+
+  /** Gra od początku fragmentu. Wywoływać z kliknięcia (wymóg przeglądarek). */
+  const playFromStart = useCallback(async () => {
+    const audio = getAudio()
+    stopWatch()
+    await waitForMetadata(audio)
+    audio.currentTime = startRef.current
+    await audio.play()
+    armWatch(audio)
+  }, [])
+
+  /** Wznawia od miejsca zatrzymania (runda 2 po złej odpowiedzi). */
+  const resume = useCallback(async () => {
+    const audio = getAudio()
+    stopWatch()
+    await waitForMetadata(audio)
+    if (audio.currentTime < startRef.current) audio.currentTime = startRef.current
+    await audio.play()
+    armWatch(audio)
   }, [])
 
   /** Zatrzymanie (zgłoszenie zawodnika albo przerwanie). */
@@ -75,5 +92,5 @@ export function useSongPlayer(onTimeout: () => void) {
     [],
   )
 
-  return useMemo(() => ({ prepare, playFromStart, stop }), [prepare, playFromStart, stop])
+  return useMemo(() => ({ prepare, playFromStart, resume, stop }), [prepare, playFromStart, resume, stop])
 }

@@ -1,4 +1,4 @@
-import type { QuestionSet, Round1Question } from './types'
+import type { Question, QuestionSet } from './types'
 
 /**
  * Wczytywanie edycji z folderu na MacBooku hosta.
@@ -23,13 +23,35 @@ function text(v: unknown, field: string, where: string): string {
   return v.trim()
 }
 
-function parseRound1(raw: unknown): Round1Question[] {
-  if (!Array.isArray(raw)) throw new QuestionFileError('Brakuje listy „runda1”.')
-  if (raw.length !== 5) {
-    throw new QuestionFileError(`Runda 1 musi mieć dokładnie 5 haseł (jest ${raw.length}).`)
+/** Polska odmiana: 1 hasło, 2–4 hasła, 5+ haseł. */
+export function hasla(n: number): string {
+  if (n === 1) return '1 hasło'
+  const last = n % 10
+  const lastTwo = n % 100
+  if (last >= 2 && last <= 4 && !(lastTwo >= 12 && lastTwo <= 14)) return `${n} hasła`
+  return `${n} haseł`
+}
+
+interface ListSpec {
+  key: string
+  label: string
+  /** Dokładna liczba haseł albo zakres [min, max]. */
+  count: number | [number, number]
+  optional?: boolean
+}
+
+function parseList(raw: unknown, spec: ListSpec): Question[] {
+  if (raw === undefined && spec.optional) return []
+  if (!Array.isArray(raw)) throw new QuestionFileError(`Brakuje listy „${spec.key}”.`)
+
+  const [min, max] = typeof spec.count === 'number' ? [spec.count, spec.count] : spec.count
+  if (raw.length < min || raw.length > max) {
+    const need = min === max ? `dokładnie ${hasla(min)}` : `od ${min} do ${hasla(max)}`
+    throw new QuestionFileError(`${spec.label} musi mieć ${need} (jest ${raw.length}).`)
   }
+
   return raw.map((item, i) => {
-    const where = `Runda 1, hasło ${i + 1}`
+    const where = `${spec.label}, hasło ${i + 1}`
     const q = (item ?? {}) as Record<string, unknown>
     const start = q.start === undefined ? 0 : Number(q.start)
     if (!Number.isFinite(start) || start < 0) {
@@ -51,8 +73,15 @@ export function parseQuestionSet(json: unknown): QuestionSet {
   const raw = json as Record<string, unknown>
   return {
     edycja: typeof raw.edycja === 'string' && raw.edycja.trim() ? raw.edycja.trim() : 'Edycja bez nazwy',
-    runda1: parseRound1(raw.runda1),
+    runda1: parseList(raw.runda1, { key: 'runda1', label: 'Runda 1', count: 5 }),
+    runda2: parseList(raw.runda2, { key: 'runda2', label: 'Runda 2', count: 3, optional: true }),
+    dogrywka2: parseList(raw.dogrywka2, { key: 'dogrywka2', label: 'Dogrywka', count: [0, 5], optional: true }),
   }
+}
+
+/** Wszystkie pytania edycji (do sprawdzenia, czy są pliki). */
+export function allQuestions(set: QuestionSet): Question[] {
+  return [...set.runda1, ...set.runda2, ...set.dogrywka2]
 }
 
 /** Wczytuje pliki wybrane przez <input webkitdirectory>. */
@@ -73,7 +102,7 @@ export async function loadEdition(files: FileList | File[]): Promise<LoadedEditi
   for (const f of list) {
     if (/\.(mp3|m4a|wav|ogg|aac)$/i.test(f.name)) audio.set(f.name, URL.createObjectURL(f))
   }
-  const missing = set.runda1.map((q) => q.plik).filter((name) => !audio.has(name))
+  const missing = [...new Set(allQuestions(set).map((q) => q.plik))].filter((name) => !audio.has(name))
   return { set, audio, missing }
 }
 

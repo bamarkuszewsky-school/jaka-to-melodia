@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BuzzOrder } from '../components/BuzzOrder'
 import { EditionLoader } from '../components/host/EditionLoader'
-import { Round1Control } from '../components/host/Round1Control'
+import { RoundControl } from '../components/host/RoundControl'
 import { PresencePanel } from '../components/PresencePanel'
 import { Shell } from '../components/Shell'
 import { StationNamesCard } from '../components/StationNamesCard'
@@ -39,7 +39,7 @@ export function HostPage() {
       <div className="grid">
         <StationNamesCard />
         <EditionLoader edition={edition} onLoaded={setEdition} />
-        <Round1Control edition={edition} />
+        <RoundControl edition={edition} />
 
         <section className="card card--wide">
           <div className="card__head">

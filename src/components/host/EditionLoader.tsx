@@ -40,7 +40,7 @@ export function EditionLoader({ edition, onLoaded }: Props) {
           <h2 className="card__title">Edycja</h2>
           <p className="muted">
             {edition
-              ? `${edition.set.edycja} · ${edition.set.runda1.length} haseł w rundzie 1`
+              ? `${edition.set.edycja} · runda 1: ${edition.set.runda1.length} haseł · runda 2: ${edition.set.runda2.length} · dogrywka: ${edition.set.dogrywka2.length}`
               : 'Wybierz folder z plikiem pytania.json i muzyką.'}
           </p>
         </div>

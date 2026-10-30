@@ -1,4 +1,4 @@
-import { Round1Board } from '../components/board/Round1Board'
+import { RoundBoard } from '../components/board/RoundBoard'
 import { Shell } from '../components/Shell'
 import { useBuzzes } from '../lib/buzzTest'
 import { useGame } from '../lib/game/state'
@@ -16,11 +16,11 @@ export function BoardPage() {
   const names = useStationNames()
   const game = useGame()
 
-  // Trwa runda 1 → plansza gry. Inaczej ekran oczekiwania z klasami (i test przycisków).
-  if (game.runda === 1 && game.runda1) {
+  // Trwa gra → plansza rundy. Inaczej ekran oczekiwania z klasami (i test przycisków).
+  if ((game.runda === 1 && game.runda1) || (game.runda === 2 && game.runda2)) {
     return (
       <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
-        <Round1Board game={game} names={names} />
+        <RoundBoard game={game} names={names} />
       </Shell>
     )
   }

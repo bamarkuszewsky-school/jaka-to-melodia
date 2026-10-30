@@ -28,15 +28,25 @@ export function StreamPage() {
       lower = {
         key: `buzz-${p.odpowiada}-${p.odpowiedzStart}`,
         label: `Przedstawiciel klasy ${labelForKey(names, p.odpowiada)} pierwszy wcisnął guzik!`,
-        value: `${p.wartosc} pkt do zdobycia`,
+        value: p.dogrywka ? 'Dogrywka' : `${p.wartosc} pkt do zdobycia`,
       }
     } else if (p?.faza === 'odslona' && p.wynik) {
       lower = {
         key: `reveal-${p.haslo}`,
         label: p.wynik.stanowisko
-          ? `+${p.wynik.punkty} pkt dla ${labelForKey(names, p.wynik.stanowisko)}`
+          ? p.dogrywka
+            ? `${labelForKey(names, p.wynik.stanowisko)} wygrywa dogrywkę!`
+            : `+${p.wynik.punkty} pkt dla ${labelForKey(names, p.wynik.stanowisko)}`
           : 'Nikt nie zgadł',
         value: `${p.wynik.tytul} — ${p.wynik.wykonawca}`,
+      }
+    } else if (!p && game.runda2?.odpada) {
+      const out = game.runda2.odpada
+      const awans = (['1', '2', '3'] as const).filter((k) => k !== out)
+      lower = {
+        key: `wyniki-r2-${out}`,
+        label: 'Do rundy 3 przechodzą',
+        value: awans.map((k) => labelForKey(names, k)).join(' i '),
       }
     }
   } else if (buzzes[0]) {
