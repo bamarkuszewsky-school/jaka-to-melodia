@@ -4,7 +4,7 @@ Teleturniej muzyczny w przeglądarce: tablica dla widowni, panel hosta, przycisk
 
 Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Database**, logowanie ról przez **Firebase Authentication**, hosting na **GitHub Pages**.
 
-## Co już działa (wersja 0.1)
+## Co już działa (wersja 0.3)
 
 - Ekran startowy z wyborem roli: **Zawodnik, Host, Tech Support, Tablica**.
 - Logowanie hasłem — każda rola ma własne konto w Firebase.
@@ -12,6 +12,48 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 - **Test przycisków:** zawodnik wciska przycisk, host widzi kolejność i różnicę w milisekundach, tablica podświetla pierwsze stanowisko, nakładka do OBS pokazuje „Zgłasza się”.
 - Lista urządzeń online (kto jest podłączony).
 - Pełny ekran, blokada wygaszania ekranu (tam, gdzie przeglądarka pozwala).
+- **Nazwy klas na stanowiskach** — host wpisuje je w panelu, widać je wszędzie.
+- **Runda 1** według zasad TVP (punkty zamiast złotówek, 10 s na odpowiedź zamiast 5 s).
+
+## Runda 1 — jak to działa
+
+1. Host wczytuje folder edycji (karta „Edycja” → „Wybierz folder”).
+2. „Rozpocznij rundę 1” — punkty się zerują, na tablicy pojawia się 5 haseł.
+3. Zawodnik, który wybiera, wskazuje hasło — host klika kafelek, potem **▶ Graj utwór**.
+4. Muzyka gra dokładnie 15 s, a wartość rośnie od **100 do 200 pkt** (co 10 pkt).
+5. Pierwszy przycisk zatrzymuje muzykę i licznik; zawodnik ma **10 s** na tytuł.
+6. Host klika **✓ Dobrze** — punkty trafiają do klasy, tytuł się odsłania, ta klasa wybiera następne hasło.
+   Albo **✗ Źle** — klasa jest zablokowana do końca tej piosenki, muzyka leci od początku dla pozostałych, licznik znów od 100.
+7. Jeśli przez 15 s nikt się nie zgłosi (albo wszyscy się pomylą) — host klika **Odsłoń tytuł**.
+
+Wartość punktów liczy serwer (czas od startu muzyki do zgłoszenia), więc opóźnienia Wi‑Fi nie zmieniają wyniku.
+
+## Edycja: folder z pytaniami i muzyką
+
+Folder leży **tylko na MacBooku hosta** — nie wrzucamy go do repozytorium (jest publiczne, uczniowie podejrzeliby odpowiedzi). W folderze:
+
+- `pytania.json` — lista haseł z odpowiedziami,
+- pliki MP3 o nazwach podanych w `pytania.json`.
+
+Wzór pliku jest w [`przyklad/pytania.json`](przyklad/pytania.json):
+
+```json
+{
+  "edycja": "Edycja 1",
+  "runda1": [
+    { "haslo": "Królowa popu", "tytul": "…", "wykonawca": "…", "plik": "e01-r1-01.mp3", "start": 0 }
+  ]
+}
+```
+
+| Pole | Co wpisać |
+| --- | --- |
+| `haslo` | Hasło na tablicy (wykonawca, gatunek, temat — np. „Włoskie słońce”) |
+| `tytul`, `wykonawca` | Odpowiedź — widzi ją tylko host, na tablicy pojawia się po odsłonięciu |
+| `plik` | Nazwa pliku MP3 w tym samym folderze (najlepiej numer, np. `e01-r1-01.mp3`) |
+| `start` | Od której sekundy grać (0 = początek utworu; można pominąć) |
+
+W rundzie 1 musi być dokładnie 5 haseł. Po odświeżeniu strony host wybiera folder ponownie — stan gry i punkty zostają w bazie.
 
 ## Uruchomienie u siebie (WebStorm)
 
@@ -32,6 +74,7 @@ Przydatne komendy:
 | `npm run build` | Sprawdza typy i buduje wersję do publikacji (`dist/`) |
 | `npm run preview` | Podgląd zbudowanej wersji |
 | `npm run lint` | Szuka typowych błędów w kodzie |
+| `npm test` | Testy logiki gry (punktacja, wczytywanie pytań) |
 
 ## Jednorazowa konfiguracja Firebase
 
@@ -71,8 +114,10 @@ Przydatne komendy:
 ```
 src/
   lib/        Firebase, role, logowanie, obecność urządzeń, pełny ekran, test przycisków
-  components/ Rama widoków, ochrona tras, panele
+  lib/game/   Zasady i stan gry: punktacja, pytania, akcje hosta i zawodnika, odtwarzacz
+  components/ Rama widoków, ochrona tras, panele (host/, board/ — runda 1)
   pages/      Ekran startowy, logowanie i pięć widoków
+przyklad/pytania.json Wzór pliku z pytaniami (bez prawdziwych odpowiedzi)
 database.rules.json   Reguły dostępu do bazy (wklejane w konsoli Firebase)
 .github/workflows/    Automatyczna publikacja na GitHub Pages
 ```

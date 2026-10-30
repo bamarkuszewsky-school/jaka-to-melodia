@@ -31,6 +31,19 @@
             ".validate": false
           }
         }
+      },
+      "zgloszenie": {
+        ".write": "auth != null && auth.token.email === 'zawodnik@cyfroweszkoly.pl' && !data.exists() && newData.exists() && root.child('gra/pytanie/faza').val() === 'gra' && !root.child('gra/pytanie/zablokowane').child(newData.child('stanowisko').val()).exists()",
+        ".validate": "newData.hasChildren(['stanowisko', 'czas']) && (newData.child('stanowisko').val() === '1' || newData.child('stanowisko').val() === '2' || newData.child('stanowisko').val() === '3') && newData.child('czas').val() === now",
+        "stanowisko": {
+          ".validate": "newData.isString()"
+        },
+        "czas": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     }
   }

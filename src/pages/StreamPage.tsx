@@ -1,33 +1,57 @@
 import { useEffect } from 'react'
 import { useBuzzes } from '../lib/buzzTest'
+import { useGame } from '../lib/game/state'
 import { usePresence } from '../lib/presence'
-import { stationLabel, useStationNames } from '../lib/stations'
+import { labelForKey, stationLabel, useStationNames } from '../lib/stations'
 
 /**
  * Nakładka do OBS / vMix: przezroczyste tło 1920×1080.
- * Na razie pokazuje belkę z logo i kto zgłosił się pierwszy.
- * TODO: animacja „Przedstawiciel klasy 4BT pierwszy wcisnął guzik!”
+ * W grze: kto pierwszy wcisnął guzik i wynik po odsłonięciu. Poza grą: test przycisków.
+ * TODO: pełna animacja i wygląd nakładki.
  */
 export function StreamPage() {
   usePresence('stream')
   const buzzes = useBuzzes()
   const names = useStationNames()
-  const first = buzzes[0]
+  const game = useGame()
 
   useEffect(() => {
     document.documentElement.classList.add('transparent')
     return () => document.documentElement.classList.remove('transparent')
   }, [])
 
+  const p = game.pytanie
+  let lower: { label: string; value: string; key: string } | null = null
+
+  if (game.runda !== undefined) {
+    if (p?.faza === 'odpowiedz' && p.odpowiada) {
+      lower = {
+        key: `buzz-${p.odpowiada}-${p.odpowiedzStart}`,
+        label: `Przedstawiciel klasy ${labelForKey(names, p.odpowiada)} pierwszy wcisnął guzik!`,
+        value: `${p.wartosc} pkt do zdobycia`,
+      }
+    } else if (p?.faza === 'odslona' && p.wynik) {
+      lower = {
+        key: `reveal-${p.haslo}`,
+        label: p.wynik.stanowisko
+          ? `+${p.wynik.punkty} pkt dla ${labelForKey(names, p.wynik.stanowisko)}`
+          : 'Nikt nie zgadł',
+        value: `${p.wynik.tytul} — ${p.wynik.wykonawca}`,
+      }
+    }
+  } else if (buzzes[0]) {
+    lower = { key: `test-${buzzes[0].stanowisko}`, label: 'Zgłasza się', value: stationLabel(names, buzzes[0].stanowisko) }
+  }
+
   return (
     <div className="stream">
       <div className="stream__bug">
         Jaka to <span className="accent">melodia?</span>
       </div>
-      {first && (
-        <div className="stream__lower" key={first.stanowisko}>
-          <span className="stream__lower-label">Zgłasza się</span>
-          <span className="stream__lower-value">{stationLabel(names, first.stanowisko)}</span>
+      {lower && (
+        <div className="stream__lower" key={lower.key}>
+          <span className="stream__lower-label">{lower.label}</span>
+          <span className="stream__lower-value">{lower.value}</span>
         </div>
       )}
     </div>

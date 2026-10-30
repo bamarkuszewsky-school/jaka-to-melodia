@@ -52,3 +52,8 @@ export function saveStationNames(names: StationNames): Promise<void> {
   }
   return update(ref(db, 'gra/stanowiska'), changes)
 }
+
+/** To samo co stationLabel, ale dla klucza z bazy ('1' | '2' | '3'). */
+export function labelForKey(names: StationNames, key: '1' | '2' | '3'): string {
+  return stationLabel(names, Number(key) as Stanowisko)
+}
