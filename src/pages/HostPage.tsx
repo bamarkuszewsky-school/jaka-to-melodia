@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { BuzzOrder } from '../components/BuzzOrder'
 import { EditionLoader } from '../components/host/EditionLoader'
+import { IntroCard } from '../components/host/IntroCard'
 import { RoundControl } from '../components/host/RoundControl'
 import { PresencePanel } from '../components/PresencePanel'
 import { Shell } from '../components/Shell'
@@ -40,6 +41,7 @@ export function HostPage() {
         <StationNamesCard />
         <EditionLoader edition={edition} onLoaded={setEdition} />
         <RoundControl edition={edition} />
+        <IntroCard edition={edition} />
 
         <section className="card card--wide">
           <div className="card__head">

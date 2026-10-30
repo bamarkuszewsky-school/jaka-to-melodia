@@ -12,6 +12,8 @@ export interface LoadedEdition {
   audio: Map<string, string>
   /** Pliki wymienione w pytaniach, których nie ma w folderze. */
   missing: string[]
+  /** Podkład czołówki (plik „czolowka.mp3/.wav/.m4a” w folderze edycji). */
+  intro?: string
 }
 
 export class QuestionFileError extends Error {}
@@ -103,7 +105,9 @@ export async function loadEdition(files: FileList | File[]): Promise<LoadedEditi
     if (/\.(mp3|m4a|wav|ogg|aac)$/i.test(f.name)) audio.set(f.name, URL.createObjectURL(f))
   }
   const missing = [...new Set(allQuestions(set).map((q) => q.plik))].filter((name) => !audio.has(name))
-  return { set, audio, missing }
+  const introFile = list.find((f) => /^czolowka\.(mp3|wav|m4a|aac|ogg)$/i.test(f.name))
+  const intro = introFile ? audio.get(introFile.name) : undefined
+  return { set, audio, missing, intro }
 }
 
 /** Zwalnia pamięć po poprzedniej edycji. */

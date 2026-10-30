@@ -1567,6 +1567,184 @@ h3 {
   color: #2b0505;
 }
 
+/* ---------- Czołówka ---------- */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: #04061a;
+}
+
+.intro__stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  transform-origin: center;
+}
+
+.intro__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(900px 600px at 50% 40%, rgb(42 53 160 / 0.55), transparent 70%),
+    radial-gradient(1200px 500px at 50% 110%, rgb(255 61 139 / 0.25), transparent 70%),
+    #060820;
+}
+
+.intro__rays {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 3200px;
+  height: 3200px;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgb(245 197 66 / 0.16) 0deg 6deg,
+    transparent 6deg 18deg
+  );
+  -webkit-mask: radial-gradient(circle, #000 0%, transparent 55%);
+  mask: radial-gradient(circle, #000 0%, transparent 55%);
+}
+
+.intro__beam {
+  position: absolute;
+  bottom: -60px;
+  width: 260px;
+  height: 1500px;
+  background: linear-gradient(0deg, rgb(255 240 200 / 0.55), rgb(255 240 200 / 0) 85%);
+  clip-path: polygon(40% 100%, 60% 100%, 100% 0, 0 0);
+  filter: blur(6px);
+  transform-origin: 50% 100%;
+  mix-blend-mode: screen;
+}
+
+.intro__beam--l {
+  left: 260px;
+}
+
+.intro__beam--r {
+  right: 260px;
+}
+
+.intro__note {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-shadow: 0 0 18px currentColor;
+}
+
+.intro__owl {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 620px;
+  aspect-ratio: 611 / 900;
+}
+
+.intro__owl img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.intro__owl-img {
+  filter: drop-shadow(0 0 30px rgb(255 255 255 / 0.45));
+}
+
+.intro__owl-ghost {
+  mix-blend-mode: screen;
+  opacity: 0.8;
+}
+
+.intro__owl-ghost--c {
+  filter: brightness(0) invert(1) sepia(1) saturate(6) hue-rotate(140deg);
+}
+
+.intro__owl-ghost--m {
+  filter: brightness(0) invert(1) sepia(1) saturate(8) hue-rotate(300deg);
+}
+
+.intro__title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 560px;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 34px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 190px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #fff;
+  transform-origin: 50% 50%;
+}
+
+.intro__word {
+  display: inline-block;
+  transform-origin: 50% 60%;
+}
+
+.intro__word--2,
+.intro__word--3 {
+  color: var(--gold);
+}
+
+.intro__word--3 {
+  margin-left: -28px;
+}
+
+.intro__subtitle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 790px;
+  margin: 0;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.intro__eq {
+  position: absolute;
+  left: 160px;
+  right: 160px;
+  bottom: 0;
+  height: 300px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  -webkit-mask: linear-gradient(0deg, #000 30%, transparent);
+  mask: linear-gradient(0deg, #000 30%, transparent);
+}
+
+.intro__eq span {
+  flex: 1;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(0deg, #fb2c55, #f5c542 60%, #2cf5ff);
+  opacity: 0.75;
+}
+
+.intro__flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, #fff, rgb(255 230 160 / 0.6) 50%, transparent 80%);
+  pointer-events: none;
+}
+
 /* ---------- Nakładka OBS ---------- */
 
 .stream {

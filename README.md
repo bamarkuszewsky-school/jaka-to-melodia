@@ -4,7 +4,7 @@ Teleturniej muzyczny w przeglądarce: tablica dla widowni, panel hosta, przycisk
 
 Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Database**, logowanie ról przez **Firebase Authentication**, hosting na **GitHub Pages**.
 
-## Co już działa (wersja 0.4)
+## Co już działa (wersja 0.5)
 
 - Ekran startowy z wyborem roli: **Zawodnik, Host, Tech Support, Tablica**.
 - Logowanie hasłem — każda rola ma własne konto w Firebase.
@@ -15,6 +15,15 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 - **Nazwy klas na stanowiskach** — host wpisuje je w panelu, widać je wszędzie.
 - **Runda 1** według zasad TVP (punkty zamiast złotówek, 10 s na odpowiedź zamiast 5 s).
 - **Runda 2** z malejącą stawką, eliminacją i dogrywką.
+- **Czołówka** z logo szkoły, zgrana z podkładem — host puszcza ją jednym przyciskiem.
+
+## Czołówka
+
+1. Do folderu edycji wrzuć podkład jako `czolowka.mp3` (albo `czolowka.wav`).
+2. Po wczytaniu folderu w panelu hosta pojawia się karta „Czołówka” → **▶ Puść czołówkę**.
+3. Podkład gra z MacBooka, a animacja jednocześnie pokazuje się na tablicy i w nakładce OBS (`#/stream`).
+
+Animacja jest ułożona pod bity obecnego podkładu (17,5 s, ok. 152 BPM) — czasy są w `src/lib/intro/timeline.ts`. Logo szkoły: `public/logo-szkoly.png`.
 
 ## Runda 1 — jak to działa
 

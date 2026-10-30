@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { IntroOverlay } from '../components/intro/IntroOverlay'
 import { useBuzzes } from '../lib/buzzTest'
 import { useGame } from '../lib/game/state'
 import { usePresence } from '../lib/presence'
@@ -55,6 +56,7 @@ export function StreamPage() {
 
   return (
     <div className="stream">
+      <IntroOverlay czolowka={game.czolowka} />
       <div className="stream__bug">
         Jaka to <span className="accent">melodia?</span>
       </div>
