@@ -57,8 +57,8 @@ export function IntroStage({ t }: { t: number }) {
   const owlPop = easeBack(ramp(t, MOMENTS.drop, MOMENTS.drop + 0.45))
   const owlUp = easeInOut(ramp(t, 5.75, 6.7))
   const owlScale =
-    (t < MOMENTS.drop ? 0.55 + 0.25 * owlIn : 0.8 + 0.25 * owlPop) * (1 - 0.42 * owlUp) * (1 + 0.05 * pulse + 0.08 * finalPulse)
-  const owlY = -330 * owlUp
+    (t < MOMENTS.drop ? 0.55 + 0.25 * owlIn : 0.8 + 0.25 * owlPop) * (1 - 0.36 * owlUp) * (1 + 0.05 * pulse + 0.08 * finalPulse)
+  const owlY = -235 * owlUp
   const shake = t < MOMENTS.drop ? (hash(Math.floor(t * 24)) - 0.5) * 10 * owlIn : 0
   const glitchOn = t >= MOMENTS.glitchFrom && t <= MOMENTS.glitchTo && beatIndex(t) % 2 === 0
   const split = (glitchOn ? 14 : 0) * pulse + 22 * finalPulse + (t < MOMENTS.drop ? 6 * owlIn : 0)
