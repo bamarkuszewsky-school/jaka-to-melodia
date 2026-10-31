@@ -4,6 +4,7 @@ import { AuthProvider } from './lib/AuthContext'
 import { BoardPage } from './pages/BoardPage'
 import { HostPage } from './pages/HostPage'
 import { LoginScreen } from './pages/LoginScreen'
+import { MusicianPage } from './pages/MusicianPage'
 import { PlayerPage } from './pages/PlayerPage'
 import { StartScreen } from './pages/StartScreen'
 import { StreamPage } from './pages/StreamPage'
@@ -54,6 +55,14 @@ export default function App() {
             element={
               <RequireRole allow={['tech']}>
                 <StreamPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/muzyk"
+            element={
+              <RequireRole allow={['muzyk']}>
+                <MusicianPage />
               </RequireRole>
             }
           />

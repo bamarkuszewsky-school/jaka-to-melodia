@@ -3,6 +3,7 @@ import { IntroOverlay } from '../components/intro/IntroOverlay'
 import { useBuzzes } from '../lib/buzzTest'
 import { useGame } from '../lib/game/state'
 import { usePresence } from '../lib/presence'
+import { nut, poNutach } from '../lib/game/rules3'
 import { labelForKey, stationLabel, useStationNames } from '../lib/stations'
 
 /**
@@ -24,7 +25,33 @@ export function StreamPage() {
   const p = game.pytanie
   let lower: { label: string; value: string; key: string } | null = null
 
-  if (game.runda !== undefined) {
+  const p3 = game.pytanie3
+  const r3 = game.runda3
+  if (game.runda === 3 && r3) {
+    if (p3?.faza === 'licytacja' && p3.licytacja.nuty && p3.licytacja.prowadzi) {
+      lower = {
+        key: `bid-${p3.haslo}-${p3.licytacja.nuty}`,
+        label: `Licytacja · ${p3.wykonawca}`,
+        value: `${labelForKey(names, p3.licytacja.prowadzi)}: ${p3.licytacja.nuty} ${nut(p3.licytacja.nuty)}`,
+      }
+    } else if ((p3?.faza === 'granie' || p3?.faza === 'odpowiedz') && p3.gra && p3.nuty) {
+      lower = {
+        key: `play-${p3.haslo}`,
+        label: `${labelForKey(names, p3.gra)} zgaduje ${poNutach(p3.nuty)}`,
+        value: `${p3.wartosc} pkt do zdobycia`,
+      }
+    } else if (p3?.faza === 'odslona' && p3.wynik) {
+      lower = {
+        key: `r3-${p3.haslo}`,
+        label: p3.wynik.trafil
+          ? `+${p3.wynik.punkty} pkt dla ${labelForKey(names, p3.wynik.stanowisko)}`
+          : `Pudło! Punkt dla ${labelForKey(names, p3.wynik.stanowisko)}`,
+        value: `${p3.wynik.tytul} — ${p3.wynik.wykonawca}`,
+      }
+    } else if (!p3 && r3.zwyciezca) {
+      lower = { key: `final-${r3.zwyciezca}`, label: 'Do finału przechodzi', value: labelForKey(names, r3.zwyciezca) }
+    }
+  } else if (game.runda !== undefined) {
     if (p?.faza === 'odpowiedz' && p.odpowiada) {
       lower = {
         key: `buzz-${p.odpowiada}-${p.odpowiedzStart}`,

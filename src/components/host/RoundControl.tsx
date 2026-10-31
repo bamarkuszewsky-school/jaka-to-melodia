@@ -18,6 +18,7 @@ import {
   undoAnnounceRound2,
 } from '../../lib/game/hostActions'
 import type { LoadedEdition } from '../../lib/game/questions'
+import { startRound3 } from '../../lib/game/round3Actions'
 import {
   ANSWER_MS,
   currentChooser,
@@ -418,11 +419,20 @@ function Between({ game, edition, runda, label, run }: BetweenProps) {
       <div className="round-end">
         <p className="notice">
           Do rundy 3 przechodzą: <strong>{awans.map(label).join(' i ')}</strong>. Odpada <strong>{label(r2.odpada)}</strong>{' '}
-          z wynikiem {game.punkty[r2.odpada]} pkt. Runda 3 wkrótce.
+          z wynikiem {game.punkty[r2.odpada]} pkt.
         </p>
-        <button type="button" className="btn btn--ghost" onClick={() => run(undoAnnounceRound2)}>
-          Cofnij ogłoszenie
-        </button>
+        <div className="card__actions">
+          {set.runda3.length === 6 ? (
+            <button type="button" className="btn btn--primary btn--huge" onClick={() => run(() => startRound3(game))}>
+              Rozpocznij rundę 3
+            </button>
+          ) : (
+            <p className="error">W pytania.json brakuje listy „runda3” (6 zagadek).</p>
+          )}
+          <button type="button" className="btn btn--ghost" onClick={() => run(undoAnnounceRound2)}>
+            Cofnij ogłoszenie
+          </button>
+        </div>
       </div>
     )
   }
