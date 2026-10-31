@@ -14,6 +14,7 @@ import {
 import { useServerNow } from '../../lib/game/state'
 import { STATION_KEYS, type GameState, type RoundNo, type StationKey, type Tile } from '../../lib/game/types'
 import { labelForKey, type StationNames } from '../../lib/stations'
+import { FitText } from '../FitText'
 
 interface Props {
   game: GameState
@@ -41,7 +42,9 @@ export function RoundBoard({ game, names }: Props) {
     stage = (
       <div className="dogrywka">
         <p className="dogrywka__title">Dogrywka</p>
-        <p className="dogrywka__who">{e.contenders.map(label).join(' · ')}</p>
+        <FitText className="dogrywka__who" max={[5.5, 110]} min={28}>
+          {e.contenders.map(label).join(' · ')}
+        </FitText>
         <p className="song__hint">Kto odgadnie, przechodzi do rundy 3</p>
         {r.dogrywki && <Tiles tiles={r.dogrywki} label={label} />}
       </div>
@@ -80,7 +83,9 @@ function Song({ game, label, tiles }: { game: GameState; label: (k: StationKey) 
   return (
     <div className={`song phase-${pytanie.faza}`} key={`${pytanie.dogrywka ? 'd' : 'h'}${pytanie.haslo}`}>
       {pytanie.dogrywka && <p className="song__badge">Dogrywka</p>}
-      <p className="song__haslo">{tile?.haslo ?? '…'}</p>
+      <FitText className="song__haslo" max={[4, 76]} min={20} widthRatio={0.86}>
+        {tile?.haslo ?? '…'}
+      </FitText>
 
       {pytanie.faza === 'wybrane' && (
         <p className="song__hint">{pytanie.przesuniecie ? 'Muzyka gra dalej dla pozostałych…' : 'Za chwilę muzyka…'}</p>
@@ -103,18 +108,28 @@ function Song({ game, label, tiles }: { game: GameState; label: (k: StationKey) 
 
       {pytanie.faza === 'odpowiedz' && pytanie.odpowiada && (
         <>
-          <div className="song__who">{label(pytanie.odpowiada)}</div>
+          <FitText className="song__who" max={[12, 220]} min={40} widthRatio={0.86}>
+            {label(pytanie.odpowiada)}
+          </FitText>
           <p className="song__hint">{pytanie.dogrywka ? 'odpowiada' : `odpowiada za ${pytanie.wartosc} pkt`}</p>
           <div className="song__countdown">{secondsLeft(remaining(ANSWER_MS, pytanie.odpowiedzStart, now))}</div>
         </>
       )}
 
-      {pytanie.faza === 'brak' && <p className="song__who song__who--muted">Nikt nie zgadł</p>}
+      {pytanie.faza === 'brak' && (
+        <FitText className="song__who song__who--muted" max={[7, 130]} min={36}>
+          Nikt nie zgadł
+        </FitText>
+      )}
 
       {pytanie.faza === 'odslona' && pytanie.wynik && (
         <div className="reveal">
-          <p className="reveal__title">{pytanie.wynik.tytul}</p>
-          <p className="reveal__artist">{pytanie.wynik.wykonawca}</p>
+          <FitText className="reveal__title" max={[9.5, 190]} min={32} lines={2} widthRatio={0.88}>
+            {pytanie.wynik.tytul}
+          </FitText>
+          <FitText className="reveal__artist" max={[3.6, 70]} min={20} widthRatio={0.88}>
+            {pytanie.wynik.wykonawca}
+          </FitText>
           <p className="reveal__result">
             {pytanie.wynik.stanowisko
               ? pytanie.dogrywka
@@ -143,11 +158,17 @@ function Tiles({ tiles, label }: { tiles: Tile[]; label: (k: StationKey) => stri
       {tiles.map((t, i) => (
         <div key={i} className={`tile tile--${t.stan}`}>
           {t.stan === 'ukryte' ? (
-            <span className="tile__haslo">{t.haslo}</span>
+            <FitText className="tile__haslo" max={[3.2, 62]} min={14} lines={3} widthRatio={1}>
+              {t.haslo}
+            </FitText>
           ) : (
             <>
-              <span className="tile__title">{t.tytul}</span>
-              <span className="tile__artist">{t.wykonawca}</span>
+              <FitText className="tile__title" max={[1.8, 34]} min={12} lines={2} widthRatio={1}>
+                {t.tytul}
+              </FitText>
+              <FitText className="tile__artist" max={[1.2, 22]} min={11} lines={2} widthRatio={1}>
+                {t.wykonawca}
+              </FitText>
               <span className="tile__by">
                 {t.stan === 'odgadniete' && t.stanowisko
                   ? t.punkty
@@ -173,7 +194,9 @@ function Results({ game, label, odpada }: { game: GameState; label: (k: StationK
       <div className="results__finalists">
         {awans.map((k) => (
           <div key={k} className="results__finalist">
-            <span className="results__name">{label(k)}</span>
+            <FitText className="results__name" max={[8, 150]} min={32}>
+              {label(k)}
+            </FitText>
             <span className="results__points">{game.punkty[k]} pkt</span>
           </div>
         ))}
@@ -214,7 +237,9 @@ function Scorebar({
             key={k}
             className={`scorebar__item ${answering ? 'is-answering' : ''} ${isBlocked || out ? 'is-blocked' : ''}`}
           >
-            <span className="scorebar__name">{label(k)}</span>
+            <FitText className="scorebar__name" boxClassName="fit-box--left" max={[2.6, 52]} min={16} widthRatio={1}>
+              {label(k)}
+            </FitText>
             <span className="scorebar__points">{game.punkty[k]}</span>
             {tag && <span className={`scorebar__tag ${odpada === k ? 'is-out' : ''}`}>{tag}</span>}
           </div>
