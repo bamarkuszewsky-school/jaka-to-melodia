@@ -201,7 +201,11 @@ export function resetGame(): Promise<void> {
     runda: null,
     runda1: null,
     runda2: null,
+    runda3: null,
     pytanie: null,
+    pytanie3: null,
+    ruch: null,
+    zagrane: null,
     zgloszenie: null,
     punkty: { '1': 0, '2': 0, '3': 0 },
   })

@@ -1,3 +1,4 @@
+import { Round3Board } from '../components/board/Round3Board'
 import { RoundBoard } from '../components/board/RoundBoard'
 import { IntroOverlay } from '../components/intro/IntroOverlay'
 import { Shell } from '../components/Shell'
@@ -16,6 +17,15 @@ export function BoardPage() {
   const online = usePresenceList()
   const names = useStationNames()
   const game = useGame()
+
+  if (game.runda === 3 && game.runda3) {
+    return (
+      <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
+        <Round3Board game={game} names={names} />
+        <IntroOverlay czolowka={game.czolowka} />
+      </Shell>
+    )
+  }
 
   // Trwa gra → plansza rundy. Inaczej ekran oczekiwania z klasami (i test przycisków).
   if ((game.runda === 1 && game.runda1) || (game.runda === 2 && game.runda2)) {

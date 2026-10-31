@@ -26,8 +26,22 @@ export interface Question {
 /** @deprecated nazwa z wersji 0.3 */
 export type Round1Question = Question
 
+/** Zagadka rundy 3 (licytacja nut) — nuty gra na żywo muzyk. */
+export interface Round3Question {
+  tytul: string
+  wykonawca: string
+  /** Podpowiedź, którą czyta prowadzący (anegdota, fakt o artyście). */
+  podpowiedz: string
+  /** Zrzut nut z MuseScore (plik w folderze edycji) — widzi go muzyk. */
+  nuty?: string
+  /** 200 albo 400 pkt. */
+  wartosc: number
+}
+
 export interface QuestionSet {
   edycja: string
+  /** 6 zagadek rundy 3 (puste, jeśli plik ich nie ma). */
+  runda3: Round3Question[]
   runda1: Question[]
   /** 3 hasła rundy 2 (puste, jeśli plik ich nie ma). */
   runda2: Question[]
@@ -115,8 +129,76 @@ export interface IntroState {
   dlugosc: number
 }
 
+// ---------- Runda 3 ----------
+
+export interface Round3Tile {
+  stan: TileState
+  /** Po odsłonięciu. */
+  wykonawca?: string
+  tytul?: string
+  /** Kto zdobył punkt za tę zagadkę i ile punktów. */
+  stanowisko?: StationKey
+  punkty?: number
+  /** Czy zgadujący trafił (false = punkt dla rywala). */
+  trafil?: boolean
+  /** Kto zgadywał i po ilu nutach. */
+  zgadywal?: StationKey
+  nuty?: number
+}
+
+export interface Round3State {
+  hasla: Round3Tile[]
+  /** Dwie klasy w rundzie 3. */
+  gracze: [StationKey, StationKey]
+  wybiera: StationKey
+  /** Wygrane zagadki (gra do 3). */
+  wygrane: Partial<Record<StationKey, number>>
+  /** Kto przechodzi do finału. */
+  zwyciezca?: StationKey
+}
+
+export type Phase3 = 'licytacja' | 'granie' | 'odpowiedz' | 'odslona'
+
+export interface Bidding {
+  /** Czyja kolej w licytacji. */
+  kolej: StationKey
+  /** Aktualna najniższa oferta (brak = nikt jeszcze nie licytował, start od 7). */
+  nuty?: number
+  /** Kto złożył aktualną ofertę. */
+  prowadzi?: StationKey
+}
+
+export interface LiveQuestion3 {
+  haslo: number
+  faza: Phase3
+  /** Kto wybrał numer (następny numer wybiera rywal). */
+  wybral: StationKey
+  /** Wykonawca pokazywany po wybraniu numeru. */
+  wykonawca: string
+  wartosc: number
+  licytacja: Bidding
+  /** Kto zgaduje i po ilu nutach (po zakończeniu licytacji). */
+  gra?: StationKey
+  nuty?: number
+  odpowiedzStart?: number
+  wynik?: { tytul: string; wykonawca: string; stanowisko: StationKey; punkty: number; trafil: boolean }
+}
+
+/** Ruch zawodnika w licytacji (zapisuje iPad, przetwarza host). */
+export interface BidMove {
+  stanowisko: StationKey
+  nuty?: number
+  pas?: boolean
+  czas: number
+}
+
 export interface GameState {
   runda?: number
+  runda3?: Round3State
+  pytanie3?: LiveQuestion3
+  ruch?: BidMove
+  /** Muzyk kliknął „Zagrane” (czas serwera). */
+  zagrane?: number
   czolowka?: IntroState
   punkty: Record<StationKey, number>
   runda1?: RoundState

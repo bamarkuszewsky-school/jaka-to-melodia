@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Round3Player } from '../components/player/Round3Player'
 import { Shell } from '../components/Shell'
 import { pressBuzz, useBuzzes } from '../lib/buzzTest'
 import { buzzIn } from '../lib/game/playerActions'
@@ -66,7 +67,15 @@ export function PlayerPage() {
       subtitle={hasClassName(names, stanowisko) ? `Stanowisko ${stanowisko}` : 'Zawodnik'}
       hideBarInFullscreen
     >
-      {inGame ? (
+      {game.runda === 3 ? (
+        <Round3Player
+          me={String(stanowisko) as StationKey}
+          label={label}
+          game={game}
+          names={names}
+          onChangeStation={() => choose(null)}
+        />
+      ) : inGame ? (
         <GameBuzzer
           me={String(stanowisko) as StationKey}
           stanowisko={stanowisko}

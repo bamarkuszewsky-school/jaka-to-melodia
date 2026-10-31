@@ -1,19 +1,117 @@
 {
   "edycja": "Edycja testowa",
   "runda1": [
-    { "haslo": "Gama w górę",    "tytul": "Melodia testowa 1", "wykonawca": "Generator tonów", "plik": "test-r1-01.mp3", "start": 0 },
-    { "haslo": "Gama w dół",     "tytul": "Melodia testowa 2", "wykonawca": "Generator tonów", "plik": "test-r1-02.mp3", "start": 0 },
-    { "haslo": "Skoki",          "tytul": "Melodia testowa 3", "wykonawca": "Generator tonów", "plik": "test-r1-03.mp3", "start": 0 },
-    { "haslo": "Dzwoneczki",     "tytul": "Melodia testowa 4", "wykonawca": "Generator tonów", "plik": "test-r1-04.mp3", "start": 0 },
-    { "haslo": "Wolny marsz",    "tytul": "Melodia testowa 5", "wykonawca": "Generator tonów", "plik": "test-r1-05.mp3", "start": 0 }
+    {
+      "haslo": "Gama w górę",
+      "tytul": "Melodia testowa 1",
+      "wykonawca": "Generator tonów",
+      "plik": "test-r1-01.mp3",
+      "start": 0
+    },
+    {
+      "haslo": "Gama w dół",
+      "tytul": "Melodia testowa 2",
+      "wykonawca": "Generator tonów",
+      "plik": "test-r1-02.mp3",
+      "start": 0
+    },
+    {
+      "haslo": "Skoki",
+      "tytul": "Melodia testowa 3",
+      "wykonawca": "Generator tonów",
+      "plik": "test-r1-03.mp3",
+      "start": 0
+    },
+    {
+      "haslo": "Dzwoneczki",
+      "tytul": "Melodia testowa 4",
+      "wykonawca": "Generator tonów",
+      "plik": "test-r1-04.mp3",
+      "start": 0
+    },
+    {
+      "haslo": "Wolny marsz",
+      "tytul": "Melodia testowa 5",
+      "wykonawca": "Generator tonów",
+      "plik": "test-r1-05.mp3",
+      "start": 0
+    }
   ],
   "runda2": [
-    { "haslo": "Echo",           "tytul": "Melodia testowa 6", "wykonawca": "Generator tonów", "plik": "test-r2-01.mp3", "start": 0 },
-    { "haslo": "Pozytywka",      "tytul": "Melodia testowa 7", "wykonawca": "Generator tonów", "plik": "test-r2-02.mp3", "start": 0 },
-    { "haslo": "Basy",           "tytul": "Melodia testowa 8", "wykonawca": "Generator tonów", "plik": "test-r2-03.mp3", "start": 0 }
+    {
+      "haslo": "Echo",
+      "tytul": "Melodia testowa 6",
+      "wykonawca": "Generator tonów",
+      "plik": "test-r2-01.mp3",
+      "start": 0
+    },
+    {
+      "haslo": "Pozytywka",
+      "tytul": "Melodia testowa 7",
+      "wykonawca": "Generator tonów",
+      "plik": "test-r2-02.mp3",
+      "start": 0
+    },
+    {
+      "haslo": "Basy",
+      "tytul": "Melodia testowa 8",
+      "wykonawca": "Generator tonów",
+      "plik": "test-r2-03.mp3",
+      "start": 0
+    }
   ],
   "dogrywka2": [
-    { "haslo": "Syrena",         "tytul": "Melodia testowa 9",  "wykonawca": "Generator tonów", "plik": "test-d2-01.mp3", "start": 0 },
-    { "haslo": "Kukułka",        "tytul": "Melodia testowa 10", "wykonawca": "Generator tonów", "plik": "test-d2-02.mp3", "start": 0 }
+    {
+      "haslo": "Syrena",
+      "tytul": "Melodia testowa 9",
+      "wykonawca": "Generator tonów",
+      "plik": "test-d2-01.mp3",
+      "start": 0
+    },
+    {
+      "haslo": "Kukułka",
+      "tytul": "Melodia testowa 10",
+      "wykonawca": "Generator tonów",
+      "plik": "test-d2-02.mp3",
+      "start": 0
+    }
+  ],
+  "runda3": [
+    {
+      "tytul": "Melodia testowa 11",
+      "wykonawca": "Zespół Testowy",
+      "podpowiedz": "Ten zespół nagrał swoją pierwszą płytę w szkolnej sali gimnastycznej.",
+      "nuty": "test-r3-01.png"
+    },
+    {
+      "tytul": "Melodia testowa 12",
+      "wykonawca": "Wokalistka Próbna",
+      "podpowiedz": "Jej debiutancki singiel trafił na listy przebojów w trzech krajach.",
+      "nuty": "test-r3-02.png"
+    },
+    {
+      "tytul": "Melodia testowa 13",
+      "wykonawca": "DJ Generator",
+      "podpowiedz": "Ten utwór zaczyna się od jednego dźwięku powtórzonego cztery razy.",
+      "nuty": "test-r3-03.png"
+    },
+    {
+      "tytul": "Melodia testowa 14",
+      "wykonawca": "Orkiestra Szkolna",
+      "podpowiedz": "Grana na każdym zakończeniu roku szkolnego.",
+      "nuty": "test-r3-04.png"
+    },
+    {
+      "tytul": "Melodia testowa 15",
+      "wykonawca": "Duet Fikcyjny",
+      "podpowiedz": "Piosenka o wakacjach, które nigdy się nie kończą.",
+      "nuty": "test-r3-05.png"
+    },
+    {
+      "tytul": "Melodia testowa 16",
+      "wykonawca": "Chór Próbny",
+      "podpowiedz": "Najtrudniejsza zagadka edycji — za 400 punktów.",
+      "nuty": "test-r3-06.png"
+    }
   ]
 }

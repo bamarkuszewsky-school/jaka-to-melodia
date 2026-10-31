@@ -2,7 +2,7 @@ import { PRESENCE_LABELS, usePresenceList, type PresenceKey } from '../lib/prese
 import type { Stanowisko } from '../lib/roles'
 import { hasClassName, useStationNames } from '../lib/stations'
 
-const ORDER: PresenceKey[] = ['host', 'tablica', 'stanowisko1', 'stanowisko2', 'stanowisko3', 'tech', 'stream']
+const ORDER: PresenceKey[] = ['host', 'tablica', 'stanowisko1', 'stanowisko2', 'stanowisko3', 'muzyk', 'tech', 'stream']
 
 /** Kto jest teraz online — przydatne przy sprawdzaniu sprzętu przed grą. */
 export function PresencePanel() {

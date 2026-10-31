@@ -4,7 +4,7 @@ Teleturniej muzyczny w przeglądarce: tablica dla widowni, panel hosta, przycisk
 
 Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Database**, logowanie ról przez **Firebase Authentication**, hosting na **GitHub Pages**.
 
-## Co już działa (wersja 0.5)
+## Co już działa (wersja 0.6)
 
 - Ekran startowy z wyborem roli: **Zawodnik, Host, Tech Support, Tablica**.
 - Logowanie hasłem — każda rola ma własne konto w Firebase.
@@ -16,6 +16,27 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 - **Runda 1** według zasad TVP (punkty zamiast złotówek, 10 s na odpowiedź zamiast 5 s).
 - **Runda 2** z malejącą stawką, eliminacją i dogrywką.
 - **Czołówka** z logo szkoły, zgrana z podkładem — host puszcza ją jednym przyciskiem.
+- **Runda 3 — licytacja nut** z nowym profilem **Muzyk** (nuty na tablecie przy pianinie).
+
+## Runda 3 — licytacja nut
+
+1. Po ogłoszeniu wyników rundy 2 host klika **Rozpocznij rundę 3** — grają dwie klasy, które przeszły dalej.
+2. Na tablicy 6 ponumerowanych zagadek. Numery wybiera się **naprzemiennie**, zaczyna klasa z większą liczbą punktów.
+3. Po wybraniu numeru widać **wykonawcę**, a host czyta **podpowiedź** (widzi ją w panelu).
+4. **Licytacja na iPadach**: zaczyna klasa, która nie wybierała numeru. Od 7 nut w dół — można przebić (mniej nut) albo spasować („Graj, …!”). Zejście do 1 nuty kończy licytację. Host może wpisać ruch za klasę, jeśli licytują na głos.
+5. **Muzyk** widzi na swoim tablecie nuty i duży napis „Zagraj 3 nuty”. Gra i klika **Zagrane** — rusza **10 s** na odpowiedź (host ma ten sam przycisk awaryjnie).
+6. Trafienie: wygrana zagadka + punkty (200, jedna zagadka 400). Pudło: wygrana i punkty dla rywala.
+7. Kto pierwszy wygra **3 zagadki**, przechodzi do finału.
+
+W `pytania.json` lista `runda3` (dokładnie 6 zagadek):
+
+```json
+"runda3": [
+  { "tytul": "…", "wykonawca": "…", "podpowiedz": "Anegdota do przeczytania", "nuty": "e01-r3-01.png" }
+]
+```
+
+`nuty` to zrzut z MuseScore (PNG/JPG) w folderze edycji — najlepiej z ponumerowanymi nutami. Bez pola `wartosc` ostatnia zagadka jest za 400 pkt, reszta po 200; można też wpisać `"wartosc": 400` przy wybranej zagadce. Nuty trafiają do bazy tylko na czas zagadki i widzą je wyłącznie muzyk i host.
 
 ## Czołówka
 
@@ -127,6 +148,7 @@ Przydatne komendy:
 | Zawodnik | `#/zawodnik` | iPady na stanowiskach |
 | Tablica | `#/tablica` | tablica z Androidem |
 | Tech Support | `#/tech` | laptop z OBS |
+| Muzyk | `#/muzyk` | tablet przy pianinie (runda 3) |
 | Nakładka OBS | `#/stream` | źródło przeglądarki w OBS / vMix, 1920×1080 |
 
 ## Ważne zasady

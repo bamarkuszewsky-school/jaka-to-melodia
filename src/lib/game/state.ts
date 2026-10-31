@@ -1,7 +1,21 @@
 import { onValue, ref } from 'firebase/database'
 import { useEffect, useState } from 'react'
 import { db } from '../firebase'
-import type { Buzz, GameState, IntroState, LiveQuestion, Question, QuestionSet, RoundState, StationKey, Tile } from './types'
+import type {
+  BidMove,
+  Buzz,
+  GameState,
+  IntroState,
+  LiveQuestion,
+  LiveQuestion3,
+  Question,
+  QuestionSet,
+  Round3State,
+  Round3Tile,
+  RoundState,
+  StationKey,
+  Tile,
+} from './types'
 
 const EMPTY: GameState = { punkty: { '1': 0, '2': 0, '3': 0 } }
 
@@ -16,6 +30,13 @@ function toRound(raw: unknown): RoundState | undefined {
   if (!raw || typeof raw !== 'object') return undefined
   const r = raw as Omit<RoundState, 'hasla' | 'dogrywki'> & { hasla?: unknown; dogrywki?: unknown }
   return { ...r, hasla: toTiles(r.hasla), dogrywki: r.dogrywki ? toTiles(r.dogrywki) : undefined }
+}
+
+function toRound3(raw: unknown): Round3State | undefined {
+  if (!raw || typeof raw !== 'object') return undefined
+  const r = raw as Omit<Round3State, 'hasla' | 'wygrane'> & { hasla?: unknown; wygrane?: Round3State['wygrane'] }
+  const hasla = (Array.isArray(r.hasla) ? r.hasla : Object.values((r.hasla ?? {}) as object)) as Round3Tile[]
+  return { ...r, hasla: hasla.filter(Boolean), wygrane: r.wygrane ?? {} }
 }
 
 /** Cały stan gry na żywo (/gra), wspólny dla wszystkich widoków. */
@@ -33,6 +54,10 @@ export function useGame(): GameState {
           punkty: { '1': punkty['1'] ?? 0, '2': punkty['2'] ?? 0, '3': punkty['3'] ?? 0 },
           runda1: toRound(raw.runda1),
           runda2: toRound(raw.runda2),
+          runda3: toRound3(raw.runda3),
+          pytanie3: (raw.pytanie3 as LiveQuestion3 | undefined) ?? undefined,
+          ruch: (raw.ruch as BidMove | undefined) ?? undefined,
+          zagrane: typeof raw.zagrane === 'number' ? raw.zagrane : undefined,
           // Zgodność z wersją 0.3 (pytanie bez numeru rundy = runda 1).
           pytanie: pytanie ? { ...pytanie, runda: pytanie.runda ?? 1 } : undefined,
           zgloszenie: (raw.zgloszenie as Buzz | undefined) ?? undefined,

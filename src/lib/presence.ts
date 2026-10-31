@@ -6,13 +6,14 @@ import { db } from './firebase'
  * Klucze obecności w bazie (/obecnosc/<klucz>).
  * Reguły bazy pozwalają każdej roli zapisać tylko swoje klucze.
  */
-export type PresenceKey = 'host' | 'tablica' | 'tech' | 'stream' | 'stanowisko1' | 'stanowisko2' | 'stanowisko3'
+export type PresenceKey = 'host' | 'tablica' | 'tech' | 'stream' | 'muzyk' | 'stanowisko1' | 'stanowisko2' | 'stanowisko3'
 
 export const PRESENCE_LABELS: Record<PresenceKey, string> = {
   host: 'Host',
   tablica: 'Tablica',
   tech: 'Tech Support',
   stream: 'Widok /stream',
+  muzyk: 'Muzyk',
   stanowisko1: 'Stanowisko 1',
   stanowisko2: 'Stanowisko 2',
   stanowisko3: 'Stanowisko 3',

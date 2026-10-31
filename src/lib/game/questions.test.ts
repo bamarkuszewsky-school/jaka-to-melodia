@@ -53,3 +53,18 @@ describe('runda 2 i dogrywka w pytania.json', () => {
     expect(() => parseQuestionSet(raw)).toThrow('Runda 2 musi mieć dokładnie 3 hasła (jest 4).')
   })
 })
+
+describe('runda 3 w pytania.json', () => {
+  it('wczytuje 6 zagadek; bez „wartosc” ostatnia jest za 400 pkt', () => {
+    const set = parseQuestionSet(example)
+    expect(set.runda3).toHaveLength(6)
+    expect(set.runda3.map((q) => q.wartosc)).toEqual([200, 200, 200, 200, 200, 400])
+    expect(set.runda3[0]).toMatchObject({ wykonawca: 'Zespół Testowy', nuty: 'test-r3-01.png' })
+  })
+
+  it('wartości z pliku mają pierwszeństwo', () => {
+    const raw = structuredClone(example)
+    raw.runda3[2].wartosc = 400
+    expect(parseQuestionSet(raw).runda3.map((q) => q.wartosc)).toEqual([200, 200, 400, 200, 200, 200])
+  })
+})
