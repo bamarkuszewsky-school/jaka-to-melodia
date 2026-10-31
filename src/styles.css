@@ -1114,6 +1114,19 @@ h3 {
   min-height: 10px;
 }
 
+/* ---------- Napisy dopasowane do miejsca (FitText) ---------- */
+
+.fit-box {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+.fit-box--left {
+  flex: 1;
+  text-align: left;
+}
+
 /* ---------- Runda 1 — tablica widowni ---------- */
 
 .r1 {
@@ -1294,6 +1307,7 @@ h3 {
   flex-direction: column;
   align-items: center;
   gap: 1.2vh;
+  width: 100%;
   animation: pop 0.4s ease both;
 }
 
@@ -1364,9 +1378,6 @@ h3 {
   font-family: var(--font-display);
   font-size: clamp(22px, 2.6vw, 52px);
   font-weight: 800;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .scorebar__points {
