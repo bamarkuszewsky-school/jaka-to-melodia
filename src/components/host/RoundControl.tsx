@@ -35,6 +35,7 @@ import { questionFor, useGame, useServerNow } from '../../lib/game/state'
 import { STATION_KEYS, type GameState, type Question, type RoundNo, type StationKey, type Tile } from '../../lib/game/types'
 import { useSongPlayer } from '../../lib/game/useSongPlayer'
 import { labelForKey, useStationNames } from '../../lib/stations'
+import { RefrenButton } from './RefrenButton'
 
 type Run = (fn: () => Promise<unknown>) => Promise<void>
 
@@ -73,6 +74,12 @@ export function RoundControl({ edition }: { edition: LoadedEdition | null }) {
       if (url) player.prepare(url, question.start)
     }
   }, [question, edition, player])
+
+  // Hasło zniknęło (np. „Zakończ rundę”) — cisza.
+  const hasQuestion = Boolean(pytanie)
+  useEffect(() => {
+    if (!hasQuestion) player.stop()
+  }, [hasQuestion, player])
 
   // Zgłoszenie zawodnika: zatrzymujemy muzykę i zaczynamy 10 s na odpowiedź.
   const handledBuzz = useRef<number | null>(null)
@@ -114,8 +121,8 @@ export function RoundControl({ edition }: { edition: LoadedEdition | null }) {
     return (
       <section className="card card--wide">
         <h2 className="card__title">Rozgrywka</h2>
-        <p className="muted">Najpierw wczytaj folder edycji.</p>
-        {pytanie && <p className="notice">Trwa pytanie — wczytaj ten sam folder, żeby dokończyć.</p>}
+        <p className="muted">Najpierw wybierz folder z muzyką i wylosuj edycję (karta „Edycja” wyżej).</p>
+        {pytanie && <p className="notice">Trwa hasło — wybierz folder z muzyką, żeby dokończyć.</p>}
       </section>
     )
   }
@@ -185,9 +192,10 @@ export function RoundControl({ edition }: { edition: LoadedEdition | null }) {
             player.stop()
             run(songTimedOut)
           }}
+          audioUrl={edition.audio.get(question.plik)}
         />
       ) : pytanie ? (
-        <p className="notice">Trwa hasło, ale w tym folderze go nie ma — wczytaj właściwy folder.</p>
+        <p className="notice">Trwa hasło, ale brakuje go w edycji — wybierz folder z muzyką.</p>
       ) : (
         <Between game={game} edition={edition} runda={runda} label={label} run={run} />
       )}
@@ -254,9 +262,10 @@ interface StageProps {
   onPlay: () => void
   onWrong: () => void
   onStop: () => void
+  audioUrl?: string
 }
 
-function Stage({ game, question, label, run, onPlay, onWrong, onStop }: StageProps) {
+function Stage({ game, question, label, run, onPlay, onWrong, onStop, audioUrl }: StageProps) {
   const pytanie = game.pytanie!
   const live = pytanie.faza === 'gra' || pytanie.faza === 'odpowiedz'
   const now = useServerNow(live)
@@ -356,6 +365,7 @@ function Stage({ game, question, label, run, onPlay, onWrong, onStop }: StagePro
           <button type="button" className="btn btn--primary btn--huge" onClick={() => run(closeQuestion)}>
             Wróć do tablicy haseł
           </button>
+          <RefrenButton url={audioUrl} sec={question.refren} />
         </div>
       )}
     </div>
@@ -393,7 +403,7 @@ function Between({ game, edition, runda, label, run }: BetweenProps) {
               Rozpocznij rundę 2
             </button>
           ) : (
-            <p className="error">W pytania.json brakuje listy „runda2” (3 hasła) — dopisz ją i wczytaj folder ponownie.</p>
+            <p className="error">W edycji brakuje 3 haseł rundy 2.</p>
           )}
           <TileGrid tiles={r1.hasla} questions={set.runda1} label={label} />
         </div>
@@ -427,7 +437,7 @@ function Between({ game, edition, runda, label, run }: BetweenProps) {
               Rozpocznij rundę 3
             </button>
           ) : (
-            <p className="error">W pytania.json brakuje listy „runda3” (6 zagadek).</p>
+            <p className="error">W edycji brakuje 6 zagadek rundy 3.</p>
           )}
           <button type="button" className="btn btn--ghost" onClick={() => run(undoAnnounceRound2)}>
             Cofnij ogłoszenie
@@ -548,7 +558,11 @@ function TileGrid({ tiles, questions, label, onPick }: TileGridProps) {
             <span className="tile-host__answer">{q ? `${q.tytul} — ${q.wykonawca}` : '?'}</span>
             {done && (
               <span className="tile-host__result">
-                {t.stan === 'odgadniete' && t.stanowisko ? `${label(t.stanowisko)} +${t.punkty}` : 'nikt'}
+                {t.stan === 'pominiete'
+                  ? 'pominięte'
+                  : t.stan === 'odgadniete' && t.stanowisko
+                    ? `${label(t.stanowisko)} +${t.punkty}`
+                    : 'nikt'}
               </span>
             )}
           </button>

@@ -21,6 +21,8 @@ export interface Question {
   plik: string
   /** Sekunda, od której gra fragment (domyślnie 0 — początek utworu). */
   start: number
+  /** Sekunda refrenu (przycisk „Refren” po odsłonięciu). */
+  refren?: number
 }
 
 /** @deprecated nazwa z wersji 0.3 */
@@ -36,6 +38,9 @@ export interface Round3Question {
   nuty?: string
   /** 200 albo 400 pkt. */
   wartosc: number
+  /** Nagranie (opcjonalne) i refren — do puszczenia po odsłonięciu. */
+  plik?: string
+  refren?: number
 }
 
 /** Melodia finału (runda 4) — gra z MacBooka hosta. */
@@ -44,6 +49,7 @@ export interface FinalQuestion {
   wykonawca: string
   plik: string
   start: number
+  refren?: number
 }
 
 export interface QuestionSet {
@@ -71,7 +77,8 @@ export interface QuestionSet {
  */
 export type Phase = 'wybrane' | 'gra' | 'odpowiedz' | 'brak' | 'odslona'
 
-export type TileState = 'ukryte' | 'odgadniete' | 'nieodgadniete'
+/** pominiete = host zakończył rundę, zanim hasło zagrało. */
+export type TileState = 'ukryte' | 'odgadniete' | 'nieodgadniete' | 'pominiete'
 
 export interface Tile {
   haslo: string

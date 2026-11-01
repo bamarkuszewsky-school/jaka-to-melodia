@@ -11,11 +11,10 @@ interface Props {
   label: string
   game: GameState
   names: StationNames
-  onChangeStation: () => void
 }
 
 /** iPad zawodnika w rundzie 3: licytacja nut zamiast przycisku. */
-export function Round3Player({ me, label, game, names, onChangeStation }: Props) {
+export function Round3Player({ me, label, game, names }: Props) {
   const r3 = game.runda3
   const p = game.pytanie3
   const [sending, setSending] = useState(false)
@@ -136,9 +135,6 @@ export function Round3Player({ me, label, game, names, onChangeStation }: Props)
         </div>
       )}
       <div className="r3p__content">{content}</div>
-      <button type="button" className="link-button" onClick={onChangeStation}>
-        Zmień stanowisko
-      </button>
     </div>
   )
 }

@@ -4,7 +4,7 @@ Teleturniej muzyczny w przeglądarce: tablica dla widowni, panel hosta, przycisk
 
 Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Database**, logowanie ról przez **Firebase Authentication**, hosting na **GitHub Pages**.
 
-## Co już działa (wersja 0.7)
+## Co już działa (wersja 0.8)
 
 - Ekran startowy z wyborem roli: **Zawodnik, Host, Tech Support, Tablica**.
 - Logowanie hasłem — każda rola ma własne konto w Firebase.
@@ -18,6 +18,9 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 - **Czołówka** z logo szkoły, zgrana z podkładem — host puszcza ją jednym przyciskiem.
 - **Runda 3 — licytacja nut** z nowym profilem **Muzyk** (nuty na tablecie przy pianinie).
 - **Finał — 7 melodii w 30 sekund** z przyciskiem STOP na iPadzie finalisty.
+- **Baza utworów** z folderu na MacBooku: start, refren, hasła, anegdoty, historia zagrań, losowanie edycji.
+- **Ranking sezonu** z pokazem na tablicy i na live, **Zakończ rundę / Zakończ edycję**.
+- **iPady zgłaszają się przy stanowiskach**, a host przypisuje im stanowisko i klasę.
 
 ## Runda 3 — licytacja nut
 
@@ -29,15 +32,7 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 6. Trafienie: wygrana zagadka + punkty (200, jedna zagadka 400). Pudło: wygrana i punkty dla rywala.
 7. Kto pierwszy wygra **3 zagadki**, przechodzi do finału.
 
-W `pytania.json` lista `runda3` (dokładnie 6 zagadek):
-
-```json
-"runda3": [
-  { "tytul": "…", "wykonawca": "…", "podpowiedz": "Anegdota do przeczytania", "nuty": "e01-r3-01.png" }
-]
-```
-
-`nuty` to zrzut z MuseScore (PNG/JPG) w folderze edycji — najlepiej z ponumerowanymi nutami. Bez pola `wartosc` ostatnia zagadka jest za 400 pkt, reszta po 200; można też wpisać `"wartosc": 400` przy wybranej zagadce. Nuty trafiają do bazy tylko na czas zagadki i widzą je wyłącznie muzyk i host.
+Zagadki losuje aplikacja z folderu `RUNDA 3` (nuty PNG o tej samej nazwie co utwór). Anegdotę dla hosta wpisuje się w zakładce **Baza utworów**. Ostatnia z 6 zagadek jest za 400 pkt.
 
 ## Finał — 7 melodii w 30 sekund
 
@@ -50,13 +45,7 @@ W `pytania.json` lista `runda3` (dokładnie 6 zagadek):
 7. Gdy zegar dojdzie do zera, muzyka staje, a zawodnik ma jeszcze **jedną, ostatnią szansę** na odpowiedź (bez „dalej”). Na odpowiedź jest 10 s.
 8. Na koniec tablica odsłania wszystkie tytuły i pokazuje ranking klas.
 
-W `pytania.json` lista `final` (dokładnie 7 melodii, pola jak w rundzie 1, bez hasła):
-
-```json
-"final": [
-  { "tytul": "…", "wykonawca": "…", "plik": "e01-f-01.mp3", "start": 0 }
-]
-```
+Melodie finału losuje aplikacja z folderu `FINAŁ`.
 
 ## Czołówka
 
@@ -68,7 +57,7 @@ Animacja jest ułożona pod bity obecnego podkładu (17,5 s, ok. 152 BPM) — cz
 
 ## Runda 1 — jak to działa
 
-1. Host wczytuje folder edycji (karta „Edycja” → „Wybierz folder”).
+1. Host wybiera folder z muzyką i losuje edycję (karta „Edycja”). Na kafelkach rundy 1 jest wykonawca.
 2. „Rozpocznij rundę 1” — punkty się zerują, na tablicy pojawia się 5 haseł.
 3. Zawodnik, który wybiera, wskazuje hasło — host klika kafelek, potem **▶ Graj utwór**.
 4. Muzyka gra dokładnie 15 s, a wartość rośnie od **100 do 200 pkt** (co 10 pkt).
@@ -89,38 +78,33 @@ Wartość punktów liczy serwer (czas od startu muzyki do zgłoszenia), więc op
 6. **Remis na ostatnim miejscu** → dogrywka (zasady rundy 2, bez punktów). Kategorię wybiera bezpieczna klasa, która sama nie gra. Kto odgadnie, przechodzi dalej. Hasła dogrywki są w liście `dogrywka2`.
 7. Gdyby zabrakło haseł dogrywki — „Rozstrzygnij ręcznie” w panelu hosta.
 
-## Edycja: folder z pytaniami i muzyką
+## Baza utworów i edycje
 
-Folder leży **tylko na MacBooku hosta** — nie wrzucamy go do repozytorium (jest publiczne, uczniowie podejrzeliby odpowiedzi). W folderze:
+Wszystkie utwory wszystkich edycji leżą w **jednym folderze na MacBooku hosta** (nigdy w repozytorium):
 
-- `pytania.json` — lista haseł z odpowiedziami,
-- pliki MP3 o nazwach podanych w `pytania.json`.
-
-Wzór pliku jest w [`przyklad/pytania.json`](przyklad/pytania.json):
-
-```json
-{
-  "edycja": "Edycja 1",
-  "runda1": [
-    { "haslo": "Królowa popu", "tytul": "…", "wykonawca": "…", "plik": "e01-r1-01.mp3", "start": 0 }
-  ],
-  "runda2": [
-    { "haslo": "Filmowy hit", "tytul": "…", "wykonawca": "…", "plik": "e01-r2-01.mp3", "start": 0 }
-  ],
-  "dogrywka2": [
-    { "haslo": "Z bajki", "tytul": "…", "wykonawca": "…", "plik": "e01-d2-01.mp3", "start": 0 }
-  ]
-}
+```
+Muzyka/
+  czolowka.wav
+  RUNDA 1/Takie Tango - Budka Suflera.mp3
+  RUNDA 2/…
+  RUNDA 3/Takie Tango - Budka Suflera.png   ← nuty (MP3 obok opcjonalnie, na refren)
+  FINAŁ/…
 ```
 
-| Pole | Co wpisać |
-| --- | --- |
-| `haslo` | Hasło na tablicy (wykonawca, gatunek, temat — np. „Włoskie słońce”) |
-| `tytul`, `wykonawca` | Odpowiedź — widzi ją tylko host, na tablicy pojawia się po odsłonięciu |
-| `plik` | Nazwa pliku MP3 w tym samym folderze (najlepiej numer, np. `e01-r1-01.mp3`) |
-| `start` | Od której sekundy grać (0 = początek utworu; można pominąć) |
+Nazwa pliku to **„Tytuł - Wykonawca”**. Utwory mogą być całe — start fragmentu ustawia się w aplikacji.
 
-Runda 1: dokładnie 5 haseł. Runda 2: dokładnie 3 hasła. Dogrywka: od 0 do 5 haseł (zalecane 2–3). Po odświeżeniu strony host wybiera folder ponownie — stan gry i punkty zostają w bazie.
+1. **Gra → Edycja → Wybierz folder z muzyką.** Nowe utwory same trafiają do bazy (Firebase, `/baza`, czyta tylko host).
+2. **Baza utworów:** przy każdym utworze odtwarzacz, przyciski „= teraz” dla **startu** i **refrenu**, podgląd 15 s (rundy 1–2). Runda 2 — **hasło**, runda 3 — **anegdota**. Zmiany zapisują się od razu.
+3. **Pobierz CSV / Kopiuj listę** — lista do arkusza albo na czat (np. żeby wymyślić hasła). **Wczytaj CSV** — wgrywa start, refren, hasła i anegdoty (po kolumnie `id`; puste komórki nic nie zmieniają; czas jako `83,5` albo `1:23,5`).
+4. **Nowa edycja — losuj utwory:** 5 × runda 1 (na tablicy wykonawca zamiast hasła), 3 × runda 2 + 2 na dogrywkę, 6 × runda 3, 7 × finał. Losowane są tylko utwory gotowe i jeszcze niegrane; każdy można przelosować (↻).
+5. **Zakończ rundę** — przerywa bieżącą rundę (niezagrane hasła są pomijane i wracają do puli). **Zakończ edycję** — wyniki klas idą do rankingu, zagrane utwory dostają wpis w historii (edycja, odgadnięty / nie, przez kogo) i wypadają z losowania. W bazie można je odznaczyć.
+6. **Ranking** — wszystkie klasy z zakończonych edycji; przyciski **Pokaż na tablicy** i **Pokaż na live**. Edycję testową usuniesz w Baza utworów → Edycje.
+
+Po odświeżeniu strony folder trzeba wybrać ponownie — edycja, punkty i stan gry zostają w bazie.
+
+## iPady na stanowiskach
+
+Zawodnik wciska na iPadzie **„Jestem przy stanowisku”**. Host widzi zgłoszenia po kolei (z kodem iPada), wybiera stanowisko i wpisuje klasę → **Przypisz**. iPad nie ma już przycisku zmiany stanowiska — odpiąć może go tylko host.
 
 ## Uruchomienie u siebie (WebStorm)
 
@@ -183,9 +167,10 @@ Przydatne komendy:
 src/
   lib/        Firebase, role, logowanie, obecność urządzeń, pełny ekran, test przycisków
   lib/game/   Zasady i stan gry: punktacja, pytania, akcje hosta i zawodnika, odtwarzacz
+  lib/library/ Baza utworów: skan folderu, losowanie, CSV, ranking
   components/ Rama widoków, ochrona tras, panele (host/, board/ — rundy 1–2)
   pages/      Ekran startowy, logowanie i pięć widoków
-przyklad/pytania.json Wzór pliku z pytaniami (bez prawdziwych odpowiedzi)
+przyklad/pytania.json Stary format edycji (v0.7, już nieużywany w panelu)
 database.rules.json   Reguły dostępu do bazy (wklejane w konsoli Firebase)
 .github/workflows/    Automatyczna publikacja na GitHub Pages
 ```

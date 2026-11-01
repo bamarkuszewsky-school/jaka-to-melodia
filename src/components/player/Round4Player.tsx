@@ -10,11 +10,10 @@ interface Props {
   label: string
   game: GameState
   names: StationNames
-  onChangeStation: () => void
 }
 
 /** iPad w finale: finalista ma duży przycisk STOP, pozostali kibicują. */
-export function Round4Player({ me, label, game, names, onChangeStation }: Props) {
+export function Round4Player({ me, label, game, names }: Props) {
   const r = game.runda4
   const now = useServerNow(r?.faza === 'gra')
   const [sending, setSending] = useState(false)
@@ -77,9 +76,6 @@ export function Round4Player({ me, label, game, names, onChangeStation }: Props)
       <h1 className="buzzer-class">{label}</h1>
       {finalist && r.faza !== 'koniec' && <p className="r3p__artist">Odgadnięte {guessed}/7 · {r.zdobyte} pkt</p>}
       <div className="r3p__content">{content}</div>
-      <button type="button" className="link-button" onClick={onChangeStation}>
-        Zmień stanowisko
-      </button>
     </div>
   )
 }

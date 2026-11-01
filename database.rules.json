@@ -76,6 +76,33 @@
     "muzyk": {
       ".read": "auth != null && (auth.token.email === 'muzyk@cyfroweszkoly.pl' || auth.token.email === 'host@cyfroweszkoly.pl')",
       ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'"
+    },
+    "urzadzenia": {
+      ".read": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'",
+      ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'",
+      "$ipad": {
+        ".read": "auth != null && auth.token.email === 'zawodnik@cyfroweszkoly.pl'",
+        ".validate": "$ipad.length === 12",
+        "kod": {
+          ".write": "auth != null && auth.token.email === 'zawodnik@cyfroweszkoly.pl' && !data.parent().child('stanowisko').exists()",
+          ".validate": "newData.isString() && newData.val().length === 3"
+        },
+        "zgloszenie": {
+          ".write": "auth != null && auth.token.email === 'zawodnik@cyfroweszkoly.pl' && !data.parent().child('stanowisko').exists()",
+          ".validate": "newData.val() === now"
+        },
+        "stanowisko": {
+          ".validate": "newData.val() === 1 || newData.val() === 2 || newData.val() === 3"
+        }
+      }
+    },
+    "baza": {
+      ".read": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'",
+      ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'"
+    },
+    "pokaz": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'"
     }
   }
 }

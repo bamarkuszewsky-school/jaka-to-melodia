@@ -13,6 +13,7 @@ import {
   sheetToDataUrl,
 } from '../../lib/game/round3Actions'
 import { ANSWER_MS, remaining, secondsLeft } from '../../lib/game/rules'
+import { RefrenButton } from './RefrenButton'
 import { startRound4 } from '../../lib/game/round4Actions'
 import { allowedBids, canPass, nut, opponent, poNutach, WINS_TO_FINAL } from '../../lib/game/rules3'
 import { useGame, useServerNow } from '../../lib/game/state'
@@ -269,6 +270,7 @@ export function Round3Control({ edition }: { edition: LoadedEdition | null }) {
                 <button type="button" className="btn btn--primary btn--huge" onClick={() => run(closeQuestion3)}>
                   {r3.zwyciezca ? 'Pokaż zwycięzcę rundy' : 'Wróć do numerów'}
                 </button>
+                <RefrenButton url={q?.plik ? edition.audio.get(q.plik) : undefined} sec={q?.refren} />
               </>
             )}
           </div>
@@ -284,7 +286,7 @@ export function Round3Control({ edition }: { edition: LoadedEdition | null }) {
               Rozpocznij finał
             </button>
           ) : (
-            <p className="error">W pytania.json brakuje listy „final” (7 melodii).</p>
+            <p className="error">W edycji brakuje 7 melodii finału.</p>
           )}
         </div>
       ) : (

@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { startIntro, stopIntro } from '../../lib/game/hostActions'
-import type { LoadedEdition } from '../../lib/game/questions'
 import { useGame } from '../../lib/game/state'
 
 /** Panel hosta: czołówka. Podkład gra z MacBooka, animacja idzie na tablicę i do OBS. */
-export function IntroCard({ edition }: { edition: LoadedEdition | null }) {
+export function IntroCard({ url, folder }: { url?: string; folder: boolean }) {
   const { czolowka } = useGame()
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const url = edition?.intro
 
   useEffect(() => {
     if (!url) return
@@ -67,9 +65,9 @@ export function IntroCard({ edition }: { edition: LoadedEdition | null }) {
         </>
       ) : (
         <p className="muted">
-          {edition
-            ? 'W folderze edycji nie ma pliku czolowka.mp3 (albo .wav) — dodaj go i wczytaj folder ponownie.'
-            : 'Wczytaj folder edycji z plikiem czolowka.mp3 (albo .wav).'}
+          {folder
+            ? 'W folderze z muzyką nie ma pliku czolowka.mp3 (albo .wav) — dodaj go i wczytaj folder ponownie.'
+            : 'Wybierz folder z muzyką z plikiem czolowka.mp3 (albo .wav) w głównym katalogu.'}
         </p>
       )}
       {error && <p className="error">{error}</p>}

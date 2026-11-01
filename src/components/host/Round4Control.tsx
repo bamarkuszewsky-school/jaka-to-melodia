@@ -27,7 +27,7 @@ function useFinalPlayer() {
   }, [])
   const stop = useCallback(() => audioRef.current?.pause(), [])
   useEffect(() => () => audioRef.current?.pause(), [])
-  return { play, stop }
+  return useMemo(() => ({ play, stop }), [play, stop])
 }
 
 /** Panel prowadzącego — finał: 7 melodii w 30 sekund. */
@@ -63,6 +63,12 @@ export function Round4Control({ edition }: { edition: LoadedEdition | null }) {
     [questions, edition, player],
   )
 
+  // Finał zakończony (także przez „Zakończ rundę”) — cisza.
+  const ended = r?.faza === 'koniec'
+  useEffect(() => {
+    if (ended) player.stop()
+  }, [ended, player])
+
   // STOP z iPada finalisty.
   const handledStop = useRef<number | null>(null)
   useEffect(() => {
@@ -92,8 +98,8 @@ export function Round4Control({ edition }: { edition: LoadedEdition | null }) {
         <h2 className="card__title">Finał</h2>
         <p className="muted">
           {edition
-            ? 'W pytania.json brakuje listy „final” (7 melodii) — dopisz ją i wczytaj folder ponownie.'
-            : 'Wczytaj folder edycji, żeby poprowadzić finał.'}
+            ? 'W edycji brakuje 7 melodii finału.'
+            : 'Wybierz folder z muzyką (karta „Edycja”), żeby poprowadzić finał.'}
         </p>
       </section>
     )

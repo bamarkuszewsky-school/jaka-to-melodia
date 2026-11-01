@@ -157,7 +157,7 @@ function Tiles({ tiles, label }: { tiles: Tile[]; label: (k: StationKey) => stri
     >
       {tiles.map((t, i) => (
         <div key={i} className={`tile tile--${t.stan}`}>
-          {t.stan === 'ukryte' ? (
+          {t.stan === 'ukryte' || t.stan === 'pominiete' ? (
             <FitText className="tile__haslo" max={[3.2, 62]} min={14} lines={3} widthRatio={1}>
               {t.haslo}
             </FitText>

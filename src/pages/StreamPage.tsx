@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { IntroOverlay } from '../components/intro/IntroOverlay'
+import { RankingView } from '../components/RankingView'
+import { usePokaz } from '../lib/library/db'
 import { useBuzzes } from '../lib/buzzTest'
 import { useGame } from '../lib/game/state'
 import { usePresence } from '../lib/presence'
@@ -17,6 +19,7 @@ export function StreamPage() {
   const buzzes = useBuzzes()
   const names = useStationNames()
   const game = useGame()
+  const pokaz = usePokaz()
 
   useEffect(() => {
     document.documentElement.classList.add('transparent')
@@ -107,7 +110,12 @@ export function StreamPage() {
       <div className="stream__bug">
         Jaka to <span className="accent">melodia?</span>
       </div>
-      {lower && (
+      {pokaz?.stream && (
+        <div className="stream__ranking">
+          <RankingView lista={pokaz.lista} limit={10} variant="stream" />
+        </div>
+      )}
+      {lower && !pokaz?.stream && (
         <div className="stream__lower" key={lower.key}>
           <span className="stream__lower-label">{lower.label}</span>
           <span className="stream__lower-value">{lower.value}</span>

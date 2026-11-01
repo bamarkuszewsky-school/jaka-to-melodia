@@ -103,8 +103,8 @@ export function Round3Board({ game, names }: { game: GameState; names: StationNa
     stage = (
       <div className="tiles tiles--six" style={{ gridTemplateColumns: 'repeat(6, minmax(0, 1fr))' }}>
         {r3.hasla.map((t, i) => (
-          <div key={i} className={`tile tile--${t.stan} ${t.stan === 'ukryte' ? 'tile--number' : ''}`}>
-            {t.stan === 'ukryte' ? (
+          <div key={i} className={`tile tile--${t.stan} ${t.stan === 'ukryte' || t.stan === 'pominiete' ? 'tile--number' : ''}`}>
+            {t.stan === 'ukryte' || t.stan === 'pominiete' ? (
               <span className="tile__number">{i + 1}</span>
             ) : (
               <>

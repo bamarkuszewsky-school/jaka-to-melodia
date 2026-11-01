@@ -2,6 +2,8 @@ import { Round4Board } from '../components/board/Round4Board'
 import { Round3Board } from '../components/board/Round3Board'
 import { RoundBoard } from '../components/board/RoundBoard'
 import { IntroOverlay } from '../components/intro/IntroOverlay'
+import { RankingView } from '../components/RankingView'
+import { usePokaz } from '../lib/library/db'
 import { Shell } from '../components/Shell'
 import { useBuzzes } from '../lib/buzzTest'
 import { useGame } from '../lib/game/state'
@@ -18,6 +20,16 @@ export function BoardPage() {
   const online = usePresenceList()
   const names = useStationNames()
   const game = useGame()
+  const pokaz = usePokaz()
+
+  if (pokaz?.tablica) {
+    return (
+      <Shell title="Tablica" subtitle="Ranking" hideBarInFullscreen>
+        <RankingView lista={pokaz.lista} variant="board" />
+        <IntroOverlay czolowka={game.czolowka} />
+      </Shell>
+    )
+  }
 
   if (game.runda === 4 && game.runda4) {
     return (

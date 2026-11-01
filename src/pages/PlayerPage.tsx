@@ -8,52 +8,58 @@ import { ANSWER_MS, currentChooser, remaining, secondsLeft } from '../lib/game/r
 import { useGame, useServerNow } from '../lib/game/state'
 import type { GameState, StationKey } from '../lib/game/types'
 import { usePresence } from '../lib/presence'
-import { STANOWISKA, type Stanowisko } from '../lib/roles'
+import { deviceCode, deviceId, registerDevice, useDevice } from '../lib/devices'
+import type { Stanowisko } from '../lib/roles'
 import { useWakeLock } from '../lib/screen'
 import { hasClassName, labelForKey, stationLabel, useStationNames, type StationNames } from '../lib/stations'
 
-const STORAGE_KEY = 'jtm-stanowisko'
-
-function readStanowisko(): Stanowisko | null {
-  try {
-    const v = Number(localStorage.getItem(STORAGE_KEY))
-    return (STANOWISKA as readonly number[]).includes(v) ? (v as Stanowisko) : null
-  } catch {
-    return null
-  }
-}
-
-/** Widok zawodnika (iPad): wybór stanowiska, potem duży przycisk. */
+/** Widok zawodnika (iPad): zgłoszenie przy stanowisku, potem duży przycisk. Stanowisko nadaje host. */
 export function PlayerPage() {
-  const [stanowisko, setStanowisko] = useState<Stanowisko | null>(readStanowisko)
+  const [id] = useState(deviceId)
+  const device = useDevice(id)
   const names = useStationNames()
   const game = useGame()
+  const stanowisko = device?.stanowisko ?? null
   usePresence(stanowisko ? `stanowisko${stanowisko}` : null)
   useWakeLock()
-
-  const choose = (s: Stanowisko | null) => {
-    try {
-      if (s) localStorage.setItem(STORAGE_KEY, String(s))
-      else localStorage.removeItem(STORAGE_KEY)
-    } catch {
-      /* brak pamięci przeglądarki — trudno, wybór działa do odświeżenia */
-    }
-    setStanowisko(s)
-  }
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   if (!stanowisko) {
+    const waiting = Boolean(device?.zgloszenie)
+    const register = async () => {
+      setSending(true)
+      setError(null)
+      try {
+        await registerDevice(id)
+      } catch {
+        setError('Nie udało się wysłać — sprawdź Wi‑Fi i spróbuj jeszcze raz.')
+      } finally {
+        setSending(false)
+      }
+    }
     return (
-      <Shell title="Zawodnik" subtitle="Wybierz stanowisko">
+      <Shell title="Zawodnik" subtitle={`iPad ${deviceCode(id)}`}>
         <div className="center-screen">
-          <h1 className="headline">Które to stanowisko?</h1>
-          <div className="station-picker">
-            {STANOWISKA.map((s) => (
-              <button key={s} type="button" className="station-pick" onClick={() => choose(s)}>
-                <span className="station-pick__num">{s}</span>
-                {hasClassName(names, s) && <span className="station-pick__class">{names[s]}</span>}
+          {device === undefined ? (
+            <p className="muted">Łączenie…</p>
+          ) : waiting ? (
+            <>
+              <h1 className="headline">Zgłoszono!</h1>
+              <p className="lead">Prowadzący przypisuje Wam stanowisko i klasę. Kod iPada:</p>
+              <p className="device-code">{deviceCode(id)}</p>
+            </>
+          ) : (
+            <>
+              <h1 className="headline">Podejdźcie do stanowiska</h1>
+              <p className="lead">i wciśnijcie przycisk — prowadzący zobaczy zgłoszenie.</p>
+              <button type="button" className="register-button" onClick={register} disabled={sending}>
+                Jestem przy stanowisku
               </button>
-            ))}
-          </div>
+              <p className="device-code device-code--small">iPad {deviceCode(id)}</p>
+            </>
+          )}
+          {error && <p className="error">{error}</p>}
         </div>
       </Shell>
     )
@@ -74,7 +80,6 @@ export function PlayerPage() {
           label={label}
           game={game}
           names={names}
-          onChangeStation={() => choose(null)}
         />
       ) : game.runda === 3 ? (
         <Round3Player
@@ -82,7 +87,6 @@ export function PlayerPage() {
           label={label}
           game={game}
           names={names}
-          onChangeStation={() => choose(null)}
         />
       ) : inGame ? (
         <GameBuzzer
@@ -91,10 +95,9 @@ export function PlayerPage() {
           label={label}
           game={game}
           names={names}
-          onChangeStation={() => choose(null)}
         />
       ) : (
-        <TestBuzzer stanowisko={stanowisko} label={label} onChangeStation={() => choose(null)} />
+        <TestBuzzer stanowisko={stanowisko} label={label} />
       )}
     </Shell>
   )
@@ -111,11 +114,10 @@ interface ViewProps {
   stateGold?: boolean
   variant: Variant
   onPress: () => void
-  onChangeStation: () => void
   error?: string | null
 }
 
-function BuzzerView({ stanowisko, label, state, stateGold, variant, onPress, onChangeStation, error }: ViewProps) {
+function BuzzerView({ stanowisko, label, state, stateGold, variant, onPress, error }: ViewProps) {
   const cls = { active: '', first: 'buzzer--first', locked: 'buzzer--locked', idle: 'buzzer--idle' }[variant]
   return (
     <div className="buzzer-screen">
@@ -134,9 +136,6 @@ function BuzzerView({ stanowisko, label, state, stateGold, variant, onPress, onC
         <span className="buzzer__label">{stanowisko}</span>
       </button>
       {error && <p className="error">{error}</p>}
-      <button type="button" className="link-button" onClick={onChangeStation}>
-        Zmień stanowisko
-      </button>
     </div>
   )
 }
@@ -149,10 +148,9 @@ interface GameBuzzerProps {
   label: string
   game: GameState
   names: StationNames
-  onChangeStation: () => void
 }
 
-function GameBuzzer({ me, stanowisko, label, game, names, onChangeStation }: GameBuzzerProps) {
+function GameBuzzer({ me, stanowisko, label, game, names }: GameBuzzerProps) {
   const { pytanie, zgloszenie } = game
   const chooser = currentChooser(game)
   const [sending, setSending] = useState(false)
@@ -231,7 +229,6 @@ function GameBuzzer({ me, stanowisko, label, game, names, onChangeStation }: Gam
       stateGold={gold}
       variant={variant}
       onPress={onPress}
-      onChangeStation={onChangeStation}
     />
   )
 }
@@ -241,10 +238,9 @@ function GameBuzzer({ me, stanowisko, label, game, names, onChangeStation }: Gam
 interface TestBuzzerProps {
   stanowisko: Stanowisko
   label: string
-  onChangeStation: () => void
 }
 
-function TestBuzzer({ stanowisko, label, onChangeStation }: TestBuzzerProps) {
+function TestBuzzer({ stanowisko, label }: TestBuzzerProps) {
   const buzzes = useBuzzes()
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -276,7 +272,6 @@ function TestBuzzer({ stanowisko, label, onChangeStation }: TestBuzzerProps) {
       stateGold={pressed && myIndex === 0}
       variant={pressed ? (myIndex === 0 ? 'first' : 'locked') : 'active'}
       onPress={onPress}
-      onChangeStation={onChangeStation}
       error={error}
     />
   )
