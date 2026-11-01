@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { BuzzOrder } from '../components/BuzzOrder'
 import { DevicesCard } from '../components/host/DevicesCard'
 import { EditionCard } from '../components/host/EditionCard'
@@ -22,7 +22,8 @@ import {
   useSongs,
 } from '../lib/library/db'
 import { buildEdition } from '../lib/library/edition'
-import { DRAW_KEYS, syncChanges } from '../lib/library/library'
+import { DRAW_KEYS, roundIntroFor, syncChanges } from '../lib/library/library'
+import { useRoundIntroAudio } from '../lib/game/useRoundIntroAudio'
 import { useLibraryFolder } from '../lib/library/useLibraryFolder'
 import { usePresence } from '../lib/presence'
 import { useStationNames } from '../lib/stations'
@@ -87,6 +88,14 @@ export function HostPage() {
   )
 
   const introUrl = useMemo(() => (scan?.intro ? urlFor(scan.intro) : undefined), [scan, urlFor])
+  const roundIntroUrl = useCallback(
+    (runda: number) => {
+      const f = scan ? roundIntroFor(scan.roundIntros, runda) : undefined
+      return f ? urlFor(f) : undefined
+    },
+    [scan, urlFor],
+  )
+  useRoundIntroAudio(game.zapowiedz, roundIntroUrl)
 
   const onReset = async () => {
     setBusy(true)
@@ -147,7 +156,7 @@ export function HostPage() {
         ) : (
           <RoundControl edition={edition} />
         )}
-        <IntroCard url={introUrl} folder={Boolean(scan)} />
+        <IntroCard url={introUrl} folder={Boolean(scan)} roundIntros={scan ? Object.keys(scan.roundIntros).length : 0} />
 
         <section className="card card--wide">
           <div className="card__head">

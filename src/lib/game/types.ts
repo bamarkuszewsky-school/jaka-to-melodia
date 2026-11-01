@@ -251,8 +251,17 @@ export interface Round4State {
   bonus?: number
 }
 
+/** Zapowiedź rundy (intro): numer rundy, czas startu (serwer) i długość podkładu. */
+export interface RoundIntroState {
+  runda: number
+  start: number
+  /** Ustawia host, gdy zna długość pliku (ms). */
+  dlugosc?: number
+}
+
 export interface GameState {
   runda?: number
+  zapowiedz?: RoundIntroState
   runda4?: Round4State
   /** Finalista wcisnął STOP (czas serwera). */
   stop4?: { stanowisko: StationKey; czas: number }

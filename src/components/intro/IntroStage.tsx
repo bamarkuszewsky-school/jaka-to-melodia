@@ -1,4 +1,5 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import type { CSSProperties } from 'react'
+import { useFitScale } from '../../lib/intro/useFitScale'
 import {
   beatIndex,
   beatPulse,
@@ -12,21 +13,7 @@ import {
   ramp,
 } from '../../lib/intro/timeline'
 
-const W = 1920
-const H = 1080
 const LOGO = `${import.meta.env.BASE_URL}logo-szkoly.png`
-
-/** Dopasowuje scenę 1920×1080 do okna (tablica, iPad, OBS). */
-function useFitScale(): number {
-  const read = () => Math.min(window.innerWidth / W, window.innerHeight / H)
-  const [scale, setScale] = useState(read)
-  useEffect(() => {
-    const onResize = () => setScale(read())
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-  return scale
-}
 
 const WORDS = ['Jaka', 'to', 'melodia', '?'] as const
 const BARS = 36
@@ -55,7 +42,7 @@ export function IntroStage({ t }: { t: number }) {
   // --- Sowa ---
   const owlIn = easeOut(ramp(t, MOMENTS.owlAppears, MOMENTS.drop))
   const owlPop = easeBack(ramp(t, MOMENTS.drop, MOMENTS.drop + 0.45))
-  const owlUp = easeInOut(ramp(t, 5.75, 6.7))
+  const owlUp = easeInOut(ramp(t, MOMENTS.owlUpFrom, MOMENTS.owlUpTo))
   const owlScale =
     (t < MOMENTS.drop ? 0.55 + 0.25 * owlIn : 0.8 + 0.25 * owlPop) * (1 - 0.36 * owlUp) * (1 + 0.05 * pulse + 0.08 * finalPulse)
   const owlY = -235 * owlUp

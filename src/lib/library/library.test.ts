@@ -10,6 +10,8 @@ import {
   parseRoundFolder,
   parseSongName,
   redrawOne,
+  roundIntroFor,
+  systemSound,
   scanLibrary,
   songId,
   songOutcomes,
@@ -61,6 +63,22 @@ describe('folder z muzyką', () => {
     expect(r3.nutyPath).toBe('RUNDA 3/Lato - Zespół.png')
     expect(scan.intro?.name).toBe('czolowka.wav')
     expect(scan.skipped).toEqual(['luzem.mp3'])
+  })
+
+  it('rozpoznaje dźwięki systemowe', () => {
+    const scan = scanLibrary([
+      f('Muzyka/SYSTEMOWE/Jaka to melodia czołówka intro.mp3'),
+      f('Muzyka/SYSTEMOWE/Jaka to melodia runda intro.mp3'),
+      f('Muzyka/SYSTEMOWE/Finał intro.mp3'),
+      f('Muzyka/czolowka.wav'),
+      f('Muzyka/RUNDA 1/A - B.mp3'),
+    ])
+    expect(scan.intro?.name).toBe('Jaka to melodia czołówka intro.mp3')
+    expect(scan.roundIntros.wszystkie?.name).toBe('Jaka to melodia runda intro.mp3')
+    expect(roundIntroFor(scan.roundIntros, 1)?.name).toBe('Jaka to melodia runda intro.mp3')
+    expect(roundIntroFor(scan.roundIntros, 4)?.name).toBe('Finał intro.mp3')
+    expect(scan.songs.size).toBe(1)
+    expect(systemSound('Runda 2 intro.mp3')).toEqual({ kind: 'runda', key: '2' })
   })
 
   it('synchronizacja dodaje nowe, nie rusza ustawień, oznacza brakujące', () => {

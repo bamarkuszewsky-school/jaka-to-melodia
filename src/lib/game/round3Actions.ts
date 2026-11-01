@@ -17,6 +17,7 @@ export function startRound3(game: GameState): Promise<void> {
   const odpada = game.runda2?.odpada
   const gracze = STATION_KEYS.filter((k) => k !== odpada).slice(0, 2) as [StationKey, StationKey]
   return update(gra(), {
+    zapowiedz: { runda: 3, start: serverTimestamp() },
     runda: 3,
     runda3: {
       hasla: Array.from({ length: R3_TILES }, () => ({ stan: 'ukryte' })),

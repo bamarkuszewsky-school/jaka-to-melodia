@@ -14,6 +14,7 @@ export function startRound4(game: GameState): Promise<void> {
   const gracz = game.runda3?.zwyciezca
   if (!gracz) return Promise.resolve()
   return update(gra(), {
+    zapowiedz: { runda: 4, start: serverTimestamp() },
     runda: 4,
     runda4: {
       gracz,

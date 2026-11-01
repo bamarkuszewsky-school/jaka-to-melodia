@@ -3,7 +3,7 @@ import { startIntro, stopIntro } from '../../lib/game/hostActions'
 import { useGame } from '../../lib/game/state'
 
 /** Panel hosta: czołówka. Podkład gra z MacBooka, animacja idzie na tablicę i do OBS. */
-export function IntroCard({ url, folder }: { url?: string; folder: boolean }) {
+export function IntroCard({ url, folder, roundIntros }: { url?: string; folder: boolean; roundIntros: number }) {
   const { czolowka } = useGame()
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -66,8 +66,15 @@ export function IntroCard({ url, folder }: { url?: string; folder: boolean }) {
       ) : (
         <p className="muted">
           {folder
-            ? 'W folderze z muzyką nie ma pliku czolowka.mp3 (albo .wav) — dodaj go i wczytaj folder ponownie.'
-            : 'Wybierz folder z muzyką z plikiem czolowka.mp3 (albo .wav) w głównym katalogu.'}
+            ? 'W folderze SYSTEMOWE nie ma czołówki (plik z „czołówka” w nazwie) — dodaj go i wczytaj folder ponownie.'
+            : 'Wybierz folder z muzyką — czołówka i intra rund leżą w podfolderze SYSTEMOWE.'}
+        </p>
+      )}
+      {folder && (
+        <p className="muted small">
+          {roundIntros > 0
+            ? 'Intro rundy gra samo przy „Rozpocznij rundę…” (animacja na tablicy i w OBS).'
+            : 'Brak intra rund w SYSTEMOWE — przy starcie rundy tablica pokaże tylko krótką planszę.'}
         </p>
       )}
       {error && <p className="error">{error}</p>}

@@ -49,11 +49,11 @@ Melodie finału losuje aplikacja z folderu `FINAŁ`.
 
 ## Czołówka
 
-1. Do folderu edycji wrzuć podkład jako `czolowka.mp3` (albo `czolowka.wav`).
+1. Do folderu `SYSTEMOWE` w folderze z muzyką wrzuć podkład z „czołówka” w nazwie (stary sposób — `czolowka.mp3` w folderze głównym — też działa).
 2. Po wczytaniu folderu w panelu hosta pojawia się karta „Czołówka” → **▶ Puść czołówkę**.
 3. Podkład gra z MacBooka, a animacja jednocześnie pokazuje się na tablicy i w nakładce OBS (`#/stream`).
 
-Animacja jest ułożona pod bity obecnego podkładu (17,5 s, ok. 152 BPM) — czasy są w `src/lib/intro/timeline.ts`. Logo szkoły: `public/logo-szkoly.png`.
+Animacja jest ułożona pod bity podkładu „Jaka to melodia czołówka intro” (18,8 s, ok. 152 BPM) — czasy są w `src/lib/intro/timeline.ts`. Intro rund: `src/lib/intro/roundTimeline.ts` (6,1 s, numer rundy wskakuje na 1,87 s, podtytuł na 3,92 s). Logo szkoły: `public/logo-szkoly.png`.
 
 ## Runda 1 — jak to działa
 
@@ -84,7 +84,8 @@ Wszystkie utwory wszystkich edycji leżą w **jednym folderze na MacBooku hosta*
 
 ```
 Muzyka/
-  czolowka.wav
+  SYSTEMOWE/Jaka to melodia czołówka intro.mp3
+  SYSTEMOWE/Jaka to melodia runda intro.mp3
   RUNDA 1/Takie Tango - Budka Suflera.mp3
   RUNDA 2/…
   RUNDA 3/Takie Tango - Budka Suflera.png   ← nuty (MP3 obok opcjonalnie, na refren)
@@ -92,6 +93,8 @@ Muzyka/
 ```
 
 Nazwa pliku to **„Tytuł - Wykonawca”**. Utwory mogą być całe — start fragmentu ustawia się w aplikacji.
+
+**SYSTEMOWE** — dźwięki gry, rozpoznawane po nazwie: plik z „czołówka” w nazwie to czołówka, z „runda” — intro każdej rundy. Można dać osobne pliki: „runda 1 …”, „runda 2 …”, „runda 3 …”, „finał …” (mają pierwszeństwo przed wspólnym). Intro gra samo po kliknięciu „Rozpocznij rundę…”, a tablica i OBS pokazują w tym czasie zapowiedź rundy.
 
 1. **Gra → Edycja → Wybierz folder z muzyką.** Nowe utwory same trafiają do bazy (Firebase, `/baza`, czyta tylko host).
 2. **Baza utworów:** przy każdym utworze odtwarzacz, przyciski „= teraz” dla **startu** i **refrenu**, podgląd 15 s (rundy 1–2). Runda 2 — **hasło**, runda 3 — **anegdota**. Zmiany zapisują się od razu.

@@ -59,6 +59,7 @@ export function useGame(): GameState {
         setState({
           runda: typeof raw.runda === 'number' ? raw.runda : undefined,
           czolowka: (raw.czolowka as IntroState | undefined) ?? undefined,
+          zapowiedz: (raw.zapowiedz as GameState['zapowiedz']) ?? undefined,
           punkty: { '1': punkty['1'] ?? 0, '2': punkty['2'] ?? 0, '3': punkty['3'] ?? 0 },
           runda1: toRound(raw.runda1),
           runda2: toRound(raw.runda2),
@@ -85,7 +86,7 @@ export function questionFor(set: QuestionSet, p: Pick<LiveQuestion, 'runda' | 'h
 }
 
 /** Różnica między zegarem tego urządzenia a zegarem serwera Firebase (ms). */
-function useServerOffset(): number {
+export function useServerOffset(): number {
   const [offset, setOffset] = useState(0)
   useEffect(() => onValue(ref(db, '.info/serverTimeOffset'), (snap) => setOffset(Number(snap.val()) || 0)), [])
   return offset

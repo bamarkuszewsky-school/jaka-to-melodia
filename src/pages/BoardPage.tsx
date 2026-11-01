@@ -2,6 +2,7 @@ import { Round4Board } from '../components/board/Round4Board'
 import { Round3Board } from '../components/board/Round3Board'
 import { RoundBoard } from '../components/board/RoundBoard'
 import { IntroOverlay } from '../components/intro/IntroOverlay'
+import { RoundIntroOverlay } from '../components/intro/RoundIntro'
 import { RankingView } from '../components/RankingView'
 import { usePokaz } from '../lib/library/db'
 import { Shell } from '../components/Shell'
@@ -27,6 +28,7 @@ export function BoardPage() {
       <Shell title="Tablica" subtitle="Ranking" hideBarInFullscreen>
         <RankingView lista={pokaz.lista} variant="board" />
         <IntroOverlay czolowka={game.czolowka} />
+        <RoundIntroOverlay zapowiedz={game.zapowiedz} />
       </Shell>
     )
   }
@@ -36,6 +38,7 @@ export function BoardPage() {
       <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
         <Round4Board game={game} names={names} />
         <IntroOverlay czolowka={game.czolowka} />
+        <RoundIntroOverlay zapowiedz={game.zapowiedz} />
       </Shell>
     )
   }
@@ -45,6 +48,7 @@ export function BoardPage() {
       <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
         <Round3Board game={game} names={names} />
         <IntroOverlay czolowka={game.czolowka} />
+        <RoundIntroOverlay zapowiedz={game.zapowiedz} />
       </Shell>
     )
   }
@@ -55,6 +59,7 @@ export function BoardPage() {
       <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
         <RoundBoard game={game} names={names} />
         <IntroOverlay czolowka={game.czolowka} />
+        <RoundIntroOverlay zapowiedz={game.zapowiedz} />
       </Shell>
     )
   }
@@ -62,6 +67,7 @@ export function BoardPage() {
   return (
     <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
       <IntroOverlay czolowka={game.czolowka} />
+        <RoundIntroOverlay zapowiedz={game.zapowiedz} />
       <div className="board">
         <h1 className="board__title">
           Jaka to <span className="accent">melodia?</span>

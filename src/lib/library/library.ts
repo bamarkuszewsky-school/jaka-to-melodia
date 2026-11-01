@@ -9,7 +9,7 @@ import { STATION_KEYS } from '../game/types'
  *   Muzyka/RUNDA 2/…
  *   Muzyka/RUNDA 3/Takie Tango - Budka Suflera.png   ← nuty (mp3 obok opcjonalnie, na refren)
  *   Muzyka/FINAŁ/…
- *   Muzyka/czolowka.wav
+ *   Muzyka/SYSTEMOWE/czołówka.mp3, intro rundy (…runda….mp3 albo osobno „runda 1”, „finał”)
  * Nazwa pliku = „Tytuł - Wykonawca”. Ustawienia (start, refren, hasło, anegdota, historia)
  * trzyma baza w Firebase pod /baza/utwory — czyta i pisze tylko host.
  */
@@ -151,14 +151,44 @@ export interface ScannedSong<F extends FileLike = FileLike> {
   nutyPath?: string
 }
 
+/** Klucz intra rundy: konkretna runda (4 = finał) albo „wszystkie”. */
+export type RoundIntroKey = '1' | '2' | '3' | '4' | 'wszystkie'
+
 export interface ScanResult<F extends FileLike = FileLike> {
   songs: Map<string, ScannedSong<F>>
+  /** Czołówka (SYSTEMOWE/…czołówka… albo czolowka.* w folderze głównym). */
   intro?: F
+  /** Intra rund z folderu SYSTEMOWE. */
+  roundIntros: Partial<Record<RoundIntroKey, F>>
   /** Pliki poza folderami rund (poza czołówką). */
   skipped: string[]
 }
 
+/** „SYSTEMOWE”, „Systemowe”, „SYSTEM” → folder z dźwiękami systemowymi. */
+export function isSystemFolder(name: string): boolean {
+  const n = plain(name).toUpperCase().replace(/[^A-Z]/g, '')
+  return n === 'SYSTEMOWE' || n === 'SYSTEM' || n === 'SYSTEMOWY'
+}
+
+/** Rozpoznaje dźwięk systemowy po nazwie pliku. */
+export function systemSound(fileName: string): { kind: 'czolowka' } | { kind: 'runda'; key: RoundIntroKey } | null {
+  const n = plain(fileName.replace(/\.[^.]+$/, '')).toLowerCase()
+  if (n.includes('czolowka')) return { kind: 'czolowka' }
+  if (/final/.test(n) || /runda[^a-z0-9]*4/.test(n)) return { kind: 'runda', key: '4' }
+  const m = n.match(/runda[^a-z0-9]*([1-3])/)
+  if (m) return { kind: 'runda', key: m[1] as RoundIntroKey }
+  if (n.includes('runda') || n.includes('round')) return { kind: 'runda', key: 'wszystkie' }
+  return null
+}
+
+/** Intro dla danej rundy: osobny plik albo wspólny „runda intro”. */
+export function roundIntroFor<F>(intros: Partial<Record<RoundIntroKey, F>>, runda: number): F | undefined {
+  return intros[String(runda) as RoundIntroKey] ?? intros.wszystkie
+}
+
 export function scanLibrary<F extends FileLike>(files: Iterable<F>): ScanResult<F> {
+  const roundIntros: Partial<Record<RoundIntroKey, F>> = {}
+  let systemIntro: F | undefined
   const songs = new Map<string, ScannedSong<F>>()
   const skipped: string[] = []
   let intro: F | undefined
@@ -171,6 +201,13 @@ export function scanLibrary<F extends FileLike>(files: Iterable<F>): ScanResult<
     let runda: LibRound | null = null
     for (let i = 0; i < parts.length - 1; i++) {
       runda = parseRoundFolder(parts[i]) ?? runda
+    }
+    if (!runda && isAudio && parts.slice(0, -1).some(isSystemFolder)) {
+      const snd = systemSound(f.name)
+      if (snd?.kind === 'czolowka') systemIntro = f
+      else if (snd?.kind === 'runda') roundIntros[snd.key] = f
+      else skipped.push(rel)
+      continue
     }
     if (!runda) {
       if (isAudio && /^czolowka\./i.test(f.name)) intro = f
@@ -190,7 +227,7 @@ export function scanLibrary<F extends FileLike>(files: Iterable<F>): ScanResult<
     }
     songs.set(id, s)
   }
-  return { songs, intro, skipped }
+  return { songs, intro: systemIntro ?? intro, roundIntros, skipped }
 }
 
 /**

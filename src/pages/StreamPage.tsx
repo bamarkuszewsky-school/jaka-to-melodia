@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { IntroOverlay } from '../components/intro/IntroOverlay'
+import { RoundIntroOverlay } from '../components/intro/RoundIntro'
 import { RankingView } from '../components/RankingView'
 import { usePokaz } from '../lib/library/db'
 import { useBuzzes } from '../lib/buzzTest'
@@ -107,6 +108,7 @@ export function StreamPage() {
   return (
     <div className="stream">
       <IntroOverlay czolowka={game.czolowka} />
+        <RoundIntroOverlay zapowiedz={game.zapowiedz} />
       <div className="stream__bug">
         Jaka to <span className="accent">melodia?</span>
       </div>

@@ -15,6 +15,7 @@ const hiddenTiles = (questions: Question[]) => questions.map((q) => ({ haslo: q.
 /** Nowa gra: zeruje punkty i wykłada hasła rundy 1 (bez odpowiedzi). */
 export function startRound1(questions: Question[], wybiera: StationKey = '1'): Promise<void> {
   return update(gra(), {
+    zapowiedz: { runda: 1, start: serverTimestamp() },
     runda: 1,
     punkty: { '1': 0, '2': 0, '3': 0 },
     runda1: { hasla: hiddenTiles(questions), wybiera },
@@ -27,6 +28,7 @@ export function startRound1(questions: Question[], wybiera: StationKey = '1'): P
 /** Runda 2: punkty zostają, zaczyna stanowisko z najmniejszą liczbą punktów. */
 export function startRound2(game: GameState, questions: Question[], dogrywki: Question[]): Promise<void> {
   return update(gra(), {
+    zapowiedz: { runda: 2, start: serverTimestamp() },
     runda: 2,
     runda2: {
       hasla: hiddenTiles(questions),
@@ -199,6 +201,7 @@ export function adjustScore(state: GameState, s: StationKey, delta: number): Pro
 export function resetGame(): Promise<void> {
   return update(gra(), {
     runda: null,
+    zapowiedz: null,
     runda1: null,
     runda2: null,
     runda3: null,
