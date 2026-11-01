@@ -4,7 +4,7 @@ Teleturniej muzyczny w przeglądarce: tablica dla widowni, panel hosta, przycisk
 
 Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Database**, logowanie ról przez **Firebase Authentication**, hosting na **GitHub Pages**.
 
-## Co już działa (wersja 0.6)
+## Co już działa (wersja 0.7)
 
 - Ekran startowy z wyborem roli: **Zawodnik, Host, Tech Support, Tablica**.
 - Logowanie hasłem — każda rola ma własne konto w Firebase.
@@ -17,6 +17,7 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 - **Runda 2** z malejącą stawką, eliminacją i dogrywką.
 - **Czołówka** z logo szkoły, zgrana z podkładem — host puszcza ją jednym przyciskiem.
 - **Runda 3 — licytacja nut** z nowym profilem **Muzyk** (nuty na tablecie przy pianinie).
+- **Finał — 7 melodii w 30 sekund** z przyciskiem STOP na iPadzie finalisty.
 
 ## Runda 3 — licytacja nut
 
@@ -37,6 +38,25 @@ W `pytania.json` lista `runda3` (dokładnie 6 zagadek):
 ```
 
 `nuty` to zrzut z MuseScore (PNG/JPG) w folderze edycji — najlepiej z ponumerowanymi nutami. Bez pola `wartosc` ostatnia zagadka jest za 400 pkt, reszta po 200; można też wpisać `"wartosc": 400` przy wybranej zagadce. Nuty trafiają do bazy tylko na czas zagadki i widzą je wyłącznie muzyk i host.
+
+## Finał — 7 melodii w 30 sekund
+
+1. Po rundzie 3 host klika **Rozpocznij finał**, a potem **Start finału** — rusza pierwsza melodia i zegar 30 s (widać go na tablicy z dziesiątymi sekundy).
+2. Finalista ma na iPadzie duży przycisk **STOP**. Wciśnięcie zatrzymuje zegar i muzykę.
+3. Zawodnik podaje tytuł (host: **Dobrze**) albo prosi o następną melodię (host: **Dalej**). W obu przypadkach od razu gra kolejna melodia i zegar rusza dalej.
+4. Pominięte melodie wracają po przejściu całej siódemki, dopóki jest czas.
+5. **250 pkt** za każdą odgadniętą melodię. **Komplet 7/7 = +1000 pkt bonusu** i tytuł **Mistrza edycji**.
+6. **Zła odpowiedź kończy finał** — zdobyte punkty zostają.
+7. Gdy zegar dojdzie do zera, muzyka staje, a zawodnik ma jeszcze **jedną, ostatnią szansę** na odpowiedź (bez „dalej”). Na odpowiedź jest 10 s.
+8. Na koniec tablica odsłania wszystkie tytuły i pokazuje ranking klas.
+
+W `pytania.json` lista `final` (dokładnie 7 melodii, pola jak w rundzie 1, bez hasła):
+
+```json
+"final": [
+  { "tytul": "…", "wykonawca": "…", "plik": "e01-f-01.mp3", "start": 0 }
+]
+```
 
 ## Czołówka
 

@@ -1,3 +1,4 @@
+import { Round4Board } from '../components/board/Round4Board'
 import { Round3Board } from '../components/board/Round3Board'
 import { RoundBoard } from '../components/board/RoundBoard'
 import { IntroOverlay } from '../components/intro/IntroOverlay'
@@ -17,6 +18,15 @@ export function BoardPage() {
   const online = usePresenceList()
   const names = useStationNames()
   const game = useGame()
+
+  if (game.runda === 4 && game.runda4) {
+    return (
+      <Shell title="Tablica" subtitle="Ekran widowni" hideBarInFullscreen>
+        <Round4Board game={game} names={names} />
+        <IntroOverlay czolowka={game.czolowka} />
+      </Shell>
+    )
+  }
 
   if (game.runda === 3 && game.runda3) {
     return (

@@ -4,6 +4,7 @@ import { useBuzzes } from '../lib/buzzTest'
 import { useGame } from '../lib/game/state'
 import { usePresence } from '../lib/presence'
 import { nut, poNutach } from '../lib/game/rules3'
+import { guessedCount } from '../lib/game/rules4'
 import { labelForKey, stationLabel, useStationNames } from '../lib/stations'
 
 /**
@@ -27,7 +28,26 @@ export function StreamPage() {
 
   const p3 = game.pytanie3
   const r3 = game.runda3
-  if (game.runda === 3 && r3) {
+  const r4 = game.runda4
+  if (game.runda === 4 && r4) {
+    const who = labelForKey(names, r4.gracz)
+    const ok = guessedCount(r4.utwory)
+    const last = r4.utwory.map((s, i) => ({ ...s, i })).filter((s) => s.stan === 'odgadnieta' && s.tytul)
+    if (r4.faza === 'gotowe') {
+      lower = { key: 'f-start', label: 'Finał · 7 melodii w 30 sekund', value: who }
+    } else if (r4.faza === 'koniec') {
+      lower = {
+        key: `f-end-${r4.wynik}`,
+        label: r4.wynik === 'komplet' ? 'MISTRZ EDYCJI!' : r4.wynik === 'blad' ? 'Koniec finału' : 'Czas minął',
+        value: `${who} · ${ok}/7 · +${r4.zdobyte} pkt`,
+      }
+    } else if (last.length > 0) {
+      const l = last[last.length - 1]
+      lower = { key: `f-ok-${l.i}`, label: `Finał · ${who} · ${ok}/7`, value: `${l.tytul} — ${l.wykonawca ?? ''}` }
+    } else {
+      lower = { key: 'f-play', label: 'Finał', value: who }
+    }
+  } else if (game.runda === 3 && r3) {
     if (p3?.faza === 'licytacja' && p3.licytacja.nuty && p3.licytacja.prowadzi) {
       lower = {
         key: `bid-${p3.haslo}-${p3.licytacja.nuty}`,

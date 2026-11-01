@@ -68,3 +68,23 @@ describe('runda 3 w pytania.json', () => {
     expect(parseQuestionSet(raw).runda3.map((q) => q.wartosc)).toEqual([200, 200, 400, 200, 200, 200])
   })
 })
+
+describe('finał w pytania.json', () => {
+  it('wczytuje 7 melodii finałowych', () => {
+    const set = parseQuestionSet(example)
+    expect(set.final).toHaveLength(7)
+    expect(set.final[0]).toMatchObject({ plik: 'test-f-01.mp3', start: 0 })
+  })
+
+  it('bez listy „final” finału po prostu nie ma', () => {
+    const raw = structuredClone(example)
+    delete raw.final
+    expect(parseQuestionSet(raw).final).toEqual([])
+  })
+
+  it('finał musi mieć dokładnie 7 melodii', () => {
+    const raw = structuredClone(example)
+    raw.final.pop()
+    expect(() => parseQuestionSet(raw)).toThrow('Finał musi mieć dokładnie 7 melodii (jest 6).')
+  })
+})
