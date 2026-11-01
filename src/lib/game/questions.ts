@@ -1,5 +1,6 @@
 import { R3_BIG_VALUE, R3_TILES, R3_VALUE } from './rules3'
-import type { Question, QuestionSet, Round3Question } from './types'
+import { FINAL_SONGS } from './rules4'
+import type { FinalQuestion, Question, QuestionSet, Round3Question } from './types'
 
 /**
  * Wczytywanie edycji z folderu na MacBooku hosta.
@@ -99,6 +100,28 @@ function parseRound3(raw: unknown): Round3Question[] {
   }))
 }
 
+function parseFinal(raw: unknown): FinalQuestion[] {
+  if (raw === undefined) return []
+  if (!Array.isArray(raw)) throw new QuestionFileError('„final” musi być listą.')
+  if (raw.length !== FINAL_SONGS) {
+    throw new QuestionFileError(`Finał musi mieć dokładnie ${FINAL_SONGS} melodii (jest ${raw.length}).`)
+  }
+  return raw.map((item, i) => {
+    const where = `Finał, melodia ${i + 1}`
+    const q = (item ?? {}) as Record<string, unknown>
+    const start = q.start === undefined ? 0 : Number(q.start)
+    if (!Number.isFinite(start) || start < 0) {
+      throw new QuestionFileError(`${where}: „start” musi być liczbą sekund (np. 0 albo 12.5).`)
+    }
+    return {
+      tytul: text(q.tytul, 'tytul', where),
+      wykonawca: text(q.wykonawca, 'wykonawca', where),
+      plik: text(q.plik, 'plik', where),
+      start,
+    }
+  })
+}
+
 /** Sprawdza i porządkuje zawartość pytania.json. */
 export function parseQuestionSet(json: unknown): QuestionSet {
   if (!json || typeof json !== 'object') throw new QuestionFileError('Plik pytania.json jest pusty albo uszkodzony.')
@@ -109,6 +132,7 @@ export function parseQuestionSet(json: unknown): QuestionSet {
     runda2: parseList(raw.runda2, { key: 'runda2', label: 'Runda 2', count: 3, optional: true }),
     dogrywka2: parseList(raw.dogrywka2, { key: 'dogrywka2', label: 'Dogrywka', count: [0, 5], optional: true }),
     runda3: parseRound3(raw.runda3),
+    final: parseFinal(raw.final),
   }
 }
 
@@ -141,6 +165,7 @@ export async function loadEdition(files: FileList | File[]): Promise<LoadedEditi
   }
   const wanted = [
     ...allQuestions(set).map((q) => q.plik),
+    ...set.final.map((q) => q.plik),
     ...set.runda3.map((q) => q.nuty).filter((n): n is string => Boolean(n)),
   ]
   const missing = [...new Set(wanted)].filter((name) => !audio.has(name) && !images.has(name))

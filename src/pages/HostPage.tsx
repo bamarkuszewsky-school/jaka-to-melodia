@@ -3,6 +3,7 @@ import { BuzzOrder } from '../components/BuzzOrder'
 import { EditionLoader } from '../components/host/EditionLoader'
 import { IntroCard } from '../components/host/IntroCard'
 import { Round3Control } from '../components/host/Round3Control'
+import { Round4Control } from '../components/host/Round4Control'
 import { RoundControl } from '../components/host/RoundControl'
 import { PresencePanel } from '../components/PresencePanel'
 import { Shell } from '../components/Shell'
@@ -41,7 +42,13 @@ export function HostPage() {
       <div className="grid">
         <StationNamesCard />
         <EditionLoader edition={edition} onLoaded={setEdition} />
-        {game.runda === 3 ? <Round3Control edition={edition} /> : <RoundControl edition={edition} />}
+        {game.runda === 4 ? (
+          <Round4Control edition={edition} />
+        ) : game.runda === 3 ? (
+          <Round3Control edition={edition} />
+        ) : (
+          <RoundControl edition={edition} />
+        )}
         <IntroCard edition={edition} />
 
         <section className="card card--wide">

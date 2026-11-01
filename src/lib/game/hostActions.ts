@@ -202,6 +202,8 @@ export function resetGame(): Promise<void> {
     runda1: null,
     runda2: null,
     runda3: null,
+    runda4: null,
+    stop4: null,
     pytanie: null,
     pytanie3: null,
     ruch: null,

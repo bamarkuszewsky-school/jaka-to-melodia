@@ -67,6 +67,10 @@
       "zagrane": {
         ".write": "auth != null && auth.token.email === 'muzyk@cyfroweszkoly.pl' && !data.exists() && newData.exists() && root.child('gra/pytanie3/faza').val() === 'granie'",
         ".validate": "newData.val() === now"
+      },
+      "stop4": {
+        ".write": "auth != null && auth.token.email === 'zawodnik@cyfroweszkoly.pl' && !data.exists() && newData.exists() && root.child('gra/runda4/faza').val() === 'gra' && newData.child('stanowisko').val() === root.child('gra/runda4/gracz').val()",
+        ".validate": "newData.hasChildren(['stanowisko', 'czas']) && newData.child('czas').val() === now"
       }
     },
     "muzyk": {

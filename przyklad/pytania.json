@@ -113,5 +113,49 @@
       "podpowiedz": "Najtrudniejsza zagadka edycji — za 400 punktów.",
       "nuty": "test-r3-06.png"
     }
+  ],
+  "final": [
+    {
+      "tytul": "Melodia finałowa 1",
+      "wykonawca": "Zespół Testowy",
+      "plik": "test-f-01.mp3",
+      "start": 0
+    },
+    {
+      "tytul": "Melodia finałowa 2",
+      "wykonawca": "Wokalistka Próbna",
+      "plik": "test-f-02.mp3",
+      "start": 0
+    },
+    {
+      "tytul": "Melodia finałowa 3",
+      "wykonawca": "DJ Generator",
+      "plik": "test-f-03.mp3",
+      "start": 0
+    },
+    {
+      "tytul": "Melodia finałowa 4",
+      "wykonawca": "Orkiestra Szkolna",
+      "plik": "test-f-04.mp3",
+      "start": 0
+    },
+    {
+      "tytul": "Melodia finałowa 5",
+      "wykonawca": "Duet Fikcyjny",
+      "plik": "test-f-05.mp3",
+      "start": 0
+    },
+    {
+      "tytul": "Melodia finałowa 6",
+      "wykonawca": "Chór Próbny",
+      "plik": "test-f-06.mp3",
+      "start": 0
+    },
+    {
+      "tytul": "Melodia finałowa 7",
+      "wykonawca": "Kapela Szkolna",
+      "plik": "test-f-07.mp3",
+      "start": 0
+    }
   ]
 }

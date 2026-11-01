@@ -2195,3 +2195,334 @@ h3 {
 .role-card:last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
+
+/* ============================================================
+   Finał (runda 4) — 7 melodii w 30 sekund
+   ============================================================ */
+
+.final-clock {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  font-size: 64px;
+  line-height: 1;
+  color: var(--text);
+  transition: color 0.2s;
+}
+
+.final-clock.is-running {
+  color: var(--gold);
+  text-shadow: 0 0 28px rgb(245 197 66 / 0.45);
+}
+
+.final-clock.is-low {
+  color: var(--magenta);
+  text-shadow: 0 0 28px rgb(255 61 139 / 0.5);
+}
+
+.final-clock--board {
+  font-size: clamp(90px, min(20vw, 30vh), 360px);
+  line-height: 1.1;
+  padding-bottom: 0.06em;
+}
+
+/* host */
+.final-host {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) 1fr;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+.final-host__clock-box {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  text-align: center;
+}
+
+.final-host__stage {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+}
+
+@media (max-width: 720px) {
+  .final-host {
+    grid-template-columns: 1fr;
+  }
+}
+
+.final-songs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.final-song {
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.final-song__num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.final-song__state {
+  font-weight: 800;
+  text-align: center;
+}
+
+.final-song.is-current {
+  border-color: var(--gold);
+}
+
+.final-song.is-odgadnieta .final-song__state {
+  color: var(--ok);
+}
+
+.final-song.is-pominieta .final-song__state {
+  color: var(--gold);
+}
+
+.final-song.is-zla .final-song__state {
+  color: var(--danger);
+}
+
+.final-ranking {
+  margin: 0;
+  padding-left: 22px;
+  display: grid;
+  gap: 4px;
+}
+
+.final-ranking li > span {
+  margin-right: 12px;
+}
+
+/* tablica */
+.final-board {
+  display: grid;
+  justify-items: center;
+  gap: 1.2vh;
+  width: 100%;
+}
+
+.final-board__who {
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.song__countdown--small {
+  width: clamp(70px, 7vw, 130px);
+  font-size: clamp(32px, 3.6vw, 68px);
+}
+
+.final-slots {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) minmax(0, 1.2fr);
+  gap: 0.8vw;
+}
+
+.final-slot {
+  min-width: 0;
+  min-height: clamp(70px, 13vh, 150px);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.4vh;
+  padding: 0.8vh 0.6vw;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 2px solid var(--line);
+  text-align: center;
+  transition:
+    background 0.3s,
+    border-color 0.3s,
+    transform 0.3s;
+}
+
+.final-slot__num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(26px, 3.4vw, 64px);
+  line-height: 1;
+}
+
+.final-slot__title {
+  font-weight: 700;
+}
+
+.final-slot__artist {
+  color: var(--muted);
+}
+
+.final-slot__label {
+  color: var(--muted);
+  font-size: clamp(12px, 1.1vw, 20px);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.final-slot.is-current {
+  border-color: var(--gold);
+  transform: translateY(-6px);
+  box-shadow: 0 0 24px rgb(245 197 66 / 0.35);
+}
+
+.final-slot.is-odgadnieta {
+  background: rgb(61 220 151 / 0.16);
+  border-color: var(--ok);
+}
+
+.final-slot.is-odgadnieta .final-slot__num {
+  color: var(--ok);
+}
+
+.final-slot.is-pominieta .final-slot__num {
+  color: var(--gold);
+}
+
+.final-slot.is-zla {
+  background: rgb(255 107 107 / 0.14);
+  border-color: var(--danger);
+}
+
+.final-slot.is-zla .final-slot__num {
+  color: var(--danger);
+}
+
+.final-slot--points {
+  background: var(--surface-2);
+  border-color: var(--gold);
+}
+
+.final-slot--points .final-slot__num {
+  color: var(--gold);
+}
+
+.final-end {
+  display: grid;
+  justify-items: center;
+  gap: 1.4vh;
+  width: 100%;
+}
+
+.final-end__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(32px, 4vw, 76px);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.final-end__title.is-gold {
+  color: var(--gold);
+  text-shadow: 0 0 36px rgb(245 197 66 / 0.6);
+  animation: final-pulse 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes final-pulse {
+  to {
+    transform: scale(1.06);
+  }
+}
+
+.final-end__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.final-end__sum {
+  margin: 0;
+  font-size: clamp(20px, 2.2vw, 42px);
+}
+
+.final-end__ranking {
+  list-style: none;
+  margin: 1vh 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6vh;
+  width: min(70vw, 900px);
+}
+
+.final-end__ranking li {
+  display: grid;
+  grid-template-columns: 3ch 1fr auto;
+  gap: 1vw;
+  padding: 0.8vh 1.4vw;
+  border-radius: 14px;
+  background: var(--surface);
+  font-size: clamp(18px, 2vw, 38px);
+}
+
+.final-end__ranking li.is-finalist {
+  background: var(--surface-2);
+  outline: 2px solid var(--gold);
+}
+
+.final-end__place {
+  color: var(--muted);
+}
+
+.final-end__class {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* iPad finalisty */
+.stop-button {
+  width: min(70vw, 60vh);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 0;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  background: radial-gradient(circle at 35% 30%, #ff8ab8, var(--magenta) 50%, #b5175a 100%);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(56px, 12vw, 130px);
+  box-shadow:
+    0 14px 0 #7d0e3d,
+    0 24px 50px rgb(0 0 0 / 0.5);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stop-button:active:not(:disabled) {
+  transform: translateY(10px);
+  box-shadow:
+    0 4px 0 #7d0e3d,
+    0 10px 24px rgb(0 0 0 / 0.5);
+}
+
+.stop-button:disabled {
+  opacity: 0.6;
+}
+
+.stop-button__clock {
+  font-size: 0.36em;
+  font-variant-numeric: tabular-nums;
+}

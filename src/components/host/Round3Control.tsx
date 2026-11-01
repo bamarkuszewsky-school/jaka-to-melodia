@@ -13,6 +13,7 @@ import {
   sheetToDataUrl,
 } from '../../lib/game/round3Actions'
 import { ANSWER_MS, remaining, secondsLeft } from '../../lib/game/rules'
+import { startRound4 } from '../../lib/game/round4Actions'
 import { allowedBids, canPass, nut, opponent, poNutach, WINS_TO_FINAL } from '../../lib/game/rules3'
 import { useGame, useServerNow } from '../../lib/game/state'
 import type { StationKey } from '../../lib/game/types'
@@ -273,10 +274,19 @@ export function Round3Control({ edition }: { edition: LoadedEdition | null }) {
           </div>
         </div>
       ) : r3.zwyciezca ? (
-        <p className="notice">
-          Do finału przechodzi <strong>{label(r3.zwyciezca)}</strong> ({r3.wygrane[r3.zwyciezca]} : {' '}
-          {r3.wygrane[opponent(r3.gracze, r3.zwyciezca)] ?? 0}). Runda 4 wkrótce.
-        </p>
+        <div className="round-end">
+          <p className="notice">
+            Do finału przechodzi <strong>{label(r3.zwyciezca)}</strong> ({r3.wygrane[r3.zwyciezca]} :{' '}
+            {r3.wygrane[opponent(r3.gracze, r3.zwyciezca)] ?? 0}).
+          </p>
+          {edition.set.final.length === 7 ? (
+            <button type="button" className="btn btn--primary btn--huge" onClick={() => run(() => startRound4(game))}>
+              Rozpocznij finał
+            </button>
+          ) : (
+            <p className="error">W pytania.json brakuje listy „final” (7 melodii).</p>
+          )}
+        </div>
       ) : (
         <>
           <p className="muted">

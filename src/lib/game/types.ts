@@ -38,8 +38,18 @@ export interface Round3Question {
   wartosc: number
 }
 
+/** Melodia finału (runda 4) — gra z MacBooka hosta. */
+export interface FinalQuestion {
+  tytul: string
+  wykonawca: string
+  plik: string
+  start: number
+}
+
 export interface QuestionSet {
   edycja: string
+  /** 7 melodii finału (puste, jeśli plik ich nie ma). */
+  final: FinalQuestion[]
   /** 6 zagadek rundy 3 (puste, jeśli plik ich nie ma). */
   runda3: Round3Question[]
   runda1: Question[]
@@ -192,8 +202,53 @@ export interface BidMove {
   czas: number
 }
 
+// ---------- Runda 4 (finał) ----------
+
+/** czeka = jeszcze nie grała, pominieta = „dalej”, odgadnieta, zla = błędna odpowiedź. */
+export type FinalSongState = 'czeka' | 'pominieta' | 'odgadnieta' | 'zla'
+
+/**
+ * Fazy finału:
+ * gotowe → czeka na start, gra → zegar i muzyka lecą,
+ * stop → zawodnik wcisnął przycisk (albo skończył się czas): odpowiada albo prosi o następną,
+ * koniec → finał rozstrzygnięty.
+ */
+export type FinalPhase = 'gotowe' | 'gra' | 'stop' | 'koniec'
+
+export type FinalOutcome = 'komplet' | 'blad' | 'czas'
+
+export interface FinalSong {
+  stan: FinalSongState
+  /** Odsłaniane po odgadnięciu (i wszystkie na koniec). */
+  tytul?: string
+  wykonawca?: string
+}
+
+export interface Round4State {
+  gracz: StationKey
+  utwory: FinalSong[]
+  /** Która melodia teraz gra / grała. */
+  biezacy: number
+  faza: FinalPhase
+  /** Ile ms zostało na zegarze w chwili ostatniego zatrzymania. */
+  czasZostal: number
+  /** Czas serwera, kiedy zegar ostatnio ruszył (tylko w fazie „gra”). */
+  start?: number
+  /** Czas serwera, kiedy zaczęło się odliczanie na odpowiedź (faza „stop”). */
+  odpowiedzStart?: number
+  /** Zegar doszedł do zera — ostatnia szansa na odpowiedź, bez „dalej”. */
+  ostatnia?: boolean
+  /** Punkty zdobyte w finale. */
+  zdobyte: number
+  wynik?: FinalOutcome
+  bonus?: number
+}
+
 export interface GameState {
   runda?: number
+  runda4?: Round4State
+  /** Finalista wcisnął STOP (czas serwera). */
+  stop4?: { stanowisko: StationKey; czas: number }
   runda3?: Round3State
   pytanie3?: LiveQuestion3
   ruch?: BidMove

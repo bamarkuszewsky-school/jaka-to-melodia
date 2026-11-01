@@ -30,6 +30,7 @@ export function MusicianPage() {
   }
 
   let status: ReactNode = <p className="muzyk__status">Czekaj na rundę 3.</p>
+  if (game.runda === 4) status = <p className="muzyk__status">Trwa finał — muzyk ma wolne. Dziękujemy!</p>
   if (game.runda === 3 && !p) status = <p className="muzyk__status">Czekaj, aż klasa wybierze numer zagadki.</p>
   if (p?.faza === 'licytacja') {
     status = (

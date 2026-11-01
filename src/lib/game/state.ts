@@ -12,6 +12,7 @@ import type {
   QuestionSet,
   Round3State,
   Round3Tile,
+  Round4State,
   RoundState,
   StationKey,
   Tile,
@@ -39,6 +40,13 @@ function toRound3(raw: unknown): Round3State | undefined {
   return { ...r, hasla: hasla.filter(Boolean), wygrane: r.wygrane ?? {} }
 }
 
+function toRound4(raw: unknown): Round4State | undefined {
+  if (!raw || typeof raw !== 'object') return undefined
+  const r = raw as Omit<Round4State, 'utwory'> & { utwory?: unknown }
+  const utwory = (Array.isArray(r.utwory) ? r.utwory : Object.values((r.utwory ?? {}) as object)) as Round4State['utwory']
+  return { ...r, utwory: utwory.filter(Boolean), zdobyte: r.zdobyte ?? 0 }
+}
+
 /** Cały stan gry na żywo (/gra), wspólny dla wszystkich widoków. */
 export function useGame(): GameState {
   const [state, setState] = useState<GameState>(EMPTY)
@@ -55,6 +63,8 @@ export function useGame(): GameState {
           runda1: toRound(raw.runda1),
           runda2: toRound(raw.runda2),
           runda3: toRound3(raw.runda3),
+          runda4: toRound4(raw.runda4),
+          stop4: (raw.stop4 as GameState['stop4']) ?? undefined,
           pytanie3: (raw.pytanie3 as LiveQuestion3 | undefined) ?? undefined,
           ruch: (raw.ruch as BidMove | undefined) ?? undefined,
           zagrane: typeof raw.zagrane === 'number' ? raw.zagrane : undefined,
