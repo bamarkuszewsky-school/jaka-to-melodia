@@ -21,6 +21,11 @@ export function clockLeft(r: Pick<Round4State, 'faza' | 'czasZostal' | 'start'>,
   return Math.max(0, r.czasZostal)
 }
 
+/** Sekundy na zegarze finału na tablicy — bez przecinka (30, 29, … 1, 0). */
+export function finalSeconds(ms: number): number {
+  return Math.ceil(Math.max(0, ms) / 1000)
+}
+
 /** Zegar w formacie 29,4 (sekundy z dziesiątymi). */
 export function formatClock(ms: number): string {
   return (Math.ceil(ms / 100) / 10).toFixed(1).replace('.', ',')

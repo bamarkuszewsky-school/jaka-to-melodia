@@ -4,6 +4,7 @@ import { RoundBoard } from '../components/board/RoundBoard'
 import { IntroOverlay } from '../components/intro/IntroOverlay'
 import { RoundIntroOverlay } from '../components/intro/RoundIntro'
 import { RankingView } from '../components/RankingView'
+import { EditionScreen } from '../components/board/EditionScreen'
 import { usePokaz } from '../lib/library/db'
 import { Shell } from '../components/Shell'
 import { useBuzzes } from '../lib/buzzTest'
@@ -27,6 +28,18 @@ export function BoardPage() {
     return (
       <Shell title="Tablica" subtitle="Ranking" hideBarInFullscreen>
         <RankingView lista={pokaz.lista} variant="board" />
+        <IntroOverlay czolowka={game.czolowka} />
+        <RoundIntroOverlay zapowiedz={game.zapowiedz} />
+      </Shell>
+    )
+  }
+
+  // Przed rundą 1 i po zakończeniu edycji: ranking sezonu, potem napis z edycją.
+  if (game.runda === undefined && pokaz?.plansza) {
+    const klasy = STANOWISKA.filter((s) => hasClassName(names, s)).map((s) => names[s])
+    return (
+      <Shell title="Tablica" subtitle={pokaz.plansza.nazwa} hideBarInFullscreen>
+        <EditionScreen plansza={pokaz.plansza} lista={pokaz.lista} klasy={klasy} />
         <IntroOverlay czolowka={game.czolowka} />
         <RoundIntroOverlay zapowiedz={game.zapowiedz} />
       </Shell>

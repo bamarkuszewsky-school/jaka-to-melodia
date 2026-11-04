@@ -4,7 +4,10 @@ import { RoundIntroOverlay } from '../components/intro/RoundIntro'
 import { RankingView } from '../components/RankingView'
 import { usePokaz } from '../lib/library/db'
 import { useBuzzes } from '../lib/buzzTest'
-import { useGame } from '../lib/game/state'
+import { useGame, useServerNow } from '../lib/game/state'
+import type { Round4State } from '../lib/game/types'
+import { FinalPanel } from '../components/board/FinalPanel'
+import { Plate } from '../components/board/Round4Board'
 import { usePresence } from '../lib/presence'
 import { nut, poNutach } from '../lib/game/rules3'
 import { guessedCount } from '../lib/game/rules4'
@@ -105,24 +108,40 @@ export function StreamPage() {
     lower = { key: `test-${buzzes[0].stanowisko}`, label: 'Zgłasza się', value: stationLabel(names, buzzes[0].stanowisko) }
   }
 
+  // W trakcie finału: panel z numerami i zegarem na przezroczystym tle (kamera na zawodnika).
+  const finalLive = game.runda === 4 && Boolean(r4) && r4?.faza !== 'koniec'
+
   return (
     <div className="stream">
       <IntroOverlay czolowka={game.czolowka} />
-        <RoundIntroOverlay zapowiedz={game.zapowiedz} />
+      <RoundIntroOverlay zapowiedz={game.zapowiedz} />
       <div className="stream__bug">
         Jaka to <span className="accent">melodia?</span>
       </div>
+      {finalLive && r4 && <StreamFinal r4={r4} name={labelForKey(names, r4.gracz)} points={game.punkty[r4.gracz]} />}
       {pokaz?.stream && (
         <div className="stream__ranking">
           <RankingView lista={pokaz.lista} limit={10} variant="stream" />
         </div>
       )}
-      {lower && !pokaz?.stream && (
+      {lower && !pokaz?.stream && !finalLive && (
         <div className="stream__lower" key={lower.key}>
           <span className="stream__lower-label">{lower.label}</span>
           <span className="stream__lower-value">{lower.value}</span>
         </div>
       )}
+    </div>
+  )
+}
+
+function StreamFinal({ r4, name, points }: { r4: Round4State; name: string; points: number }) {
+  const now = useServerNow(r4.faza === 'gra' || r4.faza === 'stop')
+  return (
+    <div className="stream-final">
+      <FinalPanel r={r4} now={now} />
+      <div className="stream-final__plate">
+        <Plate name={name} points={points} answering={r4.faza === 'stop'} status={r4.zdobyte ? `+${r4.zdobyte} pkt w finale` : undefined} />
+      </div>
     </div>
   )
 }

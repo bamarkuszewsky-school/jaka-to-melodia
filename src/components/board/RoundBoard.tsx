@@ -12,49 +12,82 @@ import {
   SONG_MS,
 } from '../../lib/game/rules'
 import { useServerNow } from '../../lib/game/state'
-import { STATION_KEYS, type GameState, type RoundNo, type StationKey, type Tile } from '../../lib/game/types'
+import { STATION_KEYS, type GameState, type RoundNo, type StationKey } from '../../lib/game/types'
 import { labelForKey, type StationNames } from '../../lib/stations'
 import { FitText } from '../FitText'
+import { ShowRows, type ShowRow } from './ShowRows'
 
 interface Props {
   game: GameState
   names: StationNames
 }
 
-/** Tablica widowni w rundach 1–2: plansza haseł, aktualna piosenka, dogrywka, wyniki. */
+/** Tablica widowni w rundach 1–2: lista haseł jak w teleturnieju, pasek stanu piosenki, dogrywka, wyniki. */
 export function RoundBoard({ game, names }: Props) {
   const runda: RoundNo = game.runda === 2 ? 2 : 1
   const r = roundState(game, runda)
   const label = (k: StationKey) => labelForKey(names, k)
+  const { pytanie } = game
+  const now = useServerNow(pytanie?.faza === 'gra' || pytanie?.faza === 'odpowiedz')
   if (!r) return null
 
-  const { pytanie } = game
   const r2 = game.runda2
   const dogrywkaPhase = runda === 2 && roundTilesDone(game, 2) && !r2?.odpada
   const e = dogrywkaPhase ? elimination(game.punkty, r2?.awans) : null
+  const showDogrywka = Boolean(pytanie?.dogrywka) || e?.status === 'dogrywka'
 
   let stage: ReactNode
-  if (pytanie) {
-    stage = <Song game={game} label={label} tiles={pytanie.dogrywka ? (r.dogrywki ?? []) : r.hasla} />
-  } else if (runda === 2 && r2?.odpada) {
+  if (!pytanie && runda === 2 && r2?.odpada) {
     stage = <Results game={game} label={label} odpada={r2.odpada} />
-  } else if (e?.status === 'dogrywka') {
+  } else {
+    const tiles = showDogrywka ? (r.dogrywki ?? []) : r.hasla
+    const startValue = runda === 2 ? 200 : 100
+    const rows: ShowRow[] = tiles.map((t, i) => {
+      const active = Boolean(pytanie && pytanie.haslo === i && Boolean(pytanie.dogrywka) === showDogrywka)
+      const value = active && pytanie
+        ? pytanie.dogrywka
+          ? '—'
+          : pytanie.faza === 'odpowiedz' && pytanie.wartosc
+            ? pytanie.wartosc
+            : pytanie.faza === 'gra'
+              ? roundValue(pytanie.runda, elapsedOf(pytanie, now))
+              : pytanie.faza === 'odslona' && pytanie.wynik?.punkty
+                ? pytanie.wynik.punkty
+                : startValue
+        : t.stan === 'odgadniete' && t.punkty
+          ? t.punkty
+          : showDogrywka
+            ? '—'
+            : startValue
+      const revealed = t.stan === 'odgadniete' || t.stan === 'nieodgadniete'
+      return {
+        key: i,
+        value,
+        label: t.haslo,
+        reveal: revealed ? `${t.tytul ?? ''}` : active && pytanie?.faza === 'odslona' ? pytanie.wynik?.tytul : undefined,
+        by: revealed
+          ? t.stan === 'odgadniete' && t.stanowisko
+            ? `${label(t.stanowisko)}${t.punkty ? ` · +${t.punkty}` : ''}`
+            : 'nikt'
+          : undefined,
+        state: active ? 'active' : t.stan === 'odgadniete' ? 'done' : t.stan === 'nieodgadniete' ? 'missed' : t.stan === 'pominiete' ? 'skipped' : 'idle',
+      }
+    })
     stage = (
-      <div className="dogrywka">
-        <p className="dogrywka__title">Dogrywka</p>
-        <FitText className="dogrywka__who" max={[5.5, 110]} min={28}>
-          {e.contenders.map(label).join(' · ')}
-        </FitText>
-        <p className="song__hint">Kto odgadnie, przechodzi do rundy 3</p>
-        {r.dogrywki && <Tiles tiles={r.dogrywki} label={label} />}
+      <div className={`show ${pytanie ? 'show--live' : ''}`}>
+        {showDogrywka && (
+          <p className="show__badge">
+            Dogrywka{e?.status === 'dogrywka' ? ` · ${e.contenders.map(label).join(' · ')}` : ''} — kto odgadnie, przechodzi dalej
+          </p>
+        )}
+        <ShowRows rows={rows} dimOthers={Boolean(pytanie)} />
+        {pytanie && <SongStatus game={game} label={label} now={now} />}
       </div>
     )
-  } else {
-    stage = <Tiles tiles={r.hasla} label={label} />
   }
 
   return (
-    <div className="r1">
+    <div className="r1 r1--show">
       <header className="r1__head">
         <span className="r1__round">Runda {runda}</span>
         <span className="r1__logo">
@@ -69,117 +102,61 @@ export function RoundBoard({ game, names }: Props) {
   )
 }
 
-// ---------- Piosenka ----------
+// ---------- Pasek stanu piosenki (pod listą haseł) ----------
 
-function Song({ game, label, tiles }: { game: GameState; label: (k: StationKey) => string; tiles: Tile[] }) {
+function SongStatus({ game, label, now }: { game: GameState; label: (k: StationKey) => string; now: number }) {
   const pytanie = game.pytanie!
-  const live = pytanie.faza === 'gra' || pytanie.faza === 'odpowiedz'
-  const now = useServerNow(live)
-  const tile = tiles[pytanie.haslo]
   const poza = pytanie.poza ?? {}
   const blocked = (Object.keys(pytanie.zablokowane ?? {}) as StationKey[]).filter((k) => !poza[k])
   const elapsed = elapsedOf(pytanie, now)
 
-  return (
-    <div className={`song phase-${pytanie.faza}`} key={`${pytanie.dogrywka ? 'd' : 'h'}${pytanie.haslo}`}>
-      {pytanie.dogrywka && <p className="song__badge">Dogrywka</p>}
-      <FitText className="song__haslo" max={[4, 76]} min={20} widthRatio={0.86}>
-        {tile?.haslo ?? '…'}
-      </FitText>
-
-      {pytanie.faza === 'wybrane' && (
-        <p className="song__hint">{pytanie.przesuniecie ? 'Muzyka gra dalej dla pozostałych…' : 'Za chwilę muzyka…'}</p>
-      )}
-
-      {pytanie.faza === 'gra' && (
-        <>
-          {!pytanie.dogrywka && (
-            <div className={`song__value ${pytanie.runda === 2 ? 'is-falling' : ''}`}>
-              {roundValue(pytanie.runda, elapsed)}
-              <span>pkt</span>
-            </div>
-          )}
-          <Equalizer />
-          <div className="progress progress--big" aria-hidden>
-            <div className="progress__bar" style={{ width: `${(Math.max(0, SONG_MS - elapsed) / SONG_MS) * 100}%` }} />
-          </div>
-        </>
-      )}
-
-      {pytanie.faza === 'odpowiedz' && pytanie.odpowiada && (
-        <>
-          <FitText className="song__who" max={[12, 220]} min={40} widthRatio={0.86}>
-            {label(pytanie.odpowiada)}
-          </FitText>
-          <p className="song__hint">{pytanie.dogrywka ? 'odpowiada' : `odpowiada za ${pytanie.wartosc} pkt`}</p>
-          <div className="song__countdown">{secondsLeft(remaining(ANSWER_MS, pytanie.odpowiedzStart, now))}</div>
-        </>
-      )}
-
-      {pytanie.faza === 'brak' && (
-        <FitText className="song__who song__who--muted" max={[7, 130]} min={36}>
-          Nikt nie zgadł
+  let body: ReactNode = null
+  if (pytanie.faza === 'wybrane') {
+    body = <span className="show-status__text">{pytanie.przesuniecie ? 'Muzyka gra dalej dla pozostałych…' : 'Za chwilę muzyka…'}</span>
+  } else if (pytanie.faza === 'gra') {
+    body = (
+      <>
+        <Equalizer />
+        <div className="progress progress--big" aria-hidden>
+          <div className="progress__bar" style={{ width: `${(Math.max(0, SONG_MS - elapsed) / SONG_MS) * 100}%` }} />
+        </div>
+      </>
+    )
+  } else if (pytanie.faza === 'odpowiedz' && pytanie.odpowiada) {
+    body = (
+      <>
+        <FitText className="show-status__who" boxClassName="fit-box--left" max={[5, 96]} min={24} widthRatio={1}>
+          {label(pytanie.odpowiada)}
         </FitText>
-      )}
+        <span className="show-status__text">{pytanie.dogrywka ? 'odpowiada' : `odpowiada za ${pytanie.wartosc} pkt`}</span>
+        <span className="song__countdown song__countdown--small">{secondsLeft(remaining(ANSWER_MS, pytanie.odpowiedzStart, now))}</span>
+      </>
+    )
+  } else if (pytanie.faza === 'brak') {
+    body = <span className="show-status__text">Nikt nie zgadł</span>
+  } else if (pytanie.faza === 'odslona' && pytanie.wynik) {
+    body = (
+      <>
+        <span className="show-status__reveal">
+          <strong>{pytanie.wynik.tytul}</strong> — {pytanie.wynik.wykonawca}
+        </span>
+        <span className="show-status__text">
+          {pytanie.wynik.stanowisko
+            ? pytanie.dogrywka
+              ? `${label(pytanie.wynik.stanowisko)} przechodzi dalej!`
+              : `+${pytanie.wynik.punkty} pkt · ${label(pytanie.wynik.stanowisko)}`
+            : 'Nikt nie zdobył punktów'}
+        </span>
+      </>
+    )
+  }
 
-      {pytanie.faza === 'odslona' && pytanie.wynik && (
-        <div className="reveal">
-          <FitText className="reveal__title" max={[9.5, 190]} min={32} lines={2} widthRatio={0.88}>
-            {pytanie.wynik.tytul}
-          </FitText>
-          <FitText className="reveal__artist" max={[3.6, 70]} min={20} widthRatio={0.88}>
-            {pytanie.wynik.wykonawca}
-          </FitText>
-          <p className="reveal__result">
-            {pytanie.wynik.stanowisko
-              ? pytanie.dogrywka
-                ? `${label(pytanie.wynik.stanowisko)} przechodzi dalej!`
-                : `+${pytanie.wynik.punkty} pkt · ${label(pytanie.wynik.stanowisko)}`
-              : 'Nikt nie zdobył punktów'}
-          </p>
-        </div>
-      )}
-
-      {blocked.length > 0 && pytanie.faza !== 'odslona' && (
-        <p className="song__blocked">Zablokowani: {blocked.map(label).join(', ')}</p>
-      )}
-    </div>
-  )
-}
-
-// ---------- Plansza haseł ----------
-
-function Tiles({ tiles, label }: { tiles: Tile[]; label: (k: StationKey) => string }) {
   return (
-    <div
-      className={`tiles ${tiles.length <= 3 ? 'tiles--few' : ''}`}
-      style={{ gridTemplateColumns: `repeat(${Math.max(tiles.length, 1)}, minmax(0, 1fr))` }}
-    >
-      {tiles.map((t, i) => (
-        <div key={i} className={`tile tile--${t.stan}`}>
-          {t.stan === 'ukryte' || t.stan === 'pominiete' ? (
-            <FitText className="tile__haslo" max={[3.2, 62]} min={14} lines={3} widthRatio={1}>
-              {t.haslo}
-            </FitText>
-          ) : (
-            <>
-              <FitText className="tile__title" max={[1.8, 34]} min={12} lines={2} widthRatio={1}>
-                {t.tytul}
-              </FitText>
-              <FitText className="tile__artist" max={[1.2, 22]} min={11} lines={2} widthRatio={1}>
-                {t.wykonawca}
-              </FitText>
-              <span className="tile__by">
-                {t.stan === 'odgadniete' && t.stanowisko
-                  ? t.punkty
-                    ? `${label(t.stanowisko)} · +${t.punkty}`
-                    : label(t.stanowisko)
-                  : 'nikt'}
-              </span>
-            </>
-          )}
-        </div>
-      ))}
+    <div className={`show-status phase-${pytanie.faza}`}>
+      {body}
+      {blocked.length > 0 && pytanie.faza !== 'odslona' && (
+        <span className="show-status__blocked">Zablokowani: {blocked.map(label).join(', ')}</span>
+      )}
     </div>
   )
 }

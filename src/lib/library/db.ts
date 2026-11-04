@@ -75,12 +75,14 @@ export async function createEdition(nazwa: string, numer: number, utwory: DrawnS
     [`edycje/${id}`]: { nazwa, numer, utworzono: serverTimestamp(), utwory, test: test || null },
     biezaca: id,
   })
+  await set(ref(db, 'pokaz/plansza'), { tryb: 'start', nazwa, od: serverTimestamp() })
   return id
 }
 
 /** Porzuca wylosowaną edycję (np. test) — utwory wracają do puli. */
 export async function cancelEdition(id: string): Promise<void> {
   await update(ref(db, 'baza'), { [`edycje/${id}`]: null, biezaca: null })
+  await remove(ref(db, 'pokaz/plansza'))
   await resetGame()
 }
 
@@ -115,6 +117,14 @@ export async function finishEdition(
     changes[`utwory/${o.id}/odblokowany`] = null
   }
   await update(ref(db, 'baza'), changes)
+  // Tablica: najpierw ranking sezonu, potem napis „Edycja … zakończona”.
+  const order = (Object.keys(wyniki) as StationKey[]).sort((a, b) => wyniki[a].miejsce - wyniki[b].miejsce)
+  await set(ref(db, 'pokaz/plansza'), {
+    tryb: 'koniec',
+    nazwa: edition.nazwa,
+    klasy: order.map((k) => wyniki[k].klasa),
+    od: serverTimestamp(),
+  })
   await resetGame()
 }
 
@@ -129,21 +139,36 @@ export function deleteEdition(id: string, songs: Songs): Promise<void> {
 
 // ---------- Pokaz rankingu ----------
 
+/** Plansza edycji na tablicy (przed rundą 1 i po zakończeniu edycji): ranking, potem napis. */
+export interface Plansza {
+  tryb: 'start' | 'koniec'
+  nazwa: string
+  /** Klasy (przy „koniec” — w kolejności miejsc). Przy „start” bierzemy aktualne nazwy stanowisk. */
+  klasy?: string[]
+  od: number
+}
+
 export interface Pokaz {
   lista: RankingEntry[]
   tablica: boolean
   stream: boolean
+  plansza?: Plansza
 }
 
 const asPokaz = (v: unknown): Pokaz => {
   const raw = (v ?? {}) as Partial<Pokaz>
-  return { lista: raw.lista ?? [], tablica: Boolean(raw.tablica), stream: Boolean(raw.stream) }
+  return { lista: raw.lista ?? [], tablica: Boolean(raw.tablica), stream: Boolean(raw.stream), plansza: raw.plansza ?? undefined }
 }
 
 export const usePokaz = () => useValue('pokaz', asPokaz)
 
 export function setPokaz(target: 'tablica' | 'stream', on: boolean, lista: RankingEntry[]): Promise<void> {
   return update(ref(db, 'pokaz'), { [target]: on || null, lista })
+}
+
+/** Pokaż ranking na planszy edycji jeszcze raz (od nowa: ranking → napis). */
+export function replayPlansza(): Promise<void> {
+  return update(ref(db, 'pokaz/plansza'), { od: serverTimestamp() })
 }
 
 /** Host trzyma /pokaz/lista w zgodzie z edycjami (tablica i OBS nie czytają /baza). */

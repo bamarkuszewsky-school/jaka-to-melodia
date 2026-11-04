@@ -1,9 +1,10 @@
 import { ANSWER_MS, remaining, secondsLeft } from '../../lib/game/rules'
-import { nut, opponent, poNutach, WINS_TO_FINAL } from '../../lib/game/rules3'
+import { nut, opponent, poNutach, R3_BIG_VALUE, R3_VALUE, WINS_TO_FINAL } from '../../lib/game/rules3'
 import { useServerNow } from '../../lib/game/state'
 import type { GameState, StationKey } from '../../lib/game/types'
 import { labelForKey, type StationNames } from '../../lib/stations'
 import { FitText } from '../FitText'
+import { ShowRows, type ShowRow } from './ShowRows'
 
 /** Tablica widowni w rundzie 3: numery zagadek, licytacja, odpowiedź, wynik, zwycięzca. */
 export function Round3Board({ game, names }: { game: GameState; names: StationNames }) {
@@ -14,72 +15,7 @@ export function Round3Board({ game, names }: { game: GameState; names: StationNa
   if (!r3) return null
 
   let stage
-  if (p) {
-    const l = p.licytacja
-    stage = (
-      <div className={`song phase3-${p.faza}`} key={p.haslo}>
-        <p className="song__badge song__badge--gold">
-          Zagadka {p.haslo + 1} · {p.wartosc} pkt
-        </p>
-        <FitText className="r3__artist" max={[7, 130]} min={32} widthRatio={0.86}>
-          {p.wykonawca}
-        </FitText>
-
-        {p.faza === 'licytacja' && (
-          <div className="bidding">
-            <p className="song__hint">
-              Po ilu nutach odgadniecie? Licytuje <strong>{label(l.kolej)}</strong>
-            </p>
-            <div className="bidding__offer">
-              {l.nuty !== undefined && l.prowadzi ? (
-                <>
-                  <span className="bidding__num">{l.nuty}</span>
-                  <span className="bidding__label">
-                    {nut(l.nuty)} · oferta {label(l.prowadzi)}
-                  </span>
-                </>
-              ) : (
-                <span className="bidding__label">Start: 7 nut</span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {p.faza === 'granie' && p.gra && p.nuty && (
-          <>
-            <FitText className="song__who" max={[10, 190]} min={40} widthRatio={0.86}>
-              {label(p.gra)}
-            </FitText>
-            <p className="song__hint">zgaduje {poNutach(p.nuty)} — słuchamy!</p>
-            <Notes count={p.nuty} />
-          </>
-        )}
-
-        {p.faza === 'odpowiedz' && p.gra && (
-          <>
-            <FitText className="song__who" max={[10, 190]} min={40} widthRatio={0.86}>
-              {label(p.gra)}
-            </FitText>
-            <p className="song__hint">odpowiada za {p.wartosc} pkt</p>
-            <div className="song__countdown">{secondsLeft(remaining(ANSWER_MS, p.odpowiedzStart, now))}</div>
-          </>
-        )}
-
-        {p.faza === 'odslona' && p.wynik && (
-          <div className="reveal">
-            <FitText className="reveal__title" max={[8, 150]} min={32} lines={2} widthRatio={0.88}>
-              {p.wynik.tytul}
-            </FitText>
-            <p className="reveal__result">
-              {p.wynik.trafil
-                ? `+${p.wynik.punkty} pkt · ${label(p.wynik.stanowisko)}`
-                : `Pudło! +${p.wynik.punkty} pkt dla ${label(p.wynik.stanowisko)}`}
-            </p>
-          </div>
-        )}
-      </div>
-    )
-  } else if (r3.zwyciezca) {
+  if (!p && r3.zwyciezca) {
     const loser = opponent(r3.gracze, r3.zwyciezca)
     stage = (
       <div className="results">
@@ -100,36 +36,90 @@ export function Round3Board({ game, names }: { game: GameState; names: StationNa
       </div>
     )
   } else {
-    stage = (
-      <div className="tiles tiles--six" style={{ gridTemplateColumns: 'repeat(6, minmax(0, 1fr))' }}>
-        {r3.hasla.map((t, i) => (
-          <div key={i} className={`tile tile--${t.stan} ${t.stan === 'ukryte' || t.stan === 'pominiete' ? 'tile--number' : ''}`}>
-            {t.stan === 'ukryte' || t.stan === 'pominiete' ? (
-              <span className="tile__number">{i + 1}</span>
-            ) : (
-              <>
-                <FitText className="tile__title" max={[1.6, 30]} min={11} lines={2} widthRatio={1}>
-                  {t.tytul}
-                </FitText>
-                <FitText className="tile__artist" max={[1.1, 20]} min={10} lines={2} widthRatio={1}>
-                  {t.wykonawca}
-                </FitText>
-                {t.stanowisko && (
-                  <span className="tile__by">
-                    {t.trafil ? '' : 'pudło → '}
-                    {label(t.stanowisko)} · +{t.punkty}
-                  </span>
+    const rows: ShowRow[] = r3.hasla.map((t, i) => {
+      const active = p?.haslo === i
+      const value = i === r3.hasla.length - 1 ? R3_BIG_VALUE : R3_VALUE
+      const revealed = t.stan === 'odgadniete' || t.stan === 'nieodgadniete'
+      return {
+        key: i,
+        value: t.punkty ?? (active && p ? p.wartosc : value),
+        label: revealed ? (t.wykonawca ?? '') : active && p ? p.wykonawca : `Zagadka ${i + 1}`,
+        reveal: revealed ? t.tytul : active && p?.faza === 'odslona' ? p.wynik?.tytul : undefined,
+        by:
+          revealed && t.stanowisko
+            ? `${t.trafil ? '' : 'pudło → '}${label(t.stanowisko)}${t.nuty ? ` · ${t.nuty} ${nut(t.nuty)}` : ''}`
+            : undefined,
+        state: active ? 'active' : t.stan === 'odgadniete' ? 'done' : t.stan === 'nieodgadniete' ? 'missed' : t.stan === 'pominiete' ? 'skipped' : 'idle',
+      }
+    })
+
+    let status = null
+    if (p) {
+      const l = p.licytacja
+      status = (
+        <div className={`show-status phase3-${p.faza}`}>
+          {p.faza === 'licytacja' && (
+            <>
+              <span className="show-status__text">
+                Po ilu nutach odgadniecie? Licytuje <strong>{label(l.kolej)}</strong>
+              </span>
+              <span className="bidding__offer">
+                {l.nuty !== undefined && l.prowadzi ? (
+                  <>
+                    <span className="bidding__num">{l.nuty}</span>
+                    <span className="bidding__label">
+                      {nut(l.nuty)} · {label(l.prowadzi)}
+                    </span>
+                  </>
+                ) : (
+                  <span className="bidding__label">start: 7 nut</span>
                 )}
-              </>
-            )}
-          </div>
-        ))}
+              </span>
+            </>
+          )}
+          {p.faza === 'granie' && p.gra && p.nuty && (
+            <>
+              <FitText className="show-status__who" boxClassName="fit-box--left" max={[5, 96]} min={24} widthRatio={1}>
+                {label(p.gra)}
+              </FitText>
+              <span className="show-status__text">zgaduje {poNutach(p.nuty)} — słuchamy!</span>
+              <Notes count={p.nuty} />
+            </>
+          )}
+          {p.faza === 'odpowiedz' && p.gra && (
+            <>
+              <FitText className="show-status__who" boxClassName="fit-box--left" max={[5, 96]} min={24} widthRatio={1}>
+                {label(p.gra)}
+              </FitText>
+              <span className="show-status__text">odpowiada za {p.wartosc} pkt</span>
+              <span className="song__countdown song__countdown--small">{secondsLeft(remaining(ANSWER_MS, p.odpowiedzStart, now))}</span>
+            </>
+          )}
+          {p.faza === 'odslona' && p.wynik && (
+            <>
+              <span className="show-status__reveal">
+                <strong>{p.wynik.tytul}</strong> — {p.wynik.wykonawca}
+              </span>
+              <span className="show-status__text">
+                {p.wynik.trafil
+                  ? `+${p.wynik.punkty} pkt · ${label(p.wynik.stanowisko)}`
+                  : `Pudło! +${p.wynik.punkty} pkt dla ${label(p.wynik.stanowisko)}`}
+              </span>
+            </>
+          )}
+        </div>
+      )
+    }
+    stage = (
+      <div className={`show ${p ? 'show--live' : ''}`}>
+        <ShowRows rows={rows} dimOthers={Boolean(p)} />
+        {status}
       </div>
     )
   }
 
   return (
-    <div className="r1">
+    <div className="r1 r1--show">
       <header className="r1__head">
         <span className="r1__round">Runda 3 · Licytacja</span>
         <span className="r1__logo">

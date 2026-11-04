@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { setPokaz, type Pokaz } from '../../lib/library/db'
+import { replayPlansza, setPokaz, type Pokaz } from '../../lib/library/db'
 import { computeRanking, type EditionRecord } from '../../lib/library/library'
 
 /** Zakładka „Ranking”: wyniki klas ze wszystkich zakończonych edycji + pokaz na tablicy i w OBS. */
@@ -40,6 +40,17 @@ export function RankingPanel({ editions, pokaz }: { editions: Record<string, Edi
         <p className="notice">
           Ranking jest teraz widoczny: {[pokaz.tablica && 'tablica', pokaz.stream && 'live (OBS)'].filter(Boolean).join(' i ')}.
         </p>
+      )}
+      {pokaz?.plansza && (
+        <div className="edition-card__row">
+          <p className="muted small">
+            Plansza edycji na tablicy („{pokaz.plansza.nazwa}”{pokaz.plansza.tryb === 'koniec' ? ' zakończona' : ''}): przed rundą 1 i po
+            zakończeniu edycji tablica pokazuje 20 s rankingu, potem napis z klasami.
+          </p>
+          <button type="button" className="btn btn--ghost" onClick={() => replayPlansza().catch(() => setError('Nie udało się.'))}>
+            Pokaż ranking jeszcze raz
+          </button>
+        </div>
       )}
       {error && <p className="error">{error}</p>}
 

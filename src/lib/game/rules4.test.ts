@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { clockLeft, formatClock, nextSong } from './rules4'
+import { clockLeft, finalSeconds, formatClock, nextSong } from './rules4'
 import type { FinalSong, FinalSongState } from './types'
 
 const songs = (...states: FinalSongState[]): FinalSong[] => states.map((stan) => ({ stan }))
@@ -41,5 +41,15 @@ describe('kolejność melodii', () => {
 
   it('ostatnia pominięta wraca sama do siebie', () => {
     expect(nextSong(songs('odgadnieta', 'pominieta', 'odgadnieta'), 1)).toBe(1)
+  })
+})
+
+describe('zegar na tablicy', () => {
+  it('pokazuje pełne sekundy, bez przecinka', () => {
+    expect(finalSeconds(30000)).toBe(30)
+    expect(finalSeconds(29001)).toBe(30)
+    expect(finalSeconds(29000)).toBe(29)
+    expect(finalSeconds(1)).toBe(1)
+    expect(finalSeconds(0)).toBe(0)
   })
 })

@@ -4,7 +4,7 @@ Teleturniej muzyczny w przeglądarce: tablica dla widowni, panel hosta, przycisk
 
 Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Database**, logowanie ról przez **Firebase Authentication**, hosting na **GitHub Pages**.
 
-## Co już działa (wersja 0.8)
+## Co już działa (wersja 0.9)
 
 - Ekran startowy z wyborem roli: **Zawodnik, Host, Tech Support, Tablica**.
 - Logowanie hasłem — każda rola ma własne konto w Firebase.
@@ -21,6 +21,8 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 - **Baza utworów** z folderu na MacBooku: start, refren, hasła, anegdoty, historia zagrań, losowanie edycji.
 - **Ranking sezonu** z pokazem na tablicy i na live, **Zakończ rundę / Zakończ edycję**.
 - **iPady zgłaszają się przy stanowiskach**, a host przypisuje im stanowisko i klasę.
+- **Tablica w stylu teleturnieju:** w rundach 1–3 belki haseł z plakietką punktów (na żywo rośnie / maleje), w finale panel z numerami 1–7 i sześciokątnym zegarem z paskiem czasu, tabliczka finalisty; w OBS ten sam panel na przezroczystym tle (kamera).
+- **Plansza edycji:** przed rundą 1 i po „Zakończ edycję” tablica pokazuje 20 s rankingu, potem „Edycja 5 · 4BT VS 2AT VS 4B LO” (+ „zakończona”).
 
 ## Runda 3 — licytacja nut
 
