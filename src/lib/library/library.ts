@@ -90,6 +90,8 @@ export interface EditionRecord {
   mistrz?: boolean
   /** Ile melodii finału odgadnięto. */
   final?: number
+  /** Edycja testowa: nie trafia do rankingu i nie oznacza utworów jako zagranych. */
+  test?: boolean
 }
 
 // ---------- Folder ----------
@@ -358,6 +360,41 @@ export function drawEdition(songs: Songs, rng: () => number = Math.random): Draw
   return { utwory, braki }
 }
 
+/**
+ * Losowanie TESTOWE — do prób, gdy w bazie jest jeszcze mało utworów.
+ * Bierze każdy utwór, który ma plik (w rundzie 3: nuty albo plik), także zagrany i bez ustawień
+ * (start = 0, hasło = wykonawca). Gdy w rundzie jest za mało utworów, sięga do innych rund,
+ * a w ostateczności powtarza utwory. Braki zgłasza tylko, gdy w folderze nie ma żadnego pliku.
+ */
+export function drawTestEdition(songs: Songs, rng: () => number = Math.random): DrawResult {
+  const playable = (s: SongRecord, runda: LibRound) =>
+    !s.brak && (runda === '3' ? Boolean(s.nuty || s.plik) : Boolean(s.plik))
+  const all = Object.entries(songs)
+  const utwory = { runda1: [], runda2: [], dogrywka2: [], runda3: [], final: [] } as DrawnSongs
+  const used = new Set<string>()
+  const braki: DrawShortage[] = []
+  for (const key of DRAW_KEYS) {
+    const runda = DRAW_ROUND[key]
+    const count = DRAW_COUNT[key]
+    const own = shuffle(
+      all.filter(([, s]) => s.runda === runda && playable(s, runda)).map(([id]) => id),
+      rng,
+    )
+    const other = shuffle(
+      all.filter(([, s]) => s.runda !== runda && playable(s, runda)).map(([id]) => id),
+      rng,
+    )
+    const fresh = [...own, ...other].filter((id) => !used.has(id))
+    const anyIds = [...own, ...other]
+    const chosen: string[] = fresh.slice(0, count)
+    for (let i = 0; chosen.length < count && anyIds.length > 0; i++) chosen.push(anyIds[i % anyIds.length])
+    chosen.forEach((id) => used.add(id))
+    utwory[key] = chosen
+    if (key !== 'dogrywka2' && chosen.length < count) braki.push({ key, potrzeba: count, jest: chosen.length })
+  }
+  return { utwory, braki }
+}
+
 /** Zamienia jeden wylosowany utwór na inny z puli (undefined = nie ma czym). */
 export function redrawOne(
   songs: Songs,
@@ -448,7 +485,7 @@ export interface RankingEntry {
 export function computeRanking(editions: Record<string, EditionRecord>): RankingEntry[] {
   const out: RankingEntry[] = []
   for (const e of Object.values(editions)) {
-    if (!e.zakonczono || !e.wyniki) continue
+    if (!e.zakonczono || !e.wyniki || e.test) continue
     for (const k of STATION_KEYS) {
       const w = e.wyniki[k]
       if (!w) continue

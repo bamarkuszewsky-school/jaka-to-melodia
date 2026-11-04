@@ -68,11 +68,11 @@ export function setPlayed(id: string, rec: SongRecord, played: boolean): Promise
   })
 }
 
-export async function createEdition(nazwa: string, numer: number, utwory: DrawnSongs): Promise<string> {
+export async function createEdition(nazwa: string, numer: number, utwory: DrawnSongs, test = false): Promise<string> {
   const r = push(ref(db, 'baza/edycje'))
   const id = r.key!
   await update(ref(db, 'baza'), {
-    [`edycje/${id}`]: { nazwa, numer, utworzono: serverTimestamp(), utwory },
+    [`edycje/${id}`]: { nazwa, numer, utworzono: serverTimestamp(), utwory, test: test || null },
     biezaca: id,
   })
   return id
@@ -104,7 +104,8 @@ export async function finishEdition(
     [`edycje/${id}/final`]: game.runda4 ? game.runda4.utwory.filter((s) => s.stan === 'odgadnieta').length : null,
     biezaca: null,
   }
-  for (const o of songOutcomes(game, edition.utwory)) {
+  // Edycja testowa: wynik zostaje w „Edycjach”, ale utwory nie są oznaczane jako zagrane.
+  for (const o of edition.test ? [] : songOutcomes(game, edition.utwory)) {
     changes[`utwory/${o.id}/historia/${id}`] = {
       nazwa: edition.nazwa,
       data: serverTimestamp(),

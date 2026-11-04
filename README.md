@@ -101,6 +101,7 @@ Nazwa pliku to **„Tytuł - Wykonawca”**. Utwory mogą być całe — start f
 3. **Pobierz CSV / Kopiuj listę** — lista do arkusza albo na czat (np. żeby wymyślić hasła). **Wczytaj CSV** — wgrywa start, refren, hasła i anegdoty (po kolumnie `id`; puste komórki nic nie zmieniają; czas jako `83,5` albo `1:23,5`).
 4. **Nowa edycja — losuj utwory:** 5 × runda 1 (na tablicy wykonawca zamiast hasła), 3 × runda 2 + 2 na dogrywkę, 6 × runda 3, 7 × finał. Losowane są tylko utwory gotowe i jeszcze niegrane; każdy można przelosować (↻).
 5. **Zakończ rundę** — przerywa bieżącą rundę (niezagrane hasła są pomijane i wracają do puli). **Zakończ edycję** — wyniki klas idą do rankingu, zagrane utwory dostają wpis w historii (edycja, odgadnięty / nie, przez kogo) i wypadają z losowania. W bazie można je odznaczyć.
+**Edycja testowa** (przycisk obok „Nowa edycja”) — do prób przy małej bazie: losuje spośród wszystkich utworów z plikiem, także zagranych i bez ustawionego startu (gra wtedy od początku, hasło = wykonawca). Gdy utworów jest za mało, bierze z innych rund i powtarza. Nie trafia do rankingu i nie oznacza utworów jako zagranych.
 6. **Ranking** — wszystkie klasy z zakończonych edycji; przyciski **Pokaż na tablicy** i **Pokaż na live**. Edycję testową usuniesz w Baza utworów → Edycje.
 
 Po odświeżeniu strony folder trzeba wybrać ponownie — edycja, punkty i stan gry zostają w bazie.

@@ -3,6 +3,7 @@ import type { GameState } from '../game/types'
 import {
   computeRanking,
   drawEdition,
+  drawTestEdition,
   exportCsv,
   importCsv,
   isPlayed,
@@ -159,6 +160,26 @@ describe('gotowość i losowanie', () => {
     expect(drawEdition(songs).braki).toEqual([{ key: 'final', potrzeba: 7, jest: 6 }])
   })
 
+  it('edycja testowa działa nawet z 3 utworami bez ustawień', () => {
+    const songs: Songs = {
+      a: { runda: '1', tytul: 'A', wykonawca: 'X', plik: 'a.mp3' },
+      b: { runda: '2', tytul: 'B', wykonawca: 'Y', plik: 'b.mp3', historia: { e1: { nazwa: 'E1', data: 1, odgadniety: true } } },
+      c: { runda: 'F', tytul: 'C', wykonawca: 'Z', plik: 'c.mp3' },
+      d: { runda: '3', tytul: 'D', wykonawca: 'W', brak: true, plik: 'd.mp3' },
+    }
+    const r = drawTestEdition(songs, () => 0.5)
+    expect(r.braki).toEqual([])
+    expect(r.utwory.runda1).toHaveLength(5)
+    expect(r.utwory.runda3).toHaveLength(6)
+    expect(r.utwory.final).toHaveLength(7)
+    expect(r.utwory.runda1[0]).toBe('a')
+    expect(Object.values(r.utwory).flat()).not.toContain('d')
+  })
+
+  it('edycja testowa bez plików zgłasza braki', () => {
+    expect(drawTestEdition({}).braki.map((b) => b.key)).toEqual(['runda1', 'runda2', 'runda3', 'final'])
+  })
+
   it('losuje jeden utwór na zamianę', () => {
     const songs = library()
     const r = drawEdition(songs, () => 0)
@@ -229,6 +250,10 @@ describe('wyniki edycji i ranking', () => {
       e2: { nazwa: 'Edycja 2', numer: 2, utworzono: 3, utwory },
     })
     expect(ranking.map((r) => r.klasa)).toEqual(['3AG', '4BT'])
+    const withTest = computeRanking({
+      t: { nazwa: 'Test', numer: 0, utworzono: 1, zakonczono: 2, utwory, test: true, wyniki: { '1': { klasa: 'X', punkty: 9999, miejsce: 1 } } },
+    })
+    expect(withTest).toEqual([])
     expect(ranking[1]).toMatchObject({ mistrz: true, finalista: true, edycja: 'Edycja 1' })
   })
 })

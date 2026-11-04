@@ -7,6 +7,7 @@ import {
   DRAW_KEYS,
   DRAW_LABEL,
   drawEdition,
+  drawTestEdition,
   isPlayed,
   isReady,
   LIB_ROUNDS,
@@ -40,7 +41,7 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
-  const [draft, setDraft] = useState<{ utwory: DrawnSongs; braki: DrawShortage[] } | null>(null)
+  const [draft, setDraft] = useState<{ utwory: DrawnSongs; braki: DrawShortage[]; test: boolean } | null>(null)
   const [nazwa, setNazwa] = useState('')
   const [confirm, setConfirm] = useState<Confirm>(null)
   const [showSongs, setShowSongs] = useState(false)
@@ -88,10 +89,10 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
     }
   })
 
-  const startDraw = () => {
+  const startDraw = (test = false) => {
     if (!songs) return
-    setDraft(drawEdition(songs))
-    setNazwa(`Edycja ${nextNumber}`)
+    setDraft({ ...(test ? drawTestEdition(songs) : drawEdition(songs)), test })
+    setNazwa(test ? 'Edycja testowa' : `Edycja ${nextNumber}`)
   }
 
   const redraw = (key: DrawKey, i: number) => {
@@ -105,7 +106,8 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
   const confirmDraft = () =>
     run(async () => {
       if (!draft) return
-      await createEdition(nazwa.trim() || `Edycja ${nextNumber}`, nextNumber, draft.utwory)
+      if (draft.test) await createEdition(nazwa.trim() || 'Edycja testowa', 0, draft.utwory, true)
+      else await createEdition(nazwa.trim() || `Edycja ${nextNumber}`, nextNumber, draft.utwory)
       setDraft(null)
     })
 
@@ -148,6 +150,7 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
           <div className="edition-card__row">
             <p className="notice">
               Trwa <strong>{current.nazwa}</strong>
+              {current.test && ' (testowa — nie liczy się do rankingu)'}
               {game.runda ? ` · runda ${game.runda === 4 ? 'finałowa' : game.runda}` : ' · gra jeszcze nie ruszyła'}.
               {!scan && ' Wybierz folder z muzyką, żeby grać.'}
             </p>
@@ -178,7 +181,9 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
                 {confirm === 'round' &&
                   'Zakończyć bieżącą rundę? Niezagrane hasła zostaną pominięte (utwory wrócą do puli), muzyka stanie. Potem przejdziesz do kolejnej rundy jak zwykle.'}
                 {confirm === 'edition' &&
-                  'Zakończyć edycję? Wyniki klas trafią do rankingu, zagrane utwory zostaną oznaczone w bazie, a gra wyzeruje się na kolejną edycję.'}
+                  (current.test
+                    ? 'Zakończyć edycję testową? Gra wyzeruje się. Do rankingu nic nie trafi, a utwory nie zostaną oznaczone jako zagrane.'
+                    : 'Zakończyć edycję? Wyniki klas trafią do rankingu, zagrane utwory zostaną oznaczone w bazie, a gra wyzeruje się na kolejną edycję.')}
                 {confirm === 'cancel' && 'Porzucić wylosowaną edycję? Utwory wrócą do puli, nic nie trafi do rankingu.'}
               </p>
               <div className="card__actions">
@@ -219,19 +224,26 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
             <span className="field__label">Nazwa edycji</span>
             <input className="field__input" value={nazwa} onChange={(e) => setNazwa(e.target.value)} maxLength={40} />
           </label>
+          {draft.test && (
+            <p className="notice">
+              Edycja testowa: losuje spośród wszystkich utworów z plikiem (także zagranych i bez ustawionego startu — wtedy
+              gra od początku). Przy małej bazie bierze utwory z innych rund i powtarza je. Nie trafia do rankingu i nie
+              oznacza utworów jako zagranych.
+            </p>
+          )}
           {draft.braki.length > 0 && (
             <p className="error">
-              Za mało gotowych utworów:{' '}
+              {draft.test ? 'Brak plików w folderze:' : 'Za mało gotowych utworów:'}{' '}
               {draft.braki.map((b) => `${DRAW_LABEL[b.key]} — jest ${b.jest} z ${b.potrzeba}`).join(', ')}. Uzupełnij start
               (i hasła / anegdoty) w zakładce „Baza utworów”.
             </p>
           )}
-          <DrawList utwory={draft.utwory} songs={songs} onRedraw={redraw} />
+          <DrawList utwory={draft.utwory} songs={songs} onRedraw={draft.test ? undefined : redraw} />
           <div className="card__actions">
             <button type="button" className="btn btn--primary btn--big" disabled={busy || draft.braki.length > 0} onClick={confirmDraft}>
               Zatwierdź edycję
             </button>
-            <button type="button" className="btn btn--ghost" onClick={startDraw}>
+            <button type="button" className="btn btn--ghost" onClick={() => startDraw(draft.test)}>
               Losuj wszystko od nowa
             </button>
             <button type="button" className="btn btn--ghost" onClick={() => setDraft(null)}>
@@ -246,9 +258,14 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
               ? 'Wczytywanie bazy utworów…'
               : 'Aplikacja wylosuje utwory gotowe do gry (z ustawionym startem), które nie były jeszcze grane.'}
           </p>
-          <button type="button" className="btn btn--primary" onClick={startDraw} disabled={!songs || busy}>
-            Nowa edycja — losuj utwory
-          </button>
+          <div className="card__actions">
+            <button type="button" className="btn btn--ghost" onClick={() => startDraw(true)} disabled={!songs || busy}>
+              Edycja testowa
+            </button>
+            <button type="button" className="btn btn--primary" onClick={() => startDraw()} disabled={!songs || busy}>
+              Nowa edycja — losuj utwory
+            </button>
+          </div>
         </div>
       )}
 
@@ -281,7 +298,7 @@ function DrawList({
             {utwory[key].map((id, i) => {
               const s = songs[id]
               return (
-                <li key={id}>
+                <li key={`${id}-${i}`}>
                   <span>
                     {key === 'runda2' || key === 'dogrywka2' ? <em className="draw-list__haslo">{s?.haslo} · </em> : null}
                     {s ? `${s.tytul} — ${s.wykonawca}` : id}

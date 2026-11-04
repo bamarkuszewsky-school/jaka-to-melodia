@@ -464,11 +464,11 @@ function EditionsView({ editions, songs, currentId }: { editions: Record<string,
               <div key={key} className="draw-list__group">
                 <h3 className="draw-list__title">{DRAW_LABEL[key]}</h3>
                 <ol>
-                  {e.utwory[key].map((sid) => {
+                  {e.utwory[key].map((sid, i) => {
                     const s = songs[sid]
                     const h = s?.historia?.[id]
                     return (
-                      <li key={sid}>
+                      <li key={`${sid}-${i}`}>
                         <span>{s ? `${s.tytul} — ${s.wykonawca}` : sid}</span>
                         <span className={`chip ${h ? (h.odgadniety ? 'chip--ok' : 'chip--danger') : 'chip--muted'}`}>
                           {h ? (h.odgadniety ? `odgadnięty${h.klasa ? ` · ${h.klasa}` : ''}` : 'nieodgadnięty') : 'nie zagrany'}
