@@ -1,5 +1,6 @@
 import { ref, serverTimestamp, set, update } from 'firebase/database'
 import { db } from '../firebase'
+import { KLIENT } from '../version'
 import { clockLeft, FINAL_BONUS, FINAL_MS, FINAL_POINTS, FINAL_SONGS, guessedCount, nextSong } from './rules4'
 import type { FinalQuestion, FinalSong, GameState, StationKey } from './types'
 
@@ -131,5 +132,5 @@ export function finalWrong(game: GameState, questions: FinalQuestion[]): Promise
 // ---------- iPad finalisty ----------
 
 export function finalistStop(stanowisko: StationKey): Promise<void> {
-  return set(gra('stop4'), { stanowisko, czas: serverTimestamp() })
+  return set(gra('stop4'), { stanowisko, czas: serverTimestamp(), k: KLIENT })
 }

@@ -47,6 +47,13 @@ function toRound4(raw: unknown): Round4State | undefined {
   return { ...r, utwory: utwory.filter(Boolean), zdobyte: r.zdobyte ?? 0 }
 }
 
+/** Muzyk kliknął „Zagrane”: { czas, k } (dawniej sama liczba). */
+function zagraneCzas(v: unknown): number | undefined {
+  if (typeof v === 'number') return v
+  const czas = (v as { czas?: unknown } | null)?.czas
+  return typeof czas === 'number' ? czas : undefined
+}
+
 /** Cały stan gry na żywo (/gra), wspólny dla wszystkich widoków. */
 export function useGame(): GameState {
   const [state, setState] = useState<GameState>(EMPTY)
@@ -68,7 +75,7 @@ export function useGame(): GameState {
           stop4: (raw.stop4 as GameState['stop4']) ?? undefined,
           pytanie3: (raw.pytanie3 as LiveQuestion3 | undefined) ?? undefined,
           ruch: (raw.ruch as BidMove | undefined) ?? undefined,
-          zagrane: typeof raw.zagrane === 'number' ? raw.zagrane : undefined,
+          zagrane: zagraneCzas(raw.zagrane),
           // Zgodność z wersją 0.3 (pytanie bez numeru rundy = runda 1).
           pytanie: pytanie ? { ...pytanie, runda: pytanie.runda ?? 1 } : undefined,
           zgloszenie: (raw.zgloszenie as Buzz | undefined) ?? undefined,

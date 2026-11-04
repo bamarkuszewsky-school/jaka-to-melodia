@@ -25,7 +25,7 @@ import { buildEdition } from '../lib/library/edition'
 import { DRAW_KEYS, roundIntroFor, syncChanges } from '../lib/library/library'
 import { useRoundIntroAudio } from '../lib/game/useRoundIntroAudio'
 import { useLibraryFolder } from '../lib/library/useLibraryFolder'
-import { usePresence } from '../lib/presence'
+import { usePresence, useStalePresenceCleanup } from '../lib/presence'
 import { useStationNames } from '../lib/stations'
 
 type Tab = 'gra' | 'baza' | 'ranking'
@@ -43,6 +43,7 @@ function readTab(): Tab {
 /** Panel prowadzącego (MacBook): gra, baza utworów, ranking sezonu. */
 export function HostPage() {
   usePresence('host')
+  useStalePresenceCleanup(true)
   const buzzes = useBuzzes()
   const names = useStationNames()
   const game = useGame()

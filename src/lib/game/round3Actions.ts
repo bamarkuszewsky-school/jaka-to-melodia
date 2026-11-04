@@ -1,5 +1,6 @@
 import { ref, remove, serverTimestamp, set, update } from 'firebase/database'
 import { db } from '../firebase'
+import { KLIENT } from '../version'
 import { applyBid, firstChooser, opponent, R3_TILES, WINS_TO_FINAL } from './rules3'
 import { STATION_KEYS, type BidMove, type GameState, type Round3Question, type StationKey } from './types'
 
@@ -144,13 +145,13 @@ export async function closeQuestion3(): Promise<void> {
 
 /** Oferta albo pas z iPada. Reguły bazy przyjmą ją tylko od klasy, której jest kolej. */
 export function sendBid(stanowisko: StationKey, bid: { nuty?: number; pas?: boolean }): Promise<void> {
-  return set(gra('ruch'), { stanowisko, ...bid, czas: serverTimestamp() })
+  return set(gra('ruch'), { stanowisko, ...bid, czas: serverTimestamp(), k: KLIENT })
 }
 
 // ---------- Muzyk ----------
 
 export function musicianPlayed(): Promise<void> {
-  return set(gra('zagrane'), serverTimestamp())
+  return set(gra('zagrane'), { czas: serverTimestamp(), k: KLIENT })
 }
 
 // ---------- Nuty dla muzyka ----------

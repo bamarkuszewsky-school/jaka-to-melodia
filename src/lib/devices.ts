@@ -2,6 +2,7 @@ import { onValue, ref, remove, serverTimestamp, update } from 'firebase/database
 import { useEffect, useState } from 'react'
 import { db } from './firebase'
 import type { Stanowisko } from './roles'
+import { KLIENT } from './version'
 
 /**
  * iPady zawodników. Każdy iPad ma swój identyfikator (zapisany w przeglądarce) i krótki kod.
@@ -54,7 +55,7 @@ export function useDevices(): Record<string, Device> {
 }
 
 export function registerDevice(id: string): Promise<void> {
-  return update(ref(db, `urzadzenia/${id}`), { kod: deviceCode(id), zgloszenie: serverTimestamp() })
+  return update(ref(db, `urzadzenia/${id}`), { kod: deviceCode(id), zgloszenie: serverTimestamp(), k: KLIENT })
 }
 
 /** Host: przypisuje iPad do stanowiska (inny iPad na tym stanowisku zostaje odpięty). */

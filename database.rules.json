@@ -5,7 +5,8 @@
     "obecnosc": {
       ".read": "auth != null",
       "$klucz": {
-        ".write": "auth != null && ((auth.token.email === 'host@cyfroweszkoly.pl' && $klucz === 'host') || (auth.token.email === 'tablica@cyfroweszkoly.pl' && $klucz === 'tablica') || (auth.token.email === 'techsupport@cyfroweszkoly.pl' && ($klucz === 'tech' || $klucz === 'stream')) || (auth.token.email === 'muzyk@cyfroweszkoly.pl' && $klucz === 'muzyk') || (auth.token.email === 'zawodnik@cyfroweszkoly.pl' && ($klucz === 'stanowisko1' || $klucz === 'stanowisko2' || $klucz === 'stanowisko3')))"
+        ".write": "auth != null && ((((auth.token.email === 'host@cyfroweszkoly.pl' && $klucz === 'host') || (auth.token.email === 'tablica@cyfroweszkoly.pl' && $klucz === 'tablica') || (auth.token.email === 'techsupport@cyfroweszkoly.pl' && ($klucz === 'tech' || $klucz === 'stream')) || (auth.token.email === 'muzyk@cyfroweszkoly.pl' && $klucz === 'muzyk') || (auth.token.email === 'zawodnik@cyfroweszkoly.pl' && ($klucz === 'stanowisko1' || $klucz === 'stanowisko2' || $klucz === 'stanowisko3')))) || (auth.token.email === 'host@cyfroweszkoly.pl' && !newData.exists()))",
+        ".validate": "!newData.exists() || (newData.child('k').isNumber() && newData.child('k').val() >= 2)"
       }
     },
     "test": {
@@ -34,11 +35,14 @@
       },
       "zgloszenie": {
         ".write": "auth != null && auth.token.email === 'zawodnik@cyfroweszkoly.pl' && !data.exists() && newData.exists() && root.child('gra/pytanie/faza').val() === 'gra' && !root.child('gra/pytanie/zablokowane').child(newData.child('stanowisko').val()).exists()",
-        ".validate": "newData.hasChildren(['stanowisko', 'czas']) && (newData.child('stanowisko').val() === '1' || newData.child('stanowisko').val() === '2' || newData.child('stanowisko').val() === '3') && newData.child('czas').val() === now",
+        ".validate": "newData.hasChildren(['stanowisko', 'czas', 'k']) && newData.child('k').val() >= 2 && (newData.child('stanowisko').val() === '1' || newData.child('stanowisko').val() === '2' || newData.child('stanowisko').val() === '3') && newData.child('czas').val() === now",
         "stanowisko": {
           ".validate": "newData.isString()"
         },
         "czas": {
+          ".validate": "newData.isNumber()"
+        },
+        "k": {
           ".validate": "newData.isNumber()"
         },
         "$other": {
@@ -47,9 +51,12 @@
       },
       "ruch": {
         ".write": "auth != null && auth.token.email === 'zawodnik@cyfroweszkoly.pl' && !data.exists() && newData.exists() && root.child('gra/pytanie3/faza').val() === 'licytacja' && newData.child('stanowisko').val() === root.child('gra/pytanie3/licytacja/kolej').val()",
-        ".validate": "newData.hasChildren(['stanowisko', 'czas']) && newData.child('czas').val() === now",
+        ".validate": "newData.hasChildren(['stanowisko', 'czas', 'k']) && newData.child('k').val() >= 2 && newData.child('czas').val() === now",
         "stanowisko": {
           ".validate": "newData.isString()"
+        },
+        "k": {
+          ".validate": "newData.isNumber()"
         },
         "nuty": {
           ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 7"
@@ -66,11 +73,11 @@
       },
       "zagrane": {
         ".write": "auth != null && auth.token.email === 'muzyk@cyfroweszkoly.pl' && !data.exists() && newData.exists() && root.child('gra/pytanie3/faza').val() === 'granie'",
-        ".validate": "newData.val() === now"
+        ".validate": "newData.hasChildren(['czas', 'k']) && newData.child('czas').val() === now && newData.child('k').val() >= 2"
       },
       "stop4": {
         ".write": "auth != null && auth.token.email === 'zawodnik@cyfroweszkoly.pl' && !data.exists() && newData.exists() && root.child('gra/runda4/faza').val() === 'gra' && newData.child('stanowisko').val() === root.child('gra/runda4/gracz').val()",
-        ".validate": "newData.hasChildren(['stanowisko', 'czas']) && newData.child('czas').val() === now"
+        ".validate": "newData.hasChildren(['stanowisko', 'czas', 'k']) && newData.child('czas').val() === now && newData.child('k').val() >= 2"
       }
     },
     "muzyk": {
@@ -90,6 +97,10 @@
         "zgloszenie": {
           ".write": "auth != null && auth.token.email === 'zawodnik@cyfroweszkoly.pl' && !data.parent().child('stanowisko').exists()",
           ".validate": "newData.val() === now"
+        },
+        "k": {
+          ".write": "auth != null && auth.token.email === 'zawodnik@cyfroweszkoly.pl' && !data.parent().child('stanowisko').exists()",
+          ".validate": "newData.isNumber() && newData.val() >= 2"
         },
         "stanowisko": {
           ".validate": "newData.val() === 1 || newData.val() === 2 || newData.val() === 3"

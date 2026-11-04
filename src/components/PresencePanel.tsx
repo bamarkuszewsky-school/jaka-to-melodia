@@ -44,8 +44,8 @@ export function PresencePanel() {
               <span className="presence__dot" aria-hidden />
               <span>{label(key)}</span>
               {online && list[key]?.wersja !== latest && (
-                <span className="chip chip--danger" title="To urządzenie ma starą wersję aplikacji — odśwież na nim stronę">
-                  stara wersja
+                <span className="chip chip--gold" title="Odświeży się samo, gdy nie trwa gra">
+                  starsza wersja
                 </span>
               )}
               <span className="presence__state">{online ? (sent[key] ? 'wylogowuję…' : 'online') : 'brak'}</span>
@@ -71,7 +71,7 @@ export function PresencePanel() {
           )
         })}
       </ul>
-      <p className="muted small">„Wyloguj” wysyła urządzenie do ekranu logowania. Działa na urządzeniach z aktualną wersją — przy „stara wersja” odśwież raz stronę na tym urządzeniu (później odświeżają się już same, gdy nie trwa gra).</p>
+      <p className="muted small">„Wyloguj” wysyła urządzenie do ekranu logowania. Urządzenia ze starą wersją aplikacji (sprzed tej poprawki) nie są tu liczone i baza nie przyjmuje od nich zgłoszeń. Nowsze wersje odświeżają się same, gdy nie trwa gra.</p>
       {error && <p className="error">{error}</p>}
     </section>
   )

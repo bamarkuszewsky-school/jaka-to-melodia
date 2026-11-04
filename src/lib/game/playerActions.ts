@@ -1,5 +1,6 @@
 import { ref, serverTimestamp, set } from 'firebase/database'
 import { db } from '../firebase'
+import { KLIENT } from '../version'
 import type { StationKey } from './types'
 
 /**
@@ -8,5 +9,5 @@ import type { StationKey } from './types'
  * każde kolejne kończy się odmową, więc „kto pierwszy” rozstrzyga serwer.
  */
 export function buzzIn(stanowisko: StationKey): Promise<void> {
-  return set(ref(db, 'gra/zgloszenie'), { stanowisko, czas: serverTimestamp() })
+  return set(ref(db, 'gra/zgloszenie'), { stanowisko, czas: serverTimestamp(), k: KLIENT })
 }

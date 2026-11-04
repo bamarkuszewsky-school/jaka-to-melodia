@@ -3,6 +3,13 @@ import { useEffect, useState } from 'react'
 import { useAuth } from './auth'
 import { db } from './firebase'
 
+/**
+ * Wersja protokołu klienta. Zapisy zawodnika / muzyka / obecność niosą pole `k`,
+ * a reguły bazy przyjmują tylko `k` ≥ KLIENT — stare wersje aplikacji (bez `k`)
+ * nie mogą już nic zapisać ani pokazać się jako „online”.
+ */
+export const KLIENT = 2
+
 /** Wersja, w której działa ta karta przeglądarki. */
 export const BUILD_ID: string = typeof __BUILD_ID__ === 'string' ? __BUILD_ID__ : 'dev'
 

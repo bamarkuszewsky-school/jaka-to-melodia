@@ -2,7 +2,7 @@ import { onDisconnect, onValue, ref, remove, serverTimestamp, set } from 'fireba
 import { useEffect, useState } from 'react'
 import { signOut } from 'firebase/auth'
 import { auth, db } from './firebase'
-import { BUILD_ID } from './version'
+import { BUILD_ID, KLIENT } from './version'
 
 /**
  * Klucze obecności w bazie (/obecnosc/<klucz>).
@@ -40,7 +40,7 @@ export function usePresence(key: PresenceKey | null): void {
       if (snap.val() !== true) return
       onDisconnect(myRef)
         .remove()
-        .then(() => set(myRef, { od: serverTimestamp(), wersja: BUILD_ID }))
+        .then(() => set(myRef, { od: serverTimestamp(), wersja: BUILD_ID, k: KLIENT }))
         .catch((e) => console.error('Obecność:', e))
     })
     // Host może wylogować to urządzenie z panelu: zapisuje /wyloguj/<klucz> = czas serwera.
@@ -70,9 +70,43 @@ export function kickDevice(key: PresenceKey): Promise<void> {
   return set(ref(db, `wyloguj/${key}`), serverTimestamp())
 }
 
-/** Lista urządzeń, które są teraz online. */
-export function usePresenceList(): Partial<Record<PresenceKey, { od: number; wersja?: string }>> {
-  const [list, setList] = useState<Partial<Record<PresenceKey, { od: number; wersja?: string }>>>({})
-  useEffect(() => onValue(ref(db, 'obecnosc'), (snap) => setList(snap.val() ?? {})), [])
+export interface PresenceEntry {
+  od: number
+  wersja?: string
+  /** Wersja protokołu — brak = stara aplikacja, której nie da się wylogować. */
+  k?: number
+}
+
+/**
+ * Lista urządzeń, które są teraz online. Wpisy starych wersji aplikacji (bez `k`) są pomijane —
+ * takiego urządzenia nie da się wylogować ani zaktualizować, więc nie liczy się jako zalogowane.
+ */
+export function usePresenceList(): Partial<Record<PresenceKey, PresenceEntry>> {
+  const [list, setList] = useState<Partial<Record<PresenceKey, PresenceEntry>>>({})
+  useEffect(
+    () =>
+      onValue(ref(db, 'obecnosc'), (snap) => {
+        const raw = (snap.val() ?? {}) as Record<string, PresenceEntry>
+        setList(Object.fromEntries(Object.entries(raw).filter(([, e]) => isCurrentClient(e))) as Partial<Record<PresenceKey, PresenceEntry>>)
+      }),
+    [],
+  )
   return list
+}
+
+export function isCurrentClient(e: PresenceEntry | null | undefined): boolean {
+  return Boolean(e && typeof e.k === 'number' && e.k >= KLIENT)
+}
+
+/** Host: usuwa z listy obecności wpisy starych wersji aplikacji (sprząta „duchy”). */
+export function useStalePresenceCleanup(active: boolean): void {
+  useEffect(() => {
+    if (!active) return
+    return onValue(ref(db, 'obecnosc'), (snap) => {
+      const raw = (snap.val() ?? {}) as Record<string, PresenceEntry>
+      for (const [key, e] of Object.entries(raw)) {
+        if (!isCurrentClient(e)) remove(ref(db, `obecnosc/${key}`)).catch(() => {})
+      }
+    })
+  }, [active])
 }
