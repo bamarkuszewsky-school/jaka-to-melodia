@@ -100,6 +100,10 @@
       ".read": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'",
       ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'"
     },
+    "wyloguj": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'"
+    },
     "pokaz": {
       ".read": "auth != null",
       ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'"

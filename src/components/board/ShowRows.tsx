@@ -40,7 +40,7 @@ export function ShowRows({ rows, dimOthers }: { rows: ShowRow[]; dimOthers?: boo
             <span className="show-row__reveal">
               {r.reveal ? (
                 <>
-                  <FitText className="show-row__title" boxClassName="fit-box--right" max={[1.9, 38]} min={11} widthRatio={1}>
+                  <FitText className="show-row__title" boxClassName="fit-box--right" max={[1.5, 30]} min={11} widthRatio={1}>
                     {r.reveal}
                   </FitText>
                   {r.by && <span className="show-row__by">{r.by}</span>}

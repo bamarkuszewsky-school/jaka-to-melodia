@@ -1,4 +1,5 @@
-import { PRESENCE_LABELS, usePresenceList, type PresenceKey } from '../lib/presence'
+import { useState } from 'react'
+import { kickDevice, PRESENCE_LABELS, usePresenceList, type PresenceKey } from '../lib/presence'
 import type { Stanowisko } from '../lib/roles'
 import { hasClassName, useStationNames } from '../lib/stations'
 
@@ -8,6 +9,18 @@ const ORDER: PresenceKey[] = ['host', 'tablica', 'stanowisko1', 'stanowisko2', '
 export function PresencePanel() {
   const list = usePresenceList()
   const names = useStationNames()
+  const [confirm, setConfirm] = useState<PresenceKey | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const kick = async (key: PresenceKey) => {
+    setConfirm(null)
+    setError(null)
+    try {
+      await kickDevice(key)
+    } catch {
+      setError('Nie udało się wylogować — sprawdź połączenie (i czy są opublikowane nowe reguły bazy).')
+    }
+  }
 
   const label = (key: PresenceKey) => {
     const match = key.match(/^stanowisko([123])$/)
@@ -27,10 +40,30 @@ export function PresencePanel() {
               <span className="presence__dot" aria-hidden />
               <span>{label(key)}</span>
               <span className="presence__state">{online ? 'online' : 'brak'}</span>
+              {online && key !== 'host' && (
+                <span className="presence__actions">
+                  {confirm === key ? (
+                    <>
+                      <button type="button" className="btn btn--tiny btn--danger" onClick={() => kick(key)}>
+                        Tak
+                      </button>
+                      <button type="button" className="btn btn--tiny" onClick={() => setConfirm(null)}>
+                        Nie
+                      </button>
+                    </>
+                  ) : (
+                    <button type="button" className="btn btn--tiny" onClick={() => setConfirm(key)} title="Wyloguj to urządzenie">
+                      Wyloguj
+                    </button>
+                  )}
+                </span>
+              )}
             </li>
           )
         })}
       </ul>
+      <p className="muted small">„Wyloguj” wysyła urządzenie do ekranu logowania (np. gdy iPad trafił w złe ręce albo trzeba zmienić rolę).</p>
+      {error && <p className="error">{error}</p>}
     </section>
   )
 }

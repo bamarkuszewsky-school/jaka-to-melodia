@@ -117,9 +117,7 @@ function SongStatus({ game, label, now }: { game: GameState; label: (k: StationK
     body = (
       <>
         <Equalizer />
-        <div className="progress progress--big" aria-hidden>
-          <div className="progress__bar" style={{ width: `${(Math.max(0, SONG_MS - elapsed) / SONG_MS) * 100}%` }} />
-        </div>
+        <SongTimer left={Math.max(0, SONG_MS - elapsed)} />
       </>
     )
   } else if (pytanie.faza === 'odpowiedz' && pytanie.odpowiada) {
@@ -223,6 +221,19 @@ function Scorebar({
         )
       })}
     </footer>
+  )
+}
+
+/** Pasek czasu utworu: ubywa w ciągu 15 s, obok pełne sekundy. */
+function SongTimer({ left }: { left: number }) {
+  const part = left / SONG_MS
+  return (
+    <div className={`song-timer ${left <= 5000 ? 'is-low' : ''}`}>
+      <div className="song-timer__track" aria-hidden>
+        <div className="song-timer__fill" style={{ transform: `scaleX(${part})` }} />
+      </div>
+      <span className="song-timer__sec">{Math.ceil(left / 1000)}</span>
+    </div>
   )
 }
 

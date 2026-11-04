@@ -1,6 +1,7 @@
 import { onDisconnect, onValue, ref, remove, serverTimestamp, set } from 'firebase/database'
 import { useEffect, useState } from 'react'
-import { db } from './firebase'
+import { signOut } from 'firebase/auth'
+import { auth, db } from './firebase'
 
 /**
  * Klucze obecności w bazie (/obecnosc/<klucz>).
@@ -41,11 +42,31 @@ export function usePresence(key: PresenceKey | null): void {
         .then(() => set(myRef, { od: serverTimestamp() }))
         .catch((e) => console.error('Obecność:', e))
     })
+    // Host może wylogować to urządzenie z panelu: zapisuje /wyloguj/<klucz> = czas serwera.
+    // Reagujemy tylko na polecenie nowsze niż chwila, w której to urządzenie się zgłosiło.
+    let offset = 0
+    const unsubOffset = onValue(ref(db, '.info/serverTimeOffset'), (snap) => {
+      offset = Number(snap.val()) || 0
+    })
+    const since = Date.now()
+    const unsubKick = onValue(ref(db, `wyloguj/${key}`), (snap) => {
+      const at = Number(snap.val())
+      if (!at || at < since + offset) return
+      remove(myRef).catch(() => {})
+      signOut(auth).catch(() => {})
+    })
     return () => {
       unsub()
+      unsubOffset()
+      unsubKick()
       remove(myRef).catch(() => {})
     }
   }, [key])
+}
+
+/** Host: wylogowuje urządzenie zgłoszone pod danym kluczem obecności. */
+export function kickDevice(key: PresenceKey): Promise<void> {
+  return set(ref(db, `wyloguj/${key}`), serverTimestamp())
 }
 
 /** Lista urządzeń, które są teraz online. */

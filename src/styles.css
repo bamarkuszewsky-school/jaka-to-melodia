@@ -4323,3 +4323,174 @@ textarea.field__input {
 .stream-final__band.is-answering .stream-final__label {
   color: #4a3500;
 }
+
+/* ============================================================
+   v0.9.2 — marginesy, pasek czasu utworu, numery finału bliżej zegara
+   ============================================================ */
+
+.r1--show {
+  gap: 2.6vh;
+  padding: 3.2vh 4vw 3.6vh;
+}
+
+.r1--show .r1__head {
+  width: min(100%, 76vw, 1460px);
+  margin: 0 auto;
+}
+
+.r1--show .r1__stage {
+  align-items: center;
+}
+
+.r1--show .scorebar {
+  width: min(100%, 76vw, 1460px);
+  margin: 0 auto;
+}
+
+.show-rows,
+.show-status {
+  width: min(100%, 76vw, 1460px);
+}
+
+.show-row__bar {
+  padding: 0 calc(var(--h) * 0.55) 0 calc(var(--h) * 0.5);
+  gap: 1.6vw;
+}
+
+.show-row__reveal {
+  gap: 0.2vh;
+}
+
+.show-row__by {
+  font-size: calc(var(--h) * 0.24);
+}
+
+.show-status {
+  flex-wrap: nowrap;
+  gap: 2.4vw;
+  min-height: clamp(64px, 10vh, 120px);
+  padding: 1.6vh 2.8vw;
+  border-radius: 999px;
+}
+
+.show-status:has(.show-status__blocked) {
+  flex-wrap: wrap;
+  border-radius: 28px;
+}
+
+.show-status .eq {
+  flex: none;
+  height: 5vh;
+  gap: 0.45vw;
+}
+
+.show-status .eq span {
+  width: 0.7vw;
+}
+
+.song-timer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.6vw;
+  min-width: 0;
+}
+
+.song-timer__track {
+  position: relative;
+  flex: 1;
+  height: clamp(10px, 1.6vh, 18px);
+  border-radius: 999px;
+  background: rgb(0 10 50 / 0.6);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(170 220 255 / 0.25);
+  overflow: hidden;
+}
+
+.song-timer__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transform-origin: left center;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.45), rgb(255 255 255 / 0) 60%),
+    linear-gradient(90deg, #5aa8ff, #9fdcff);
+  box-shadow: 0 0 14px rgb(140 210 255 / 0.8);
+}
+
+.song-timer.is-low .song-timer__fill {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.45), rgb(255 255 255 / 0) 60%),
+    linear-gradient(90deg, #ff5c8a, #ffb36b);
+  box-shadow: 0 0 14px rgb(255 92 138 / 0.8);
+}
+
+.song-timer__sec {
+  min-width: 2ch;
+  text-align: right;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: clamp(22px, 2.8vw, 52px);
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+}
+
+.song-timer.is-low .song-timer__sec {
+  color: #ffb3c6;
+}
+
+/* Finał: numery wyśrodkowane w polu między krawędzią a zegarem */
+.fpanel__nums {
+  left: calc((50vw * 0.84 - min(16vh, 10vw)) / 2 - 8vw);
+  width: 16vw;
+  top: 7vh;
+  bottom: 7vh;
+}
+
+/* OBS: belka z klasą — równe marginesy */
+.stream-final__band {
+  height: auto;
+  min-width: 0;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  column-gap: 2.4vw;
+  row-gap: 0.3vh;
+  padding: 1.6vh 4.6vw 1.8vh 8.5vw;
+  top: auto;
+  bottom: 6vh;
+}
+
+.stream-final__label {
+  align-self: end;
+  padding-left: 0.1em;
+  font-size: min(1.9vh, 1.1vw);
+  letter-spacing: 0.24em;
+}
+
+.stream-final__name,
+.stream-final__points {
+  font-size: min(5.6vh, 3.3vw);
+  line-height: 1;
+}
+
+.stream-final__points {
+  padding-left: 2.4vw;
+  border-left: 2px solid rgb(255 255 255 / 0.55);
+}
+
+.stream-final__band.is-answering .stream-final__points {
+  border-left-color: rgb(60 40 0 / 0.45);
+}
+
+.show-row__title {
+  line-height: 1.1;
+}
+
+.show-row__by {
+  font-size: calc(var(--h) * 0.22);
+  line-height: 1.1;
+}
+
+.stream-final__band {
+  padding: 2.2vh 4.6vw 2.4vh 8.5vw;
+  row-gap: 0.8vh;
+}
