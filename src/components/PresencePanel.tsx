@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { kickDevice, PRESENCE_LABELS, usePresenceList, type PresenceKey } from '../lib/presence'
 import type { Stanowisko } from '../lib/roles'
 import { hasClassName, useStationNames } from '../lib/stations'
+import { BUILD_ID, useLatestVersion } from '../lib/version'
 
 const ORDER: PresenceKey[] = ['host', 'tablica', 'stanowisko1', 'stanowisko2', 'stanowisko3', 'muzyk', 'tech', 'stream']
 
@@ -9,7 +10,9 @@ const ORDER: PresenceKey[] = ['host', 'tablica', 'stanowisko1', 'stanowisko2', '
 export function PresencePanel() {
   const list = usePresenceList()
   const names = useStationNames()
+  const latest = useLatestVersion() ?? BUILD_ID
   const [confirm, setConfirm] = useState<PresenceKey | null>(null)
+  const [sent, setSent] = useState<Partial<Record<PresenceKey, boolean>>>({})
   const [error, setError] = useState<string | null>(null)
 
   const kick = async (key: PresenceKey) => {
@@ -17,6 +20,7 @@ export function PresencePanel() {
     setError(null)
     try {
       await kickDevice(key)
+      setSent((v) => ({ ...v, [key]: true }))
     } catch {
       setError('Nie udało się wylogować — sprawdź połączenie (i czy są opublikowane nowe reguły bazy).')
     }
@@ -39,7 +43,12 @@ export function PresencePanel() {
             <li key={key} className={online ? 'presence__item is-online' : 'presence__item'}>
               <span className="presence__dot" aria-hidden />
               <span>{label(key)}</span>
-              <span className="presence__state">{online ? 'online' : 'brak'}</span>
+              {online && list[key]?.wersja !== latest && (
+                <span className="chip chip--danger" title="To urządzenie ma starą wersję aplikacji — odśwież na nim stronę">
+                  stara wersja
+                </span>
+              )}
+              <span className="presence__state">{online ? (sent[key] ? 'wylogowuję…' : 'online') : 'brak'}</span>
               {online && key !== 'host' && (
                 <span className="presence__actions">
                   {confirm === key ? (
@@ -62,7 +71,7 @@ export function PresencePanel() {
           )
         })}
       </ul>
-      <p className="muted small">„Wyloguj” wysyła urządzenie do ekranu logowania (np. gdy iPad trafił w złe ręce albo trzeba zmienić rolę).</p>
+      <p className="muted small">„Wyloguj” wysyła urządzenie do ekranu logowania. Działa na urządzeniach z aktualną wersją — przy „stara wersja” odśwież raz stronę na tym urządzeniu (później odświeżają się już same, gdy nie trwa gra).</p>
       {error && <p className="error">{error}</p>}
     </section>
   )

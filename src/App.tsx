@@ -1,4 +1,5 @@
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { reloadTo, useAutoUpdate } from './lib/version'
 import { RequireRole } from './components/RequireRole'
 import { AuthProvider } from './lib/AuthContext'
 import { BoardPage } from './pages/BoardPage'
@@ -15,6 +16,7 @@ export default function App() {
   return (
     <AuthProvider>
       <HashRouter>
+        <AutoUpdate />
         <Routes>
           <Route path="/" element={<StartScreen />} />
           <Route path="/logowanie/:roleId" element={<LoginScreen />} />
@@ -70,5 +72,30 @@ export default function App() {
         </Routes>
       </HashRouter>
     </AuthProvider>
+  )
+}
+
+/** Nowa wersja na GitHub Pages: urządzenia odświeżają się same (poza grą), host widzi komunikat. */
+function AutoUpdate() {
+  const { pathname } = useLocation()
+  const isHost = pathname.startsWith('/host')
+  const { updateReady, latest } = useAutoUpdate(!isHost)
+  if (!updateReady || !isHost) return null
+  return (
+    <div className="update-banner" role="status">
+      Jest nowa wersja aplikacji.{' '}
+      <button type="button" className="btn btn--tiny btn--primary" onClick={() => {
+          try {
+            sessionStorage.removeItem('jtm-reload')
+          } catch {
+            /* nic */
+          }
+          if (latest) reloadTo(latest)
+          else window.location.reload()
+        }}>
+        Odśwież
+      </button>{' '}
+      <span className="muted small">(potem wybierz folder z muzyką ponownie — gra i punkty zostają)</span>
+    </div>
   )
 }

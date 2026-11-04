@@ -4494,3 +4494,19 @@ textarea.field__input {
   padding: 2.2vh 4.6vw 2.4vh 8.5vw;
   row-gap: 0.8vh;
 }
+
+.update-banner {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  z-index: 200;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--gold);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.4);
+}

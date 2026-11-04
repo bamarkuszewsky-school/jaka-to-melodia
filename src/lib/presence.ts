@@ -2,6 +2,7 @@ import { onDisconnect, onValue, ref, remove, serverTimestamp, set } from 'fireba
 import { useEffect, useState } from 'react'
 import { signOut } from 'firebase/auth'
 import { auth, db } from './firebase'
+import { BUILD_ID } from './version'
 
 /**
  * Klucze obecności w bazie (/obecnosc/<klucz>).
@@ -39,7 +40,7 @@ export function usePresence(key: PresenceKey | null): void {
       if (snap.val() !== true) return
       onDisconnect(myRef)
         .remove()
-        .then(() => set(myRef, { od: serverTimestamp() }))
+        .then(() => set(myRef, { od: serverTimestamp(), wersja: BUILD_ID }))
         .catch((e) => console.error('Obecność:', e))
     })
     // Host może wylogować to urządzenie z panelu: zapisuje /wyloguj/<klucz> = czas serwera.
@@ -70,8 +71,8 @@ export function kickDevice(key: PresenceKey): Promise<void> {
 }
 
 /** Lista urządzeń, które są teraz online. */
-export function usePresenceList(): Partial<Record<PresenceKey, { od: number }>> {
-  const [list, setList] = useState<Partial<Record<PresenceKey, { od: number }>>>({})
+export function usePresenceList(): Partial<Record<PresenceKey, { od: number; wersja?: string }>> {
+  const [list, setList] = useState<Partial<Record<PresenceKey, { od: number; wersja?: string }>>>({})
   useEffect(() => onValue(ref(db, 'obecnosc'), (snap) => setList(snap.val() ?? {})), [])
   return list
 }
