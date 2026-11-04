@@ -3936,3 +3936,390 @@ textarea.field__input {
   text-transform: uppercase;
   letter-spacing: 0.2em;
 }
+
+/* ============================================================
+   v0.9.1 — wyraźniejsze belki (jak w teleturnieju) i finał bliżej oryginału
+   ============================================================ */
+
+.show-rows {
+  width: min(100%, 72vw, 1380px);
+  gap: 1.9vh;
+}
+
+.show-row {
+  grid-template-columns: calc(var(--h) * 1.35) 1fr;
+  gap: 1.4vw;
+}
+
+/* Plakietka z punktami: dwie nałożone karty (jak plik banknotów), pełny kolor */
+.show-row__value {
+  position: relative;
+  height: calc(var(--h) * 0.78);
+  border-radius: calc(var(--h) * 0.12);
+  border: 2px solid #fff;
+  background: linear-gradient(180deg, #2f6fe8 0%, #123cb0 100%);
+  box-shadow:
+    calc(var(--h) * -0.08) calc(var(--h) * -0.08) 0 -2px #1a4fd0,
+    calc(var(--h) * -0.08) calc(var(--h) * -0.08) 0 0 #fff,
+    0 0 16px rgb(120 200 255 / 0.6);
+  font-size: calc(var(--h) * 0.46);
+  text-shadow: 0 2px 4px rgb(0 20 90 / 0.6);
+}
+
+/* Belka: błyszcząca, nieprzezroczysta */
+.show-row__bar {
+  border: 2px solid #e4f4ff;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0.12) 48%, rgb(255 255 255 / 0) 52%),
+    linear-gradient(180deg, #6fb6ff 0%, #3f8cf2 50%, #2466dc 52%, #3a82ee 100%);
+  box-shadow:
+    0 0 18px rgb(140 210 255 / 0.75),
+    0 6px 14px rgb(0 20 80 / 0.45),
+    inset 0 -3px 8px rgb(10 40 140 / 0.45);
+}
+
+.show-row__label-text {
+  letter-spacing: 0.03em;
+  text-shadow:
+    0 2px 0 rgb(10 40 140 / 0.7),
+    0 0 10px rgb(10 40 140 / 0.5);
+}
+
+.show-row__title {
+  text-shadow: 0 2px 0 rgb(10 40 140 / 0.7);
+}
+
+.show-row__by {
+  color: #fff;
+  opacity: 0.9;
+}
+
+.show-row__glow {
+  background: radial-gradient(closest-side, rgb(255 210 240 / 0.95), rgb(230 150 255 / 0.4), transparent);
+  opacity: 0.9;
+}
+
+.show-row.is-active .show-row__bar {
+  border-color: #fff6cf;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.6) 0%, rgb(255 255 255 / 0.15) 48%, rgb(255 255 255 / 0) 52%),
+    linear-gradient(180deg, #ffe27a 0%, #f5c542 50%, #d99a10 52%, #f0b62c 100%);
+  box-shadow:
+    0 0 34px rgb(255 210 90 / 0.85),
+    0 6px 14px rgb(0 20 80 / 0.45);
+}
+
+.show-row.is-active .show-row__label-text,
+.show-row.is-active .show-row__title {
+  color: #1b1400;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.5);
+}
+
+.show-row.is-active .show-row__value {
+  border-color: #fff;
+  background: linear-gradient(180deg, #ffe27a, #d99a10);
+  color: #1b1400;
+  text-shadow: none;
+  box-shadow:
+    calc(var(--h) * -0.08) calc(var(--h) * -0.08) 0 -2px #e0a81c,
+    calc(var(--h) * -0.08) calc(var(--h) * -0.08) 0 0 #fff,
+    0 0 26px rgb(255 210 90 / 0.8);
+}
+
+.show-row.is-done .show-row__bar {
+  border-color: #e0fff0;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.5) 0%, rgb(255 255 255 / 0.1) 48%, rgb(255 255 255 / 0) 52%),
+    linear-gradient(180deg, #5fe3b0 0%, #23b884 50%, #12946a 52%, #1fae7d 100%);
+  box-shadow:
+    0 0 18px rgb(90 240 170 / 0.6),
+    0 6px 14px rgb(0 20 80 / 0.45);
+}
+
+.show-row.is-missed .show-row__bar {
+  border-color: #c9d3ea;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.35) 0%, rgb(255 255 255 / 0.05) 48%, rgb(255 255 255 / 0) 52%),
+    linear-gradient(180deg, #7d8cb5 0%, #5a6a98 50%, #47578a 52%, #56679a 100%);
+  box-shadow: 0 6px 14px rgb(0 20 80 / 0.45);
+}
+
+.show-row.is-dim {
+  opacity: 0.6;
+  filter: saturate(0.75) brightness(0.85);
+}
+
+.show-status {
+  width: min(100%, 72vw, 1380px);
+  background: linear-gradient(180deg, #0c2a8f, #06185e);
+  border: 2px solid rgb(170 220 255 / 0.6);
+  box-shadow: 0 0 20px rgb(100 170 255 / 0.4);
+  backdrop-filter: none;
+}
+
+/* ---------- Finał: panel jak w teleturnieju ---------- */
+
+.final-show {
+  background:
+    radial-gradient(2px 2px at 58% 18%, #fff, transparent 60%),
+    radial-gradient(3px 3px at 66% 40%, rgb(255 255 255 / 0.9), transparent 60%),
+    radial-gradient(2px 2px at 74% 12%, #fff, transparent 60%),
+    radial-gradient(2px 2px at 81% 33%, rgb(255 255 255 / 0.8), transparent 60%),
+    radial-gradient(3px 3px at 90% 22%, #fff, transparent 60%),
+    radial-gradient(2px 2px at 95% 48%, rgb(255 255 255 / 0.8), transparent 60%),
+    radial-gradient(2px 2px at 62% 64%, rgb(255 255 255 / 0.7), transparent 60%),
+    radial-gradient(3px 3px at 86% 70%, rgb(255 255 255 / 0.7), transparent 60%),
+    radial-gradient(2px 2px at 70% 84%, rgb(255 255 255 / 0.6), transparent 60%),
+    repeating-linear-gradient(90deg, rgb(120 180 255 / 0.06) 0 3px, transparent 3px 46px),
+    radial-gradient(50vw 80vh at 78% 45%, rgb(60 140 255 / 0.55), transparent 70%),
+    linear-gradient(180deg, #0b3aa8, #062074 60%, #041656);
+}
+
+.fpanel {
+  width: 50vw;
+}
+
+.fpanel__bg,
+.fpanel::before {
+  clip-path: polygon(0 0, 62% 0, 92% 50%, 62% 100%, 0 100%);
+}
+
+/* jasna krawędź „strzałki” */
+.fpanel::before {
+  inset: 0 -2.2vw 0 0;
+  background: linear-gradient(180deg, #4d9bff 0%, #2f78f0 50%, #4d9bff 100%);
+  box-shadow: none;
+  opacity: 1;
+}
+
+.fpanel__bg {
+  background:
+    radial-gradient(26vw 45vh at 22% 50%, rgb(80 150 255 / 0.55), transparent 70%),
+    linear-gradient(180deg, #1650d6 0%, #0b33a8 50%, #1650d6 100%);
+  box-shadow: none;
+}
+
+.fpanel__nums {
+  left: 9%;
+  top: 6vh;
+  bottom: 6vh;
+  width: 28%;
+}
+
+.fpanel__num {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: min(12vh, 7.6vw);
+  text-shadow: 0 3px 0 rgb(10 40 140 / 0.6);
+}
+
+.fpanel__num.is-current {
+  color: #fff;
+  text-shadow:
+    0 0 18px #fff,
+    0 0 40px rgb(140 220 255 / 0.95),
+    0 0 80px rgb(140 220 255 / 0.7);
+}
+
+.fhex {
+  left: calc(50vw * 0.84);
+  width: min(32vh, 20vw);
+}
+
+.fhex__svg {
+  filter: drop-shadow(0 0 14px rgb(150 210 255 / 0.85));
+}
+
+.fhex__plate {
+  fill: #2a6ff0;
+  stroke: #9cd2ff;
+  stroke-width: 2;
+}
+
+.fhex__track {
+  stroke: rgb(10 40 140 / 0.55);
+  stroke-width: 7;
+}
+
+.fhex__ring {
+  stroke: #fff;
+  stroke-width: 7;
+}
+
+.fhex.is-running .fhex__ring {
+  stroke: #fff;
+}
+
+.fhex.is-low .fhex__ring {
+  stroke: #ff5c8a;
+}
+
+.fhex__inner {
+  fill: #f4f8ff;
+  stroke: #0b2a8a;
+  stroke-width: 3;
+}
+
+.fhex__num {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: min(11vh, 7vw);
+  color: #13308f;
+}
+
+/* Klasa finalisty — na środku prawej części, bez ramki */
+.final-who {
+  position: absolute;
+  left: 56vw;
+  right: 3vw;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1vh;
+  text-align: center;
+}
+
+.final-who .fit-box {
+  width: 100%;
+}
+
+.final-who__status {
+  color: var(--show-cyan);
+  font-weight: 800;
+  font-size: clamp(16px, 1.8vw, 34px);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+
+.final-who__name {
+  font-family: var(--font-body);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow:
+    0 4px 0 rgb(10 40 140 / 0.7),
+    0 0 40px rgb(120 190 255 / 0.6);
+}
+
+.final-who__points {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: clamp(36px, 6vw, 120px);
+  line-height: 1;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 4px 0 rgb(10 40 140 / 0.7);
+}
+
+.final-who__won {
+  color: var(--show-cyan);
+  font-weight: 700;
+  font-size: clamp(16px, 1.8vw, 34px);
+}
+
+.final-who.is-answering .final-who__name {
+  color: var(--gold);
+  text-shadow:
+    0 4px 0 rgb(120 80 0 / 0.6),
+    0 0 50px rgb(245 197 66 / 0.7);
+}
+
+.final-who__countdown {
+  margin-top: 1vh;
+  width: clamp(60px, 7vw, 130px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 0.45vw solid #fff;
+  background: var(--magenta);
+  color: #fff;
+  font-weight: 800;
+  font-size: clamp(28px, 3.4vw, 64px);
+  box-shadow: 0 0 30px rgb(255 61 139 / 0.7);
+}
+
+/* OBS: belka z klasą wychodzi spod dolnej krawędzi panelu w prawo (pasek u dołu, nie zasłania zawodnika) */
+.stream-final__band {
+  position: absolute;
+  left: 33vw;
+  top: 80vh;
+  height: min(13vh, 8vw);
+  min-width: 26vw;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto 1fr;
+  align-items: center;
+  column-gap: 2vw;
+  padding: 0 3.4vw 0 7.5vw;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 2.4vw) 100%, 0 100%);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.45) 0%, rgb(255 255 255 / 0.08) 48%, rgb(255 255 255 / 0) 52%),
+    linear-gradient(180deg, #5aa8ff 0%, #2f78f0 50%, #1c5bd6 52%, #2b6fe8 100%);
+  z-index: -1;
+  animation: band-in 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+
+@keyframes band-in {
+  from {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  }
+}
+
+.stream-final {
+  isolation: isolate;
+}
+
+.stream-final .fpanel {
+  z-index: 1;
+}
+
+.stream-final .fhex {
+  z-index: 2;
+}
+
+.stream-final__label {
+  grid-column: 1 / -1;
+  align-self: end;
+  color: #dff2ff;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: min(2vh, 1.2vw);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.stream-final__name,
+.stream-final__points {
+  align-self: start;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: min(6vh, 3.6vw);
+  line-height: 1.05;
+  color: #fff;
+  text-transform: uppercase;
+  text-shadow: 0 3px 0 rgb(10 40 140 / 0.7);
+  white-space: nowrap;
+}
+
+.stream-final__points {
+  font-variant-numeric: tabular-nums;
+}
+
+.stream-final__band.is-answering {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.55) 0%, rgb(255 255 255 / 0.12) 48%, rgb(255 255 255 / 0) 52%),
+    linear-gradient(180deg, #ffe27a 0%, #f5c542 50%, #d99a10 52%, #f0b62c 100%);
+}
+
+.stream-final__band.is-answering .stream-final__name,
+.stream-final__band.is-answering .stream-final__points {
+  color: #1b1400;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.5);
+}
+
+.stream-final__band.is-answering .stream-final__label {
+  color: #4a3500;
+}

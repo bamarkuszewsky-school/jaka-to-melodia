@@ -7,7 +7,6 @@ import { useBuzzes } from '../lib/buzzTest'
 import { useGame, useServerNow } from '../lib/game/state'
 import type { Round4State } from '../lib/game/types'
 import { FinalPanel } from '../components/board/FinalPanel'
-import { Plate } from '../components/board/Round4Board'
 import { usePresence } from '../lib/presence'
 import { nut, poNutach } from '../lib/game/rules3'
 import { guessedCount } from '../lib/game/rules4'
@@ -136,11 +135,15 @@ export function StreamPage() {
 
 function StreamFinal({ r4, name, points }: { r4: Round4State; name: string; points: number }) {
   const now = useServerNow(r4.faza === 'gra' || r4.faza === 'stop')
+  const answering = r4.faza === 'stop'
   return (
     <div className="stream-final">
       <FinalPanel r={r4} now={now} />
-      <div className="stream-final__plate">
-        <Plate name={name} points={points} answering={r4.faza === 'stop'} status={r4.zdobyte ? `+${r4.zdobyte} pkt w finale` : undefined} />
+      {/* Belka z klasą wychodzi spod panelu — część grafiki finału, bez osobnej ramki. */}
+      <div className={`stream-final__band ${answering ? 'is-answering' : ''}`}>
+        <span className="stream-final__label">{answering ? (r4.ostatnia ? 'ostatnia szansa' : 'odpowiada') : 'w finale'}</span>
+        <span className="stream-final__name">{name}</span>
+        <span className="stream-final__points">{points}</span>
       </div>
     </div>
   )

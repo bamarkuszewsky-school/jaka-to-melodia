@@ -3,7 +3,6 @@ import { FINAL_SONGS, guessedCount } from '../../lib/game/rules4'
 import { useServerNow } from '../../lib/game/state'
 import { STATION_KEYS, type GameState, type StationKey } from '../../lib/game/types'
 import { labelForKey, type StationNames } from '../../lib/stations'
-import type { ReactNode } from 'react'
 import { FitText } from '../FitText'
 import { FinalPanel } from './FinalPanel'
 
@@ -53,7 +52,7 @@ export function Round4Board({ game, names }: { game: GameState; names: StationNa
     )
   }
 
-  // W trakcie finału: panel z numerami i zegarem + tabliczka finalisty.
+  // W trakcie finału: panel z numerami i zegarem + nazwa klasy na środku prawej części.
   const status =
     r.faza === 'gotowe'
       ? '7 melodii · 30 sekund'
@@ -65,40 +64,17 @@ export function Round4Board({ game, names }: { game: GameState; names: StationNa
   return (
     <div className="final-show">
       <FinalPanel r={r} now={now} />
-      <div className="final-show__right">
-        <Plate name={label(r.gracz)} points={game.punkty[r.gracz]} status={status} answering={r.faza === 'stop'}>
-          {r.faza === 'stop' && (
-            <span className="plate__countdown">{secondsLeft(remaining(ANSWER_MS, r.odpowiedzStart, now))}</span>
-          )}
-        </Plate>
-        {r.zdobyte > 0 && <p className="final-show__won">+{r.zdobyte} pkt w finale</p>}
+      <div className={`final-who ${r.faza === 'stop' ? 'is-answering' : ''}`}>
+        <span className="final-who__status">{status}</span>
+        <FitText className="final-who__name" max={[9, 180]} min={40} widthRatio={0.9}>
+          {label(r.gracz)}
+        </FitText>
+        <span className="final-who__points">{game.punkty[r.gracz]}</span>
+        {r.zdobyte > 0 && <span className="final-who__won">+{r.zdobyte} pkt w finale</span>}
+        {r.faza === 'stop' && (
+          <span className="final-who__countdown">{secondsLeft(remaining(ANSWER_MS, r.odpowiedzStart, now))}</span>
+        )}
       </div>
-    </div>
-  )
-}
-
-/** Tabliczka zawodnika (jak na pulpicie): nazwa klasy i punkty. */
-export function Plate({
-  name,
-  points,
-  status,
-  answering,
-  children,
-}: {
-  name: string
-  points: number
-  status?: string
-  answering?: boolean
-  children?: ReactNode
-}) {
-  return (
-    <div className={`plate ${answering ? 'is-answering' : ''}`}>
-      <FitText className="plate__name" max={[4.2, 80]} min={20} widthRatio={0.9}>
-        {name}
-      </FitText>
-      <span className="plate__points">{points}</span>
-      {status && <span className="plate__status">{status}</span>}
-      {children}
     </div>
   )
 }
