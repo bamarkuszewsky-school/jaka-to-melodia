@@ -589,7 +589,10 @@ export interface CsvImport {
   errors: string[]
 }
 
-/** Wczytuje start, refren, hasło i anegdotę (puste komórki nic nie zmieniają). */
+/**
+ * Wczytuje start, refren, hasło i anegdotę — TYLKO do pustych pól.
+ * To, co ustawiłeś w aplikacji, nigdy nie zostanie nadpisane (puste komórki też nic nie zmieniają).
+ */
 export function importCsv(text: string, songs: Songs): CsvImport {
   const rows = parseCsv(text)
   const res: CsvImport = { changes: {}, updated: 0, unknown: [], errors: [] }
@@ -613,8 +616,10 @@ export function importCsv(text: string, songs: Songs): CsvImport {
       const i = col(key)
       if (i < 0) continue
       const v = parseSeconds(r[i] ?? '')
+      const current = songs[id][key]
       if (v === null) res.errors.push(`${id}: „${r[i]}” to nie jest liczba sekund (${key}).`)
-      else if (v !== undefined && v !== songs[id][key]) {
+      // Uzupełniamy tylko puste pola — start i refren ustawione w aplikacji zostają na zawsze.
+      else if (v !== undefined && (current === undefined || current === null)) {
         res.changes[`${id}/${key}`] = v
         touched = true
       }
@@ -623,7 +628,7 @@ export function importCsv(text: string, songs: Songs): CsvImport {
       const i = col(key)
       if (i < 0) continue
       const v = (r[i] ?? '').trim()
-      if (v && v !== (songs[id][key] ?? '')) {
+      if (v && !(songs[id][key] ?? '').trim()) {
         res.changes[`${id}/${key}`] = v
         touched = true
       }

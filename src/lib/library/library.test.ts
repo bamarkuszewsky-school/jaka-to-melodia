@@ -270,6 +270,12 @@ describe('CSV', () => {
     expect(res.changes).toEqual({ '2-1/start': 62.5, '2-1/refren': 75, '2-1/haslo': 'Hasło; z średnikiem' })
   })
 
+  it('nie nadpisuje tego, co ustawiono w aplikacji', () => {
+    const songs: Songs = Object.fromEntries([song('2', 1, { start: 12.5, refren: undefined, haslo: 'Moje hasło' })])
+    const res = importCsv('id;start;refren;haslo\n2-1;0;40;Inne hasło\n', songs)
+    expect(res.changes).toEqual({ '2-1/refren': 40 })
+  })
+
   it('zgłasza nieznane id i złe liczby', () => {
     const songs: Songs = Object.fromEntries([song('1', 1)])
     const res = importCsv('id,start\n1-1,abc\nnie-ma,3\n', songs)

@@ -96,7 +96,7 @@ export function SongDatabase({ songs, editions, currentId, scan, urlFor }: Props
     const res = importCsv(await f.text(), songs)
     try {
       await applySongChanges(res.changes)
-      const parts = [`Zaktualizowano ${res.updated} utworów.`]
+      const parts = [`Uzupełniono ${res.updated} utworów (ustawień zmienionych w aplikacji CSV nie nadpisuje).`]
       if (res.unknown.length) parts.push(`Nieznane id (pominięte): ${res.unknown.length}.`)
       if (res.errors.length) parts.push(`Błędy: ${res.errors.slice(0, 3).join(' ')}`)
       setMsg({ text: parts.join(' '), error: res.errors.length > 0 })
