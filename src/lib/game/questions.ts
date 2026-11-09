@@ -129,7 +129,7 @@ export function parseQuestionSet(json: unknown): QuestionSet {
   return {
     edycja: typeof raw.edycja === 'string' && raw.edycja.trim() ? raw.edycja.trim() : 'Edycja bez nazwy',
     runda1: parseList(raw.runda1, { key: 'runda1', label: 'Runda 1', count: 5 }),
-    runda2: parseList(raw.runda2, { key: 'runda2', label: 'Runda 2', count: 3, optional: true }),
+    runda2: parseList(raw.runda2, { key: 'runda2', label: 'Runda 2', count: [3, 5], optional: true }),
     dogrywka2: parseList(raw.dogrywka2, { key: 'dogrywka2', label: 'Dogrywka', count: [0, 5], optional: true }),
     runda3: parseRound3(raw.runda3),
     final: parseFinal(raw.final),

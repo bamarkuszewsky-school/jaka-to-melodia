@@ -72,11 +72,11 @@ Wartość punktów liczy serwer (czas od startu muzyki do zgłoszenia), więc op
 
 ## Runda 2 — jak to działa
 
-1. Po rundzie 1 host klika **Rozpocznij rundę 2** — punkty zostają, na tablicy 3 hasła.
+1. Po rundzie 1 host klika **Rozpocznij rundę 2** — punkty zostają, na tablicy 5 haseł.
 2. Pierwsze hasło wybiera klasa z **najmniejszą liczbą punktów** (potem — kto ostatnio odgadł).
 3. Wartość **maleje od 200 do 100 pkt** (co 10 pkt, co 1,5 s) — im szybciej, tym więcej.
 4. Zła odpowiedź: klasa zablokowana, a muzyka **gra dalej od miejsca zatrzymania** — pozostali walczą o aktualną, już niższą stawkę.
-5. Po 3 hasłach odpada klasa z najmniejszą liczbą punktów; host klika **Ogłoś wyniki na tablicy**.
+5. Po 5 hasłach odpada klasa z najmniejszą liczbą punktów; host klika **Ogłoś wyniki na tablicy**.
 6. **Remis na ostatnim miejscu** → dogrywka (zasady rundy 2, bez punktów). Kategorię wybiera bezpieczna klasa, która sama nie gra. Kto odgadnie, przechodzi dalej. Hasła dogrywki są w liście `dogrywka2`.
 7. Gdyby zabrakło haseł dogrywki — „Rozstrzygnij ręcznie” w panelu hosta.
 

@@ -394,7 +394,7 @@ function Between({ game, edition, runda, label, run }: BetweenProps) {
       return (
         <div className="round-end">
           <p className="notice">Runda 1 zakończona. Punkty przechodzą do rundy 2.</p>
-          {set.runda2.length === 3 ? (
+          {set.runda2.length > 0 ? (
             <button
               type="button"
               className="btn btn--primary btn--huge"
@@ -403,7 +403,7 @@ function Between({ game, edition, runda, label, run }: BetweenProps) {
               Rozpocznij rundę 2
             </button>
           ) : (
-            <p className="error">W edycji brakuje 3 haseł rundy 2.</p>
+            <p className="error">W edycji brakuje haseł rundy 2.</p>
           )}
           <TileGrid tiles={r1.hasla} questions={set.runda1} label={label} />
         </div>

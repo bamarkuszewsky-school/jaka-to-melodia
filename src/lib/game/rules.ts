@@ -37,7 +37,7 @@ export function roundValue(runda: RoundNo, elapsedMs: number): number {
 }
 
 /** Ile hasła ma runda. */
-export const TILES_PER_ROUND: Record<RoundNo, number> = { 1: 5, 2: 3 }
+export const TILES_PER_ROUND: Record<RoundNo, number> = { 1: 5, 2: 5 }
 
 /** Czy po złej odpowiedzi piosenka gra dalej (runda 2), czy od początku (runda 1). */
 export function resumesAfterWrong(runda: RoundNo): boolean {

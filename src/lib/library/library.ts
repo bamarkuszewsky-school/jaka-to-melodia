@@ -63,7 +63,7 @@ export interface DrawnSongs {
 export type DrawKey = keyof DrawnSongs
 export const DRAW_KEYS: readonly DrawKey[] = ['runda1', 'runda2', 'dogrywka2', 'runda3', 'final']
 export const DRAW_ROUND: Record<DrawKey, LibRound> = { runda1: '1', runda2: '2', dogrywka2: '2', runda3: '3', final: 'F' }
-export const DRAW_COUNT: Record<DrawKey, number> = { runda1: 5, runda2: 3, dogrywka2: 2, runda3: 6, final: 7 }
+export const DRAW_COUNT: Record<DrawKey, number> = { runda1: 5, runda2: 5, dogrywka2: 2, runda3: 6, final: 7 }
 export const DRAW_LABEL: Record<DrawKey, string> = {
   runda1: 'Runda 1',
   runda2: 'Runda 2',

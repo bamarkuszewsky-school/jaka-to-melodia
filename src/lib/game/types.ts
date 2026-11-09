@@ -59,7 +59,7 @@ export interface QuestionSet {
   /** 6 zagadek rundy 3 (puste, jeśli plik ich nie ma). */
   runda3: Round3Question[]
   runda1: Question[]
-  /** 3 hasła rundy 2 (puste, jeśli plik ich nie ma). */
+  /** Hasła rundy 2 (5; starsze edycje mają 3) (puste, jeśli plik ich nie ma). */
   runda2: Question[]
   /** Zapasowe hasła na dogrywkę po rundzie 2. */
   dogrywka2: Question[]

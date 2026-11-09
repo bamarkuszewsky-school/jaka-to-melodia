@@ -116,7 +116,7 @@ function song(runda: SongRecord['runda'], i: number, extra: Partial<SongRecord> 
 function library(): Songs {
   return Object.fromEntries([
     ...Array.from({ length: 6 }, (_, i) => song('1', i)),
-    ...Array.from({ length: 6 }, (_, i) => song('2', i)),
+    ...Array.from({ length: 8 }, (_, i) => song('2', i)),
     ...Array.from({ length: 6 }, (_, i) => song('3', i)),
     ...Array.from({ length: 8 }, (_, i) => song('F', i)),
   ])
@@ -134,7 +134,7 @@ describe('gotowość i losowanie', () => {
     const r = drawEdition(library(), () => 0.3)
     expect(r.braki).toEqual([])
     expect(r.utwory.runda1).toHaveLength(5)
-    expect(r.utwory.runda2).toHaveLength(3)
+    expect(r.utwory.runda2).toHaveLength(5)
     expect(r.utwory.dogrywka2).toHaveLength(2)
     expect(r.utwory.runda3).toHaveLength(6)
     expect(r.utwory.final).toHaveLength(7)

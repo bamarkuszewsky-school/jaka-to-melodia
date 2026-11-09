@@ -47,10 +47,12 @@ describe('runda 2 i dogrywka w pytania.json', () => {
     expect(set.dogrywka2).toEqual([])
   })
 
-  it('runda 2 musi mieć dokładnie 3 hasła', () => {
+  it('runda 2 ma od 3 do 5 haseł', () => {
     const raw = structuredClone(example)
+    raw.runda2.push(raw.runda2[0], raw.runda2[0])
+    expect(parseQuestionSet(raw).runda2).toHaveLength(5)
     raw.runda2.push(raw.runda2[0])
-    expect(() => parseQuestionSet(raw)).toThrow('Runda 2 musi mieć dokładnie 3 hasła (jest 4).')
+    expect(() => parseQuestionSet(raw)).toThrow('Runda 2 musi mieć od 3 do 5 haseł (jest 6).')
   })
 })
 
