@@ -53,6 +53,11 @@ export function updateSong(id: string, patch: Partial<Record<keyof SongRecord, u
   return update(ref(db, `baza/utwory/${id}`), patch)
 }
 
+/** Zastępuje całą bazę utworów (po potwierdzeniu w panelu). */
+export function replaceSongs(songs: Songs): Promise<void> {
+  return set(ref(db, 'baza/utwory'), songs)
+}
+
 export function applySongChanges(changes: Record<string, unknown>): Promise<void> {
   if (Object.keys(changes).length === 0) return Promise.resolve()
   return update(ref(db, 'baza/utwory'), changes)

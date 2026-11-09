@@ -11,6 +11,7 @@ import {
   parseRoundFolder,
   parseSongName,
   redrawOne,
+  replaceFromCsv,
   roundIntroFor,
   systemSound,
   scanLibrary,
@@ -281,5 +282,21 @@ describe('CSV', () => {
     const res = importCsv('id,start\n1-1,abc\nnie-ma,3\n', songs)
     expect(res.unknown).toEqual(['nie-ma'])
     expect(res.errors).toHaveLength(1)
+  })
+})
+
+describe('zastąpienie bazy z CSV', () => {
+  it('ustawia dokładnie wartości z pliku, zachowuje pliki i historię, usuwa resztę', () => {
+    const songs: Songs = {
+      'r1-a-x': { runda: '1', tytul: 'A', wykonawca: 'X', plik: 'RUNDA 1/A - X.mp3', start: 0, refren: 40, historia: { e: { nazwa: 'E', data: 1, odgadniety: true } } },
+      'r1-test-y': { runda: '1', tytul: 'Test', wykonawca: 'Y' },
+    }
+    const csv = 'id;runda;tytul;wykonawca;start;refren;haslo;podpowiedz\nr1-a-x;Runda 1;A;X;;40;;\nr2-b-z;Runda 2;B;Z;3,5;;Hasło;\n'
+    const res = replaceFromCsv(csv, songs)
+    expect(res.errors).toEqual([])
+    expect(res.removed).toEqual(['r1-test-y'])
+    expect(res.songs['r1-a-x']).toEqual({ runda: '1', tytul: 'A', wykonawca: 'X', refren: 40, plik: 'RUNDA 1/A - X.mp3', historia: songs['r1-a-x'].historia })
+    expect(res.songs['r2-b-z']).toEqual({ runda: '2', tytul: 'B', wykonawca: 'Z', start: 3.5, haslo: 'Hasło' })
+    expect(res).toMatchObject({ kept: 1, added: 1 })
   })
 })

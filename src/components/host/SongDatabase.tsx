@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { SONG_MS } from '../../lib/game/rules'
-import { applySongChanges, deleteEdition, setPlayed, updateSong } from '../../lib/library/db'
+import { Waveform, type ClickMode } from './Waveform'
+import { applySongChanges, deleteEdition, replaceSongs, setPlayed, updateSong } from '../../lib/library/db'
 import {
   DRAW_KEYS,
   DRAW_LABEL,
@@ -12,6 +13,8 @@ import {
   MISSING_LABEL,
   missingFor,
   parseSeconds,
+  replaceFromCsv,
+  type CsvReplace,
   ROUND_LABEL,
   type EditionRecord,
   type LibRound,
@@ -46,6 +49,8 @@ export function SongDatabase({ songs, editions, currentId, scan, urlFor }: Props
   const [open, setOpen] = useState<string | null>(null)
   const [msg, setMsg] = useState<{ text: string; error?: boolean } | null>(null)
   const csvRef = useRef<HTMLInputElement>(null)
+  const replaceRef = useRef<HTMLInputElement>(null)
+  const [pending, setPending] = useState<CsvReplace | null>(null)
 
   const current = currentId && editions ? editions[currentId] : undefined
   const inCurrent = useMemo(() => new Set(current ? DRAW_KEYS.flatMap((k) => current.utwory[k]) : []), [current])
@@ -105,6 +110,19 @@ export function SongDatabase({ songs, editions, currentId, scan, urlFor }: Props
     }
   }
 
+  const onReplace = async (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    e.target.value = ''
+    if (!f) return
+    const res = replaceFromCsv(await f.text(), songs)
+    if (Object.keys(res.songs).length === 0) {
+      setMsg({ text: res.errors[0] ?? 'W pliku nie ma żadnych utworów.', error: true })
+      return
+    }
+    setMsg(null)
+    setPending(res)
+  }
+
   return (
     <section className="card card--wide songdb">
       <div className="card__head">
@@ -125,9 +143,51 @@ export function SongDatabase({ songs, editions, currentId, scan, urlFor }: Props
             Wczytaj CSV
           </button>
           <input ref={csvRef} type="file" accept=".csv,.txt,text/csv" hidden onChange={onCsv} />
+          <button type="button" className="btn btn--ghost" onClick={() => replaceRef.current?.click()}>
+            Zastąp bazę z CSV
+          </button>
+          <input ref={replaceRef} type="file" accept=".csv,.txt,text/csv" hidden onChange={onReplace} />
         </div>
       </div>
       {msg && <p className={msg.error ? 'error' : 'notice'}>{msg.text}</p>}
+      {pending && (
+        <div className="confirm-box">
+          <p>
+            Zastąpić całą bazę tym plikiem? Będzie w niej {Object.keys(pending.songs).length} utworów ({pending.kept} istniejących,{' '}
+            {pending.added} nowych). Wszystkie wartości (start, refren, hasła, anegdoty) będą dokładnie takie jak w pliku — puste
+            komórki wyczyszczą pole. Pliki, nuty i historia zagrań zostają.
+            {pending.removed.length > 0 && (
+              <>
+                {' '}
+                Usunie z bazy {pending.removed.length} utworów spoza pliku: {pending.removed.slice(0, 8).join(', ')}
+                {pending.removed.length > 8 ? '…' : ''}.
+              </>
+            )}
+          </p>
+          {pending.errors.length > 0 && <p className="error">Błędy w pliku: {pending.errors.slice(0, 5).join(' ')}</p>}
+          <div className="card__actions">
+            <button
+              type="button"
+              className="btn btn--danger"
+              onClick={async () => {
+                const p = pending
+                setPending(null)
+                try {
+                  await replaceSongs(p.songs)
+                  setMsg({ text: `Baza zastąpiona: ${Object.keys(p.songs).length} utworów.` })
+                } catch {
+                  setMsg({ text: 'Nie udało się zapisać bazy — sprawdź połączenie.', error: true })
+                }
+              }}
+            >
+              Tak, zastąp bazę
+            </button>
+            <button type="button" className="btn btn--ghost" onClick={() => setPending(null)}>
+              Anuluj
+            </button>
+          </div>
+        </div>
+      )}
       {!scan && <p className="muted small">Wybierz folder z muzyką w zakładce „Gra”, żeby odsłuchiwać utwory i ustawiać start.</p>}
 
       <div className="tabs">
@@ -244,6 +304,27 @@ function SongEditor({ id, s, scan, urlFor }: { id: string; s: SongRecord; scan: 
   }
 
   const now = () => Math.round((audioRef.current?.currentTime ?? 0) * 10) / 10
+  const [mode, setMode] = useState<ClickMode>(s.runda === '3' ? 'refren' : s.start === undefined ? 'start' : 'refren')
+  const [playing, setPlaying] = useState(false)
+
+  const pick = (m: ClickMode, sec: number) => {
+    const a = audioRef.current
+    if (m === 'start') save({ start: sec })
+    else if (m === 'refren') save({ refren: sec })
+    if (a) {
+      a.currentTime = sec
+      stopAt.current = null
+    }
+  }
+
+  const togglePlay = () => {
+    const a = audioRef.current
+    if (!a) return
+    if (a.paused) {
+      stopAt.current = null
+      a.play().catch(() => {})
+    } else a.pause()
+  }
 
   return (
     <div className="song-editor">
@@ -255,7 +336,51 @@ function SongEditor({ id, s, scan, urlFor }: { id: string; s: SongRecord; scan: 
       {s.runda !== '3' || audioUrl ? (
         <div className="song-editor__audio">
           {audioUrl ? (
-            <audio ref={audioRef} src={audioUrl} controls preload="metadata" />
+            <>
+              <audio
+                ref={audioRef}
+                src={audioUrl}
+                preload="metadata"
+                onPlay={() => setPlaying(true)}
+                onPause={() => setPlaying(false)}
+                hidden
+              />
+              <div className="wave-bar">
+                <button type="button" className="btn btn--tiny btn--primary" onClick={togglePlay}>
+                  {playing ? '⏸ Pauza' : '▶ Graj od kreski'}
+                </button>
+                <span className="wave-bar__label">Kliknięcie w wykres:</span>
+                <div className="segmented" role="group" aria-label="Co ustawia kliknięcie">
+                  {s.runda !== '3' && (
+                    <button type="button" className={mode === 'start' ? 'is-on' : ''} onClick={() => setMode('start')}>
+                      ustawia start
+                    </button>
+                  )}
+                  <button type="button" className={mode === 'refren' ? 'is-on' : ''} onClick={() => setMode('refren')}>
+                    ustawia refren
+                  </button>
+                  <button type="button" className={mode === 'seek' ? 'is-on' : ''} onClick={() => setMode('seek')}>
+                    tylko przewija
+                  </button>
+                </div>
+              </div>
+              {scanned?.audio && (
+                <Waveform
+                  file={scanned.audio}
+                  audioRef={audioRef}
+                  start={s.start}
+                  refren={s.refren}
+                  window={limited ? SONG_MS / 1000 : undefined}
+                  showStart={s.runda !== '3'}
+                  mode={mode}
+                  onPick={pick}
+                />
+              )}
+              <p className="muted small">
+                Wykres pokazuje głośność: cisza na początku to płaska linia, refren zwykle jest najgłośniejszy.
+                {limited && ' Żółte pole to 15 s, które zagrają w grze.'}
+              </p>
+            </>
           ) : (
             <p className="muted small">Brak pliku w wczytanym folderze ({s.plik ?? 'nie znaleziono'}).</p>
           )}

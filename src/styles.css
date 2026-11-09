@@ -4510,3 +4510,94 @@ textarea.field__input {
   border: 1px solid var(--gold);
   box-shadow: 0 10px 30px rgb(0 0 0 / 0.4);
 }
+
+/* ---------- Wykres głośności (Baza utworów) ---------- */
+
+.wave {
+  --wave-bar: #5a6a98;
+  --wave-played: #8fd6ff;
+  --wave-start: #f5c542;
+  --wave-refren: #ff5c8a;
+  --wave-window: rgba(245, 197, 66, 0.22);
+  --wave-text: #9aa8d6;
+  position: relative;
+  border-radius: 12px;
+  background: rgb(0 10 50 / 0.55);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.wave__canvas {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.wave.mode-start .wave__canvas {
+  cursor: copy;
+}
+
+.wave__loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.wave__tip {
+  position: absolute;
+  bottom: 100%;
+  transform: translate(-50%, 28px);
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #fff;
+  color: #111;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.wave-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.wave-bar__label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.segmented button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 5px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented button + button {
+  border-left: 1px solid var(--line);
+}
+
+.segmented button.is-on {
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: inset 0 -2px 0 var(--gold);
+}

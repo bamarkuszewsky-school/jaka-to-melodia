@@ -99,11 +99,12 @@ Nazwa pliku to **„Tytuł - Wykonawca”**. Utwory mogą być całe — start f
 **SYSTEMOWE** — dźwięki gry, rozpoznawane po nazwie: plik z „czołówka” w nazwie to czołówka, z „runda” — intro każdej rundy. Można dać osobne pliki: „runda 1 …”, „runda 2 …”, „runda 3 …”, „finał …” (mają pierwszeństwo przed wspólnym). Intro gra samo po kliknięciu „Rozpocznij rundę…”, a tablica i OBS pokazują w tym czasie zapowiedź rundy.
 
 1. **Gra → Edycja → Wybierz folder z muzyką.** Nowe utwory same trafiają do bazy (Firebase, `/baza`, czyta tylko host).
-2. **Baza utworów:** przy każdym utworze odtwarzacz, przyciski „= teraz” dla **startu** i **refrenu**, podgląd 15 s (rundy 1–2). Runda 2 — **hasło**, runda 3 — **anegdota**. Zmiany zapisują się od razu.
+2. **Baza utworów:** przy każdym utworze **wykres głośności** — klikasz w niego i od razu ustawiasz **start** albo **refren**, bez słuchania (cisza na początku to płaska linia, refren zwykle jest najgłośniejszy; żółte pole to 15 s, które zagrają w rundach 1–2). Do tego „Graj od kreski”, „= teraz” i podgląd 15 s. Runda 2 — **hasło**, runda 3 — **anegdota**. Zmiany zapisują się od razu.
 3. **Pobierz CSV / Kopiuj listę** — lista do arkusza albo na czat (np. żeby wymyślić hasła). **Wczytaj CSV** — uzupełnia start, refren, hasła i anegdoty (po kolumnie `id`; czas jako `83,5` albo `1:23,5`). Wpisuje tylko do pustych pól — tego, co ustawiłeś w aplikacji, nigdy nie nadpisze, więc ten sam plik można wczytywać wiele razy.
 4. **Nowa edycja — losuj utwory:** 5 × runda 1 (na tablicy wykonawca zamiast hasła), 3 × runda 2 + 2 na dogrywkę, 6 × runda 3, 7 × finał. Losowane są tylko utwory gotowe i jeszcze niegrane; każdy można przelosować (↻).
 5. **Zakończ rundę** — przerywa bieżącą rundę (niezagrane hasła są pomijane i wracają do puli). **Zakończ edycję** — wyniki klas idą do rankingu, zagrane utwory dostają wpis w historii (edycja, odgadnięty / nie, przez kogo) i wypadają z losowania. W bazie można je odznaczyć.
 **Edycja testowa** (przycisk obok „Nowa edycja”) — do prób przy małej bazie: losuje spośród wszystkich utworów z plikiem, także zagranych i bez ustawionego startu (gra wtedy od początku, hasło = wykonawca). Gdy utworów jest za mało, bierze z innych rund i powtarza. Nie trafia do rankingu i nie oznacza utworów jako zagranych.
+**Zastąp bazę z CSV** — cała baza dokładnie taka jak w pliku (puste komórki czyszczą pole, utwory spoza pliku znikają; pliki, nuty i historia zagrań zostają). Przed zapisem pokazuje podsumowanie do potwierdzenia.
 6. **Ranking** — wszystkie klasy z zakończonych edycji; przyciski **Pokaż na tablicy** i **Pokaż na live**. Edycję testową usuniesz w Baza utworów → Edycje.
 
 Po odświeżeniu strony folder trzeba wybrać ponownie — edycja, punkty i stan gry zostają w bazie.

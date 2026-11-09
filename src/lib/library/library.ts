@@ -638,6 +638,67 @@ export function importCsv(text: string, songs: Songs): CsvImport {
   return res
 }
 
+export interface CsvReplace {
+  /** Nowa zawartość całego /baza/utwory. */
+  songs: Songs
+  kept: number
+  added: number
+  removed: string[]
+  errors: string[]
+}
+
+const ROUND_BY_PREFIX: Record<string, LibRound> = { r1: '1', r2: '2', r3: '3', f: 'F' }
+const ROUND_BY_LABEL: Record<string, LibRound> = { 'runda-1': '1', 'runda-2': '2', 'runda-3': '3', final: 'F' }
+
+/**
+ * ZASTĄPIENIE bazy plikiem CSV: dokładnie te utwory i dokładnie te wartości (pusta komórka = brak).
+ * Utworów spoza CSV nie będzie. Ścieżki plików, nuty i historia zagrań istniejących utworów zostają.
+ */
+export function replaceFromCsv(text: string, songs: Songs): CsvReplace {
+  const rows = parseCsv(text)
+  const res: CsvReplace = { songs: {}, kept: 0, added: 0, removed: [], errors: [] }
+  if (rows.length === 0) {
+    res.errors.push('Plik jest pusty.')
+    return res
+  }
+  const head = rows[0].map((h) => slug(h))
+  const col = (name: string) => head.indexOf(name)
+  const get = (r: string[], name: string) => (col(name) < 0 ? '' : (r[col(name)] ?? '').trim())
+  if (col('id') < 0 || col('tytul') < 0 || col('wykonawca') < 0) {
+    res.errors.push('W pierwszym wierszu muszą być kolumny id, tytul i wykonawca.')
+    return res
+  }
+  for (const r of rows.slice(1)) {
+    const id = get(r, 'id')
+    if (!id) continue
+    const runda = ROUND_BY_PREFIX[id.split('-')[0]] ?? ROUND_BY_LABEL[slug(get(r, 'runda'))]
+    if (!runda) {
+      res.errors.push(`${id}: nie wiem, która to runda.`)
+      continue
+    }
+    const old = songs[id]
+    const rec: SongRecord = { runda, tytul: get(r, 'tytul'), wykonawca: get(r, 'wykonawca') }
+    for (const key of ['start', 'refren'] as const) {
+      const v = parseSeconds(get(r, key))
+      if (v === null) res.errors.push(`${id}: „${get(r, key)}” to nie jest liczba sekund (${key}).`)
+      else if (v !== undefined) rec[key] = v
+    }
+    const haslo = get(r, 'haslo')
+    const podpowiedz = get(r, 'podpowiedz')
+    if (haslo) rec.haslo = haslo
+    if (podpowiedz) rec.podpowiedz = podpowiedz
+    if (old) {
+      for (const key of ['plik', 'nuty', 'brak', 'historia', 'odblokowany'] as const) {
+        if (old[key] !== undefined && old[key] !== null) (rec as unknown as Record<string, unknown>)[key] = old[key]
+      }
+      res.kept++
+    } else res.added++
+    res.songs[id] = rec
+  }
+  res.removed = Object.keys(songs).filter((id) => !res.songs[id])
+  return res
+}
+
 /** Czas w sekundach do wyświetlenia: 83.5 → „1:23,5”. */
 export function formatSec(sec: number | undefined): string {
   if (sec === undefined || sec === null) return '—'
