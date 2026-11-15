@@ -257,6 +257,30 @@ describe('wyniki edycji i ranking', () => {
     expect(withTest).toEqual([])
     expect(ranking[1]).toMatchObject({ mistrz: true, finalista: true, edycja: 'Edycja 1' })
   })
+
+  it('ranking sezonu sumuje punkty klasy ze wszystkich edycji', () => {
+    const ed = (numer: number, wyniki: Record<string, { klasa: string; punkty: number; miejsce: number }>) => ({
+      nazwa: `Edycja ${numer}`,
+      numer,
+      utworzono: numer,
+      zakonczono: numer + 1,
+      utwory,
+      wyniki,
+    })
+    const ranking = computeRanking({
+      a: ed(1, { '1': { klasa: '4BT', punkty: 900, miejsce: 1 }, '2': { klasa: '3AG', punkty: 1200, miejsce: 2 } }),
+      b: ed(4, { '1': { klasa: '2AT', punkty: 1000, miejsce: 1 }, '3': { klasa: '4bt ', punkty: 700, miejsce: 2 } }),
+      c: ed(9, { '2': { klasa: '4BT', punkty: 50, miejsce: 3 } }),
+    })
+    expect(ranking.map((r) => [r.klasa, r.punkty])).toEqual([
+      ['4BT', 1650],
+      ['3AG', 1200],
+      ['2AT', 1000],
+    ])
+    expect(ranking[0]).toMatchObject({ edycja: 'Edycje 1, 4 i 9', miejsce: 1, numer: 9 })
+    expect(ranking[0].starty.map((s) => s.punkty)).toEqual([900, 700, 50])
+    expect(ranking[1].edycja).toBe('Edycja 1')
+  })
 })
 
 describe('CSV', () => {

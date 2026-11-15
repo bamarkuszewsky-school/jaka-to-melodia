@@ -15,7 +15,7 @@ export function RankingView({ lista, limit, variant }: { lista: RankingEntry[]; 
       ) : (
         <ol className={`ranking__list ${twoCols ? 'is-two' : ''}`} style={twoCols ? { gridTemplateRows: `repeat(${Math.ceil(rows.length / 2)}, auto)` } : undefined}>
           {rows.map((r, i) => (
-            <li key={`${r.edycja}-${r.klasa}-${i}`} className={`ranking__row ${i < 3 ? `is-top is-top${i + 1}` : ''}`}>
+            <li key={`${r.klasa}-${i}`} className={`ranking__row ${i < 3 ? `is-top is-top${i + 1}` : ''}`}>
               <span className="ranking__place">{i + 1}</span>
               <span className="ranking__class">
                 {r.klasa}

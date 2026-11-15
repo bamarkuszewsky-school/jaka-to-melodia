@@ -472,35 +472,62 @@ export function stationResults(game: GameState, klasy: Record<StationKey, string
 
 // ---------- Ranking sezonu ----------
 
+export interface RankingStart {
+  edycja: string
+  numer: number
+  punkty: number
+  miejsce: number
+}
+
+/** Jeden wiersz rankingu = jedna klasa; punkty sumują się ze wszystkich edycji, w których grała. */
 export interface RankingEntry {
   klasa: string
   punkty: number
+  /** Opis edycji do wyświetlenia: „Edycja 5” albo „Edycje 2 i 7”. */
   edycja: string
+  /** Numer ostatniej edycji tej klasy. */
   numer: number
+  /** Najlepsze miejsce w edycji. */
   miejsce: number
   finalista: boolean
   mistrz: boolean
+  starty: RankingStart[]
+}
+
+/** „4 bt”, „4BT ” i „4BT” to ta sama klasa. */
+function classKey(klasa: string): string {
+  return klasa.trim().replace(/\s+/g, ' ').toLocaleUpperCase('pl')
+}
+
+function editionsLabel(starty: RankingStart[]): string {
+  if (starty.length === 1) return starty[0].edycja
+  const nr = starty.map((s) => String(s.numer))
+  return `Edycje ${nr.slice(0, -1).join(', ')} i ${nr[nr.length - 1]}`
 }
 
 export function computeRanking(editions: Record<string, EditionRecord>): RankingEntry[] {
-  const out: RankingEntry[] = []
-  for (const e of Object.values(editions)) {
-    if (!e.zakonczono || !e.wyniki || e.test) continue
+  const byClass = new Map<string, RankingEntry>()
+  const done = Object.values(editions)
+    .filter((e) => e.zakonczono && e.wyniki && !e.test)
+    .sort((a, b) => a.numer - b.numer)
+  for (const e of done) {
     for (const k of STATION_KEYS) {
-      const w = e.wyniki[k]
+      const w = e.wyniki?.[k]
       if (!w) continue
-      out.push({
-        klasa: w.klasa,
-        punkty: w.punkty,
-        edycja: e.nazwa,
-        numer: e.numer,
-        miejsce: w.miejsce,
-        finalista: e.finalista === k,
-        mistrz: e.finalista === k && Boolean(e.mistrz),
-      })
+      const key = classKey(w.klasa)
+      const r = byClass.get(key) ?? { klasa: w.klasa.trim(), punkty: 0, edycja: '', numer: 0, miejsce: w.miejsce, finalista: false, mistrz: false, starty: [] }
+      r.klasa = w.klasa.trim() // pisownia z najnowszej edycji
+      r.punkty += w.punkty
+      r.numer = e.numer
+      r.miejsce = Math.min(r.miejsce, w.miejsce)
+      r.finalista ||= e.finalista === k
+      r.mistrz ||= e.finalista === k && Boolean(e.mistrz)
+      r.starty.push({ edycja: e.nazwa, numer: e.numer, punkty: w.punkty, miejsce: w.miejsce })
+      byClass.set(key, r)
     }
   }
-  return out.sort((a, b) => b.punkty - a.punkty || a.numer - b.numer || a.miejsce - b.miejsce)
+  const out = [...byClass.values()].map((r) => ({ ...r, edycja: editionsLabel(r.starty) }))
+  return out.sort((a, b) => b.punkty - a.punkty || a.miejsce - b.miejsce || a.klasa.localeCompare(b.klasa, 'pl'))
 }
 
 // ---------- CSV (do pracy w arkuszu albo na czacie) ----------

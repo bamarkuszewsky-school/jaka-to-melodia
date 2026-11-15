@@ -63,13 +63,12 @@ export function RankingPanel({ editions, pokaz }: { editions: Record<string, Edi
               <th>#</th>
               <th>Klasa</th>
               <th>Punkty</th>
-              <th>Edycja</th>
-              <th>Miejsce w edycji</th>
+              <th>Edycje (punkty, miejsce)</th>
             </tr>
           </thead>
           <tbody>
             {lista.map((r, i) => (
-              <tr key={`${r.edycja}-${r.klasa}-${i}`}>
+              <tr key={`${r.klasa}-${i}`}>
                 <td>{i + 1}</td>
                 <td>
                   <strong>{r.klasa}</strong>
@@ -77,8 +76,9 @@ export function RankingPanel({ editions, pokaz }: { editions: Record<string, Edi
                   {r.finalista && !r.mistrz && <span className="chip">finalista</span>}
                 </td>
                 <td>{r.punkty}</td>
-                <td>{r.edycja}</td>
-                <td>{r.miejsce}.</td>
+                <td>
+                  {(r.starty ?? []).map((s) => `${s.edycja}: ${s.punkty} pkt (${s.miejsce}.)`).join(' · ')}
+                </td>
               </tr>
             ))}
           </tbody>
