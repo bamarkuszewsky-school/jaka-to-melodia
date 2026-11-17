@@ -5264,41 +5264,45 @@ textarea.field__input {
   gap: 12px;
 }
 
-/* ---------- v0.11: koordynator (tablica multimedialna za sceną) ---------- */
+/* ---------- v0.11.1: koordynator — elastyczny układ (dowolny ekran, powiększony tekst) ----------
+   Bez skalowanej sceny: karty płyną w siatce, rosną z treścią i nigdy na siebie nie nachodzą.
+   Rozmiary w clamp(): czytelne z kilku metrów na dużej tablicy, mieszczą się na mniejszym ekranie. */
+.coord-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* bez marginesów ramki — panel od krawędzi do krawędzi */
+  margin: -24px -20px;
+}
+
 .coord {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, min(1.1vw, 2vh), 22px);
+  padding: clamp(12px, min(1.6vw, 2.6vh), 36px);
   background:
     radial-gradient(1100px 700px at 20% 0%, rgb(27 79 216 / 0.3), transparent 70%),
     var(--bg-deep);
 }
 
-.coord__stage {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 1920px;
-  height: 1080px;
-  padding: 36px 48px 120px;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 24px;
-  transform-origin: center;
-}
-
 .coord__head {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 24px;
+  gap: 8px 24px;
+}
+
+.coord__head > div {
+  min-width: 0;
 }
 
 .coord__eyebrow {
   margin: 0;
   color: var(--gold);
   font-weight: 700;
-  font-size: 22px;
+  font-size: clamp(13px, 1.1vw, 22px);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -5306,56 +5310,71 @@ textarea.field__input {
 .coord__title {
   margin: 4px 0 0;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 20px;
+  gap: 8px 18px;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 60px;
-  line-height: 1.05;
+  font-size: clamp(26px, min(2.7vw, 4.6vh), 54px);
+  line-height: 1.1;
 }
 
 .coord__etap {
-  padding: 6px 22px;
+  padding: 0.12em 0.6em;
   border-radius: 999px;
   background: var(--gold);
   color: #1a1400;
-  font-size: 32px;
+  font-size: 0.52em;
+  white-space: nowrap;
 }
 
 .coord__sub {
   margin: 6px 0 0;
   color: var(--muted);
-  font-size: 26px;
+  font-size: clamp(14px, min(1.2vw, 2.1vh), 24px);
   font-weight: 600;
 }
 
 .coord__clock {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 96px;
+  font-size: clamp(40px, min(4.2vw, 7.4vh), 84px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
-.coord__main {
+.coord__main,
+.coord__bottom {
   display: grid;
-  grid-template-columns: 1.55fr 1fr;
-  gap: 24px;
-  min-height: 0;
+  gap: clamp(10px, min(1.1vw, 2vh), 22px);
+  align-items: stretch;
+}
+
+.coord__main {
+  flex: 1;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+}
+
+.coord__main > .coord-card--now {
+  grid-column: span 1;
+}
+
+@media (min-width: 1100px) {
+  .coord__main {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  }
 }
 
 .coord__bottom {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr 0.9fr;
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
 }
 
 .coord-card {
-  display: grid;
-  align-content: start;
-  gap: 14px;
-  padding: 22px 26px;
-  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, min(0.8vw, 1.3vh), 14px);
+  padding: clamp(12px, min(1.2vw, 2vh), 24px);
+  border-radius: clamp(16px, 1.3vw, 24px);
   background: var(--surface);
   border: 1px solid var(--line);
   min-width: 0;
@@ -5364,7 +5383,7 @@ textarea.field__input {
 .coord-card__title {
   margin: 0;
   color: var(--show-cyan, #8fd6ff);
-  font-size: 22px;
+  font-size: clamp(13px, 1.1vw, 22px);
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -5372,27 +5391,29 @@ textarea.field__input {
 
 .coord__status {
   margin: 0;
-  font-size: 40px;
+  font-size: clamp(20px, min(1.75vw, 3.1vh), 36px);
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 .coord__muted {
   margin: 0;
   color: var(--muted);
-  font-size: 24px;
+  font-size: clamp(15px, 1.2vw, 24px);
 }
 
 .coord-stations {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: clamp(10px, 0.8vw, 16px);
 }
 
 .coord-station {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 4px;
-  padding: 16px 20px;
+  min-width: 0;
+  padding: clamp(10px, min(0.9vw, 1.5vh), 18px);
   border-radius: 18px;
   background: var(--surface-2);
   border: 2px solid transparent;
@@ -5413,22 +5434,20 @@ textarea.field__input {
 
 .coord-station__num {
   color: var(--muted);
-  font-size: 18px;
+  font-size: clamp(12px, 0.95vw, 18px);
   font-weight: 600;
 }
 
 .coord-station__name {
   font-family: var(--font-display);
-  font-size: 52px;
+  font-size: clamp(24px, min(2.3vw, 4vh), 46px);
   font-weight: 800;
-  line-height: 1.05;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .coord-station__pts {
-  font-size: 32px;
+  font-size: clamp(17px, min(1.45vw, 2.6vh), 29px);
   font-weight: 700;
   color: var(--gold);
   font-variant-numeric: tabular-nums;
@@ -5436,14 +5455,14 @@ textarea.field__input {
 
 .coord-station__foot {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px 8px;
   color: var(--muted);
-  font-size: 18px;
+  font-size: clamp(12px, 0.95vw, 18px);
 }
 
 .coord-station__tag {
-  margin-left: auto;
   padding: 2px 12px;
   border-radius: 999px;
   background: rgb(255 255 255 / 0.12);
@@ -5453,8 +5472,8 @@ textarea.field__input {
 
 .coord-dot,
 .coord-devices__dot {
-  width: 14px;
-  height: 14px;
+  width: 0.8em;
+  height: 0.8em;
   border-radius: 50%;
   background: var(--danger);
   flex: none;
@@ -5467,17 +5486,19 @@ textarea.field__input {
 
 .coord-steps {
   list-style: none;
-  margin: 6px 0 0;
+  margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  gap: clamp(8px, 0.7vw, 12px);
 }
 
 .coord-step {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 2px;
-  padding: 12px 16px;
+  min-width: 0;
+  padding: clamp(8px, 0.7vw, 12px) clamp(10px, 0.9vw, 16px);
   border-radius: 14px;
   background: rgb(255 255 255 / 0.04);
   border: 2px solid var(--line);
@@ -5493,43 +5514,43 @@ textarea.field__input {
 }
 
 .coord-step__name {
-  font-size: 24px;
+  font-size: clamp(16px, 1.25vw, 24px);
   font-weight: 800;
 }
 
 .coord-step__info {
   color: var(--muted);
-  font-size: 20px;
-}
-
-.coord-card--next {
-  align-content: start;
+  font-size: clamp(13px, 1vw, 20px);
 }
 
 .coord-next {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 0.8vw, 14px);
 }
 
 .coord-next li {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 4px;
-  padding: 16px 20px;
+  min-width: 0;
+  padding: clamp(8px, min(0.8vw, 1.3vh), 14px) clamp(12px, 1vw, 20px);
   border-radius: 18px;
   background: var(--surface-2);
+  border: 2px solid transparent;
 }
 
 .coord-next li.is-first {
   background: linear-gradient(160deg, rgb(27 79 216 / 0.7), rgb(10 42 140 / 0.7));
-  border: 2px solid var(--gold);
+  border-color: var(--gold);
 }
 
 .coord-next__label {
   color: var(--muted);
-  font-size: 20px;
+  font-size: clamp(13px, 1vw, 20px);
   font-weight: 700;
 }
 
@@ -5539,33 +5560,39 @@ textarea.field__input {
 
 .coord-next__classes {
   font-family: var(--font-display);
-  font-size: 40px;
+  font-size: clamp(20px, min(1.8vw, 3.2vh), 36px);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .coord-next li:not(.is-first) .coord-next__classes {
-  font-size: 30px;
+  font-size: clamp(17px, min(1.35vw, 2.4vh), 27px);
 }
 
 .coord-bars {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 0.8vh, 8px);
 }
 
 .coord-bars li {
   display: grid;
-  grid-template-columns: 210px 1fr 70px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(60px, 1.6fr) auto;
   align-items: center;
   gap: 12px;
-  font-size: 20px;
+  font-size: clamp(14px, min(1vw, 1.8vh), 20px);
+}
+
+.coord-bars__name {
+  min-width: 0;
 }
 
 .coord-bars__bar {
-  height: 14px;
+  height: 0.7em;
   border-radius: 99px;
   background: rgb(255 255 255 / 0.08);
   overflow: hidden;
@@ -5582,43 +5609,46 @@ textarea.field__input {
   text-align: right;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .coord__big-line {
   margin: 4px 0 0;
-  font-size: 26px;
+  font-size: clamp(16px, 1.3vw, 26px);
 }
 
 .coord__big-line strong {
   color: var(--gold);
-  font-size: 34px;
+  font-size: 1.3em;
 }
 
 .coord-songs {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 0.9vh, 10px);
 }
 
 .coord-songs li {
   display: grid;
-  grid-template-columns: 120px 64px 1fr;
+  grid-template-columns: minmax(5.5em, auto) minmax(2.5em, auto) minmax(0, 1fr);
   align-items: baseline;
-  gap: 10px;
-  font-size: 22px;
+  gap: 4px 12px;
+  font-size: clamp(14px, 1.1vw, 22px);
 }
 
 .coord-songs strong {
-  font-size: 30px;
+  font-size: 1.35em;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
 .coord-songs__note {
+  min-width: 0;
   color: var(--muted);
-  font-size: 18px;
+  font-size: 0.82em;
 }
 
 .coord-songs li.is-short strong,
@@ -5631,9 +5661,9 @@ textarea.field__input {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
   gap: 10px 16px;
-  font-size: 22px;
+  font-size: clamp(14px, 1.1vw, 22px);
   font-weight: 600;
 }
 
@@ -5641,38 +5671,38 @@ textarea.field__input {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .coord-devices .is-off {
   color: var(--muted);
 }
 
-/* Duże przyciski na dole — wygodne na ekranie dotykowym. */
+/* Przyciski widoku: własny pasek na dole (nie zasłania kart), duże pola dotyku. */
 .coord-tabs {
-  position: fixed;
-  left: 50%;
-  bottom: 18px;
+  position: sticky;
+  bottom: 0;
   z-index: 60;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
-  padding: 8px;
-  transform-origin: bottom center;
-  border-radius: 999px;
-  background: rgb(6 8 32 / 0.85);
-  border: 1px solid var(--line);
+  padding: 8px clamp(10px, 2vw, 40px) max(8px, env(safe-area-inset-bottom));
+  background: rgb(6 8 32 / 0.92);
+  border-top: 1px solid var(--line);
   backdrop-filter: blur(6px);
 }
 
 .coord-tab {
-  min-width: 170px;
-  min-height: 60px;
-  padding: 10px 28px;
+  min-width: clamp(120px, 9vw, 180px);
+  min-height: 52px;
+  padding: 8px 24px;
   border: 0;
   border-radius: 999px;
-  background: transparent;
+  background: rgb(255 255 255 / 0.06);
   color: var(--text);
   font: inherit;
-  font-size: 22px;
+  font-size: clamp(17px, 1.1vw, 22px);
   font-weight: 700;
   cursor: pointer;
 }
@@ -5686,15 +5716,17 @@ textarea.field__input {
   opacity: 0.4;
 }
 
-.coord-ranking {
-  padding-bottom: 100px;
+.coord-tab--fs {
+  white-space: nowrap;
+  color: var(--muted);
 }
 
-.coord-tab--fs {
-  min-width: 0;
-  white-space: nowrap;
-  font-size: 18px;
-  color: var(--muted);
+.coord-view {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .coord-ranking .ranking {

@@ -5,7 +5,6 @@ import { Shell } from '../components/Shell'
 import { editionSteps, stageStatus } from '../lib/game/progress'
 import { useGame, useServerOffset } from '../lib/game/state'
 import { STATION_KEYS, type GameState, type StationKey } from '../lib/game/types'
-import { useFitScale } from '../lib/intro/useFitScale'
 import { formatDate, usePokaz, type Pokaz } from '../lib/library/db'
 import { DRAW_COUNT } from '../lib/library/library'
 import { seasonProgress, type SeasonProgress } from '../lib/library/season'
@@ -50,40 +49,43 @@ export function CoordinatorPage() {
   const online = usePresenceList()
   const [view, setView] = useState<View>('panel')
   const { isFullscreen, supported, toggle } = useFullscreen()
-  // Poza pełnym ekranem zostaje pasek u góry (wylogowanie) — scena zaczyna się pod nim.
-  const reserve = isFullscreen ? 0 : 76
-  // Przyciski skalują się razem ze sceną 1920×1080 (nie zasłaniają kart na mniejszym ekranie).
-  const scale = useFitScale(reserve)
+  // Drabinka to scena 1920×1080 na całe okno: zostawiamy miejsce na pasek u góry i przyciski na dole.
+  const reserveTop = isFullscreen ? 0 : 76
+  const reserveBottom = 84
 
   return (
     <Shell title="Koordynator" subtitle="Za sceną" hideBarInFullscreen>
-      {view === 'drabinka' && pokaz?.drabinka ? (
-        <LadderBoard view={pokaz.drabinka} variant="board" reserveTop={reserve} />
-      ) : view === 'ranking' ? (
-        <div className="coord-ranking">
-          <RankingView lista={pokaz?.lista ?? []} variant="board" />
+      <div className="coord-page">
+        <div className="coord-view">
+          {view === 'drabinka' && pokaz?.drabinka ? (
+            <LadderBoard view={pokaz.drabinka} variant="board" reserveTop={reserveTop} reserveBottom={reserveBottom} />
+          ) : view === 'ranking' ? (
+            <div className="coord-ranking">
+              <RankingView lista={pokaz?.lista ?? []} variant="board" />
+            </div>
+          ) : (
+            <CoordinatorPanel game={game} pokaz={pokaz} names={names} online={online} />
+          )}
         </div>
-      ) : (
-        <CoordinatorPanel game={game} pokaz={pokaz} names={names} online={online} reserveTop={reserve} />
-      )}
-      <nav className="coord-tabs" aria-label="Widok koordynatora" style={{ transform: `translateX(-50%) scale(${scale})` }}>
-        {(['panel', 'drabinka', 'ranking'] as View[]).map((v) => (
-          <button
-            key={v}
-            type="button"
-            className={`coord-tab ${view === v ? 'is-active' : ''}`}
-            onClick={() => setView(v)}
-            disabled={v === 'drabinka' && !pokaz?.drabinka}
-          >
-            {v === 'panel' ? 'Panel' : v === 'drabinka' ? 'Drabinka' : 'Ranking'}
-          </button>
-        ))}
-        {supported && (
-          <button type="button" className="coord-tab coord-tab--fs" onClick={toggle}>
-            {isFullscreen ? 'Zamknij pełny ekran' : 'Pełny ekran'}
-          </button>
-        )}
-      </nav>
+        <nav className="coord-tabs" aria-label="Widok koordynatora">
+          {(['panel', 'drabinka', 'ranking'] as View[]).map((v) => (
+            <button
+              key={v}
+              type="button"
+              className={`coord-tab ${view === v ? 'is-active' : ''}`}
+              onClick={() => setView(v)}
+              disabled={v === 'drabinka' && !pokaz?.drabinka}
+            >
+              {v === 'panel' ? 'Panel' : v === 'drabinka' ? 'Drabinka' : 'Ranking'}
+            </button>
+          ))}
+          {supported && (
+            <button type="button" className="coord-tab coord-tab--fs" onClick={toggle}>
+              {isFullscreen ? 'Zamknij pełny ekran' : 'Pełny ekran'}
+            </button>
+          )}
+        </nav>
+      </div>
     </Shell>
   )
 }
@@ -93,15 +95,12 @@ function CoordinatorPanel({
   pokaz,
   names,
   online,
-  reserveTop,
 }: {
   game: GameState
   pokaz: Pokaz | undefined
   names: StationNames
   online: Partial<Record<PresenceKey, unknown>>
-  reserveTop: number
 }) {
-  const scale = useFitScale(reserveTop)
   const now = useClock()
   const label = (k: StationKey) => labelForKey(names, k)
   const etap = pokaz?.etap
@@ -117,61 +116,59 @@ function CoordinatorPanel({
   const clock = new Date(now).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })
 
   return (
-    <div className="coord" style={{ top: reserveTop }}>
-      <div className="coord__stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
-        <header className="coord__head">
-          <div>
-            <p className="coord__eyebrow">Jaka to melodia? · koordynator</p>
-            <h1 className="coord__title">
-              {etap?.edycja ?? 'Brak wylosowanej edycji'}
-              {etap?.etap && <span className="coord__etap">{etap.etap}</span>}
-            </h1>
-            <p className="coord__sub">
-              {[pokaz?.drabinka?.sezon, etap?.data ? formatDate(etap.data) : undefined, minutes !== undefined ? `trwa ${minutes} min` : undefined]
-                .filter(Boolean)
-                .join(' · ')}
-            </p>
+    <div className="coord">
+      <header className="coord__head">
+        <div>
+          <p className="coord__eyebrow">Jaka to melodia? · koordynator</p>
+          <h1 className="coord__title">
+            {etap?.edycja ?? 'Brak wylosowanej edycji'}
+            {etap?.etap && <span className="coord__etap">{etap.etap}</span>}
+          </h1>
+          <p className="coord__sub">
+            {[pokaz?.drabinka?.sezon, etap?.data ? formatDate(etap.data) : undefined, minutes !== undefined ? `trwa ${minutes} min` : undefined]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        </div>
+        <div className="coord__clock">{clock}</div>
+      </header>
+
+      <div className="coord__main">
+        <section className="coord-card coord-card--now">
+          <h2 className="coord-card__title">Na scenie</h2>
+          <p className="coord__status">{status}</p>
+          <div className="coord-stations">
+            {STATION_KEYS.map((k) => (
+              <StationTile key={k} k={k} game={game} label={label(k)} ipad={Boolean(online[`stanowisko${k}` as PresenceKey])} />
+            ))}
           </div>
-          <div className="coord__clock">{clock}</div>
-        </header>
+          <ol className="coord-steps">
+            {steps.map((s) => (
+              <li key={s.runda} className={`coord-step is-${s.stan}`}>
+                <span className="coord-step__name">{s.nazwa}</span>
+                <span className="coord-step__info">{s.stan === 'koniec' ? '✓ ' : ''}{s.opis ?? (s.stan === 'czeka' ? 'czeka' : '')}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
 
-        <div className="coord__main">
-          <section className="coord-card coord-card--now">
-            <h2 className="coord-card__title">Na scenie</h2>
-            <p className="coord__status">{status}</p>
-            <div className="coord-stations">
-              {STATION_KEYS.map((k) => (
-                <StationTile key={k} k={k} game={game} label={label(k)} ipad={Boolean(online[`stanowisko${k}` as PresenceKey])} />
-              ))}
-            </div>
-            <ol className="coord-steps">
-              {steps.map((s) => (
-                <li key={s.runda} className={`coord-step is-${s.stan}`}>
-                  <span className="coord-step__name">{s.nazwa}</span>
-                  <span className="coord-step__info">{s.stan === 'koniec' ? '✓ ' : ''}{s.opis ?? (s.stan === 'czeka' ? 'czeka' : '')}</span>
-                </li>
-              ))}
-            </ol>
-          </section>
+        <NextUp progress={progress} />
+      </div>
 
-          <NextUp progress={progress} />
-        </div>
-
-        <div className="coord__bottom">
-          <SeasonCard progress={progress} />
-          <SongsCard pokaz={pokaz} left={progress?.doKonca} />
-          <section className="coord-card">
-            <h2 className="coord-card__title">Sprzęt</h2>
-            <ul className="coord-devices">
-              {DEVICES.map((d) => (
-                <li key={d} className={online[d] ? 'is-on' : 'is-off'}>
-                  <span className="coord-devices__dot" />
-                  {d.startsWith('stanowisko') ? `iPad ${d.slice(-1)}` : PRESENCE_LABELS[d]}
-                </li>
-              ))}
-            </ul>
-          </section>
-        </div>
+      <div className="coord__bottom">
+        <SeasonCard progress={progress} />
+        <SongsCard pokaz={pokaz} left={progress?.doKonca} />
+        <section className="coord-card">
+          <h2 className="coord-card__title">Sprzęt</h2>
+          <ul className="coord-devices">
+            {DEVICES.map((d) => (
+              <li key={d} className={online[d] ? 'is-on' : 'is-off'}>
+                <span className="coord-devices__dot" />
+                {d.startsWith('stanowisko') ? `iPad ${d.slice(-1)}` : PRESENCE_LABELS[d]}
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </div>
   )
