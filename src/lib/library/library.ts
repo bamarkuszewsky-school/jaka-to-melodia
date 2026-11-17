@@ -1,5 +1,6 @@
 import type { GameState, StationKey } from '../game/types'
 import { STATION_KEYS } from '../game/types'
+import type { StageKey } from './season'
 
 /**
  * BAZA UTWORÓW — czysta logika (bez Firebase), żeby dało się ją testować.
@@ -92,6 +93,12 @@ export interface EditionRecord {
   final?: number
   /** Edycja testowa: nie trafia do rankingu i nie oznacza utworów jako zagranych. */
   test?: boolean
+  /** Data rozegrania (RRRR-MM-DD), wpisywana przy losowaniu. */
+  data?: string
+  /** Sezon, etap drabinki i numer meczu w etapie (gdy edycja jest meczem z drabinki). */
+  sezon?: string
+  etap?: StageKey
+  mecz?: number
 }
 
 // ---------- Folder ----------
@@ -505,7 +512,7 @@ export interface RankingEntry {
 }
 
 /** „4 bt”, „4BT ” i „4BT” to ta sama klasa. */
-function classKey(klasa: string): string {
+export function classKey(klasa: string): string {
   return klasa.trim().replace(/\s+/g, ' ').toLocaleUpperCase('pl')
 }
 
@@ -515,10 +522,15 @@ function editionsLabel(starty: RankingStart[]): string {
   return `Edycje ${nr.slice(0, -1).join(', ')} i ${nr[nr.length - 1]}`
 }
 
-export function computeRanking(editions: Record<string, EditionRecord>): RankingEntry[] {
+/**
+ * Ranking klas. Z `sezon` — tylko edycje tego sezonu (z `zLuznymi` także te bez sezonu, rozegrane
+ * przed rozpoczęciem sezonu). Finał nauczycieli nie wchodzi do rankingu klas.
+ */
+export function computeRanking(editions: Record<string, EditionRecord>, sezon?: string, zLuznymi = false): RankingEntry[] {
   const byClass = new Map<string, RankingEntry>()
+  const inSeason = (e: EditionRecord) => !sezon || e.sezon === sezon || (zLuznymi && !e.sezon)
   const done = Object.values(editions)
-    .filter((e) => e.zakonczono && e.wyniki && !e.test)
+    .filter((e) => e.zakonczono && e.wyniki && !e.test && e.etap !== 'nauczyciele' && inSeason(e))
     .sort((a, b) => a.numer - b.numer)
   for (const e of done) {
     for (const k of STATION_KEYS) {

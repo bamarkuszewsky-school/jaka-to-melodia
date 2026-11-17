@@ -7,6 +7,7 @@ import { buzzIn } from '../lib/game/playerActions'
 import { ANSWER_MS, currentChooser, remaining, secondsLeft } from '../lib/game/rules'
 import { useGame, useServerNow } from '../lib/game/state'
 import type { GameState, StationKey } from '../lib/game/types'
+import { usePokaz } from '../lib/library/db'
 import { usePresence } from '../lib/presence'
 import { deviceCode, deviceId, registerDevice, useDevice } from '../lib/devices'
 import type { Stanowisko } from '../lib/roles'
@@ -19,6 +20,7 @@ export function PlayerPage() {
   const device = useDevice(id)
   const names = useStationNames()
   const game = useGame()
+  const pokaz = usePokaz()
   const stanowisko = device?.stanowisko ?? null
   usePresence(stanowisko ? `stanowisko${stanowisko}` : null)
   useWakeLock()
@@ -67,6 +69,9 @@ export function PlayerPage() {
 
   const label = stationLabel(names, stanowisko)
   const inGame = game.runda !== undefined
+  // Po „Zakończ edycję”: podziękowanie, dopóki host nie wpisze na to stanowisko innej klasy.
+  const bye = pokaz?.plansza?.tryb === 'koniec' ? pokaz.plansza.pozegnania?.[String(stanowisko) as StationKey] : undefined
+  const farewell = !inGame && bye && bye.klasa.trim() === names[stanowisko].trim() ? bye : undefined
 
   return (
     <Shell
@@ -74,7 +79,13 @@ export function PlayerPage() {
       subtitle={hasClassName(names, stanowisko) ? `Stanowisko ${stanowisko}` : 'Zawodnik'}
       hideBarInFullscreen
     >
-      {game.runda === 4 ? (
+      {farewell ? (
+        <div className="farewell">
+          <p className="farewell__class">{farewell.klasa}</p>
+          <h1 className="farewell__title">{farewell.tytul}</h1>
+          <p className="farewell__text">{farewell.tekst}</p>
+        </div>
+      ) : game.runda === 4 ? (
         <Round4Player
           me={String(stanowisko) as StationKey}
           label={label}

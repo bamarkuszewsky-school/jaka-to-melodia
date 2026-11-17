@@ -2,11 +2,14 @@ import { useEffect } from 'react'
 import { IntroOverlay } from '../components/intro/IntroOverlay'
 import { RoundIntroOverlay } from '../components/intro/RoundIntro'
 import { RankingView } from '../components/RankingView'
+import { LadderBoard } from '../components/board/LadderBoard'
+import { formatDate } from '../lib/library/db'
 import { usePokaz } from '../lib/library/db'
 import { useBuzzes } from '../lib/buzzTest'
 import { useGame, useServerNow } from '../lib/game/state'
 import type { Round4State } from '../lib/game/types'
 import { FinalPanel } from '../components/board/FinalPanel'
+import { FinalReveal } from '../components/board/FinalReveal'
 import { usePresence } from '../lib/presence'
 import { nut, poNutach } from '../lib/game/rules3'
 import { guessedCount } from '../lib/game/rules4'
@@ -103,12 +106,21 @@ export function StreamPage() {
         value: awans.map((k) => labelForKey(names, k)).join(' i '),
       }
     }
+  } else if (pokaz?.plansza?.tryb === 'sezon-start' || pokaz?.plansza?.tryb === 'sezon-koniec') {
+    const pl = pokaz.plansza
+    lower = {
+      key: `sezon-${pl.tryb}-${pl.od}`,
+      label: pl.tryb === 'sezon-start' ? `Rozpoczynamy · ${formatDate(pl.data)}` : `Koniec sezonu · ${formatDate(pl.data)}`,
+      value: pl.tryb === 'sezon-koniec' && pl.mistrz ? `${pl.nazwa} · mistrz: ${pl.mistrz}` : pl.nazwa,
+    }
   } else if (buzzes[0]) {
     lower = { key: `test-${buzzes[0].stanowisko}`, label: 'Zgłasza się', value: stationLabel(names, buzzes[0].stanowisko) }
   }
 
   // W trakcie finału: panel z numerami i zegarem na przezroczystym tle (kamera na zawodnika).
   const finalLive = game.runda === 4 && Boolean(r4) && r4?.faza !== 'koniec'
+  // Po finale host może odsłonić wszystkie 7 tytułów.
+  const finalReveal = game.runda === 4 && r4?.faza === 'koniec' && r4.odslon ? r4 : null
 
   return (
     <div className="stream">
@@ -118,12 +130,24 @@ export function StreamPage() {
         Jaka to <span className="accent">melodia?</span>
       </div>
       {finalLive && r4 && <StreamFinal r4={r4} name={labelForKey(names, r4.gracz)} points={game.punkty[r4.gracz]} />}
+      {pokaz?.drabinkaStream && pokaz.drabinka && <LadderBoard view={pokaz.drabinka} variant="stream" />}
       {pokaz?.stream && (
         <div className="stream__ranking">
           <RankingView lista={pokaz.lista} limit={10} variant="stream" />
         </div>
       )}
-      {lower && !pokaz?.stream && !finalLive && (
+      {finalReveal && !pokaz?.stream && !pokaz?.drabinkaStream && (
+        <div className="stream-reveal">
+          <div className="stream-reveal__head">
+            <span>Finał · {labelForKey(names, finalReveal.gracz)}</span>
+            <strong>
+              {guessedCount(finalReveal.utwory)}/7 · +{finalReveal.zdobyte} pkt
+            </strong>
+          </div>
+          <FinalReveal utwory={finalReveal.utwory} variant="stream" />
+        </div>
+      )}
+      {lower && !pokaz?.stream && !pokaz?.drabinkaStream && !finalLive && !finalReveal && (
         <div className="stream__lower" key={lower.key}>
           <span className="stream__lower-label">{lower.label}</span>
           <span className="stream__lower-value">{lower.value}</span>

@@ -1,12 +1,27 @@
 import { useState } from 'react'
 import { replayPlansza, setPokaz, type Pokaz } from '../../lib/library/db'
 import { computeRanking, type EditionRecord } from '../../lib/library/library'
+import type { Season } from '../../lib/library/season'
 
 /** Zakładka „Ranking”: wyniki klas ze wszystkich zakończonych edycji + pokaz na tablicy i w OBS. */
-export function RankingPanel({ editions, pokaz }: { editions: Record<string, EditionRecord> | undefined; pokaz: Pokaz | undefined }) {
+export function RankingPanel({
+  editions,
+  pokaz,
+  seasonId,
+  season,
+}: {
+  editions: Record<string, EditionRecord> | undefined
+  pokaz: Pokaz | undefined
+  seasonId?: string | null
+  season?: Season
+}) {
   const [error, setError] = useState<string | null>(null)
-  const lista = computeRanking(editions ?? {})
-  const finished = Object.values(editions ?? {}).filter((e) => e.zakonczono).length
+  const seasonName = season?.nazwa
+  const loose = !season?.start
+  const lista = computeRanking(editions ?? {}, seasonId ?? undefined, loose)
+  const finished = Object.values(editions ?? {}).filter(
+    (e) => e.zakonczono && !e.test && e.etap !== 'nauczyciele' && (!seasonId || e.sezon === seasonId || (loose && !e.sezon)),
+  ).length
 
   const toggle = async (target: 'tablica' | 'stream') => {
     setError(null)
@@ -21,7 +36,7 @@ export function RankingPanel({ editions, pokaz }: { editions: Record<string, Edi
     <section className="card card--wide">
       <div className="card__head">
         <div>
-          <h2 className="card__title">Ranking sezonu</h2>
+          <h2 className="card__title">Ranking{seasonName ? ` · ${seasonName}` : ' sezonu'}</h2>
           <p className="muted">
             {finished} {finished === 1 ? 'zakończona edycja' : 'zakończonych edycji'} · {lista.length} klas. Edycje testowe
             usuniesz w „Baza utworów” → „Edycje”.

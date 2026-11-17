@@ -3,6 +3,7 @@ import type { RoundIntroState } from '../../lib/game/types'
 import { beatPulse, easeBack, easeOut, hash, ramp } from '../../lib/intro/timeline'
 import { ROUND_BEATS, ROUND_HITS, ROUND_INTRO_LENGTH, ROUND_TITLES } from '../../lib/intro/roundTimeline'
 import { useFitScale } from '../../lib/intro/useFitScale'
+import { etapLine, useEtap } from '../../lib/library/db'
 
 const AUDIO_LEAD_MS = 120
 const BARS = 28
@@ -10,15 +11,16 @@ const BARS = 28
 /** Zapowiedź rundy na pełnym ekranie (tablica, OBS) — zgrana z dźwiękiem u hosta. */
 export function RoundIntroOverlay({ zapowiedz }: { zapowiedz: RoundIntroState | undefined }) {
   const now = useServerNow(Boolean(zapowiedz))
+  const etap = etapLine(useEtap())
   if (!zapowiedz) return null
   const length = (zapowiedz.dlugosc ?? ROUND_INTRO_LENGTH * 1000) / 1000
   const t = (now - zapowiedz.start + AUDIO_LEAD_MS) / 1000
   if (t < 0 || t > length + 0.2) return null
-  return <RoundIntroStage t={t} runda={zapowiedz.runda} length={length} />
+  return <RoundIntroStage t={t} runda={zapowiedz.runda} length={length} etap={etap} />
 }
 
 /** Klatka intra rundy jako czysta funkcja czasu `t`. */
-export function RoundIntroStage({ t, runda, length }: { t: number; runda: number; length: number }) {
+export function RoundIntroStage({ t, runda, length, etap }: { t: number; runda: number; length: number; etap?: string }) {
   const scale = useFitScale()
   const title = ROUND_TITLES[runda] ?? ROUND_TITLES[1]
   const pulse = beatPulse(t, ROUND_BEATS, 0.14)
@@ -59,6 +61,11 @@ export function RoundIntroStage({ t, runda, length }: { t: number; runda: number
         <p className="rintro__subtitle" style={{ opacity: subIn, transform: `translateY(${(1 - subIn) * 30}px)` }}>
           {title.subtitle}
         </p>
+        {etap && (
+          <p className="rintro__etap" style={{ opacity: labelIn }}>
+            {etap}
+          </p>
+        )}
         <div className="intro__eq">
           {Array.from({ length: BARS }, (_, i) => {
             const center = 1 - Math.abs(i - (BARS - 1) / 2) / ((BARS - 1) / 2)

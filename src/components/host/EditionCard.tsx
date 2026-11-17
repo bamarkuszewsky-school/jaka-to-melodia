@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { canEndRound, endRound } from '../../lib/game/endRound'
 import type { LoadedEdition } from '../../lib/game/questions'
 import type { GameState, StationKey } from '../../lib/game/types'
-import { cancelEdition, createEdition, finishEdition } from '../../lib/library/db'
+import { cancelEdition, createEdition, finishEdition, formatDate, today } from '../../lib/library/db'
+import { matchLabel, playableMatches, type MatchRef, type Season } from '../../lib/library/season'
 import {
   DRAW_KEYS,
   DRAW_LABEL,
@@ -20,7 +21,8 @@ import {
   type ScanResult,
   type Songs,
 } from '../../lib/library/library'
-import type { StationNames } from '../../lib/stations'
+import { saveStationNames, type StationNames } from '../../lib/stations'
+import type { Redraw } from './RoundControl'
 
 interface Props {
   scan: ScanResult<File> | null
@@ -31,12 +33,16 @@ interface Props {
   game: GameState
   names: StationNames
   edition: LoadedEdition | null
+  season?: Season
+  seasonId?: string | null
+  /** Przelosowanie utworu w już wylosowanej edycji (także w trakcie rund). */
+  onRedraw?: Redraw
 }
 
 type Confirm = 'round' | 'edition' | 'cancel' | null
 
 /** Folder z muzyką, losowanie nowej edycji, „Zakończ rundę” i „Zakończ edycję”. */
-export function EditionCard({ scan, onFolder, songs, editions, currentId, game, names, edition }: Props) {
+export function EditionCard({ scan, onFolder, songs, editions, currentId, game, names, edition, season, seasonId, onRedraw }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
@@ -45,6 +51,10 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
   const [nazwa, setNazwa] = useState('')
   const [confirm, setConfirm] = useState<Confirm>(null)
   const [showSongs, setShowSongs] = useState(false)
+  const [data, setData] = useState(today)
+  /** Mecz z drabinki: „etap:numer” albo '' (edycja poza drabinką). */
+  const [mecz, setMecz] = useState('')
+  const playable = playableMatches(season)
 
   useEffect(() => {
     inputRef.current?.setAttribute('webkitdirectory', '')
@@ -93,7 +103,16 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
     if (!songs) return
     setDraft({ ...(test ? drawTestEdition(songs) : drawEdition(songs)), test })
     setNazwa(test ? 'Edycja testowa' : `Edycja ${nextNumber}`)
+    setData(today())
+    // Domyślnie następny mecz z drabinki.
+    const first = test ? undefined : playable[0]
+    setMecz(first ? `${first.etap}:${first.mecz}` : '')
   }
+
+  const chosen: MatchRef | undefined = mecz
+    ? { etap: mecz.split(':')[0] as MatchRef['etap'], mecz: Number(mecz.split(':')[1]) }
+    : undefined
+  const chosenClasses = chosen ? playable.find((p) => p.etap === chosen.etap && p.mecz === chosen.mecz)?.klasy : undefined
 
   const redraw = (key: DrawKey, i: number) => {
     if (!songs || !draft) return
@@ -106,8 +125,17 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
   const confirmDraft = () =>
     run(async () => {
       if (!draft) return
-      if (draft.test) await createEdition(nazwa.trim() || 'Edycja testowa', 0, draft.utwory, true)
-      else await createEdition(nazwa.trim() || `Edycja ${nextNumber}`, nextNumber, draft.utwory)
+      if (draft.test) await createEdition(nazwa.trim() || 'Edycja testowa', 0, draft.utwory, { test: true, data })
+      else {
+        // Mecz z drabinki: klasy od razu trafiają na stanowiska 1–3.
+        if (chosen && chosenClasses) await saveStationNames({ 1: chosenClasses[0] ?? '', 2: chosenClasses[1] ?? '', 3: chosenClasses[2] ?? '' })
+        await createEdition(nazwa.trim() || `Edycja ${nextNumber}`, nextNumber, draft.utwory, {
+          data,
+          sezon: seasonId,
+          season,
+          mecz: chosen,
+        })
+      }
       setDraft(null)
     })
 
@@ -150,6 +178,8 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
           <div className="edition-card__row">
             <p className="notice">
               Trwa <strong>{current.nazwa}</strong>
+              {current.etap && current.mecz !== undefined && ` · ${matchLabel({ etap: current.etap, mecz: current.mecz }, season)}`}
+              {current.data && ` · ${formatDate(current.data)}`}
               {current.test && ' (testowa — nie liczy się do rankingu)'}
               {game.runda ? ` · runda ${game.runda === 4 ? 'finałowa' : game.runda}` : ' · gra jeszcze nie ruszyła'}.
               {!scan && ' Wybierz folder z muzyką, żeby grać.'}
@@ -194,8 +224,8 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
                   onClick={() =>
                     run(async () => {
                       if (confirm === 'round') await endRound(game, edition?.set)
-                      if (confirm === 'edition') await finishEdition(currentId, current, game, klasy)
-                      if (confirm === 'cancel') await cancelEdition(currentId)
+                      if (confirm === 'edition') await finishEdition(currentId, current, game, klasy, season)
+                      if (confirm === 'cancel') await cancelEdition(currentId, current)
                       setConfirm(null)
                     })
                   }
@@ -216,14 +246,63 @@ export function EditionCard({ scan, onFolder, songs, editions, currentId, game, 
           <button type="button" className="link-button" onClick={() => setShowSongs((v) => !v)}>
             {showSongs ? 'Ukryj wylosowane utwory' : 'Pokaż wylosowane utwory (odpowiedzi!)'}
           </button>
-          {showSongs && songs && <DrawList utwory={current.utwory} songs={songs} />}
+          {showSongs && songs && (
+            <>
+              {onRedraw && (
+                <p className="muted small">
+                  ↻ przelosowuje utwór także w trakcie gry (np. gdy plik się nie odtwarza) — tylko taki, którego jeszcze nikt
+                  nie zgadywał.
+                </p>
+              )}
+              <DrawList
+                utwory={current.utwory}
+                songs={songs}
+                onRedraw={
+                  onRedraw
+                    ? (key, i) =>
+                        run(async () => {
+                          const why = await onRedraw(key, i)
+                          if (why) setError(why)
+                        })
+                    : undefined
+                }
+              />
+            </>
+          )}
         </>
       ) : draft && songs ? (
         <div className="draw">
-          <label className="field">
-            <span className="field__label">Nazwa edycji</span>
-            <input className="field__input" value={nazwa} onChange={(e) => setNazwa(e.target.value)} maxLength={40} />
-          </label>
+          <div className="draw__fields">
+            <label className="field">
+              <span className="field__label">Nazwa edycji</span>
+              <input className="field__input" value={nazwa} onChange={(e) => setNazwa(e.target.value)} maxLength={40} />
+            </label>
+            <label className="field">
+              <span className="field__label">Data</span>
+              <input className="field__input" type="date" value={data} onChange={(e) => setData(e.target.value)} />
+            </label>
+            {!draft.test && (
+              <label className="field">
+                <span className="field__label">Mecz z drabinki</span>
+                <select className="field__input" value={mecz} onChange={(e) => setMecz(e.target.value)}>
+                  {playable.map((p) => (
+                    <option key={`${p.etap}:${p.mecz}`} value={`${p.etap}:${p.mecz}`}>
+                      {matchLabel(p, season)} — {p.klasy.join(' · ')}
+                    </option>
+                  ))}
+                  <option value="">Poza drabinką (klasy wpiszę sam)</option>
+                </select>
+              </label>
+            )}
+          </div>
+          {!draft.test && chosenClasses && (
+            <p className="muted small">
+              Po zatwierdzeniu klasy trafią na stanowiska: {chosenClasses.map((k, i) => `${i + 1} — ${k}`).join(', ')}.
+            </p>
+          )}
+          {!draft.test && !season && (
+            <p className="muted small">Nie ma jeszcze drabinki sezonu — utworzysz ją w zakładce „Drabinka”.</p>
+          )}
           {draft.test && (
             <p className="notice">
               Edycja testowa: losuje spośród wszystkich utworów z plikiem (także zagranych i bez ustawionego startu — wtedy

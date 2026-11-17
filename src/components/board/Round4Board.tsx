@@ -3,11 +3,15 @@ import { FINAL_SONGS, guessedCount } from '../../lib/game/rules4'
 import { useServerNow } from '../../lib/game/state'
 import { STATION_KEYS, type GameState, type StationKey } from '../../lib/game/types'
 import { labelForKey, type StationNames } from '../../lib/stations'
+import { useEtap } from '../../lib/library/db'
 import { FitText } from '../FitText'
 import { FinalPanel } from './FinalPanel'
+import { FinalReveal } from './FinalReveal'
 
 /** Tablica widowni w finale: duży zegar, 7 melodii, punkty, wynik. */
 export function Round4Board({ game, names }: { game: GameState; names: StationNames }) {
+  // Etap drabinki w nagłówku planszy („Ćwierćfinał 2”).
+  const etapHead = useEtap()?.etap
   const r = game.runda4
   const now = useServerNow(r?.faza === 'gra' || r?.faza === 'stop')
   const label = (k: StationKey) => labelForKey(names, k)
@@ -18,31 +22,35 @@ export function Round4Board({ game, names }: { game: GameState; names: StationNa
   if (r.faza === 'koniec') {
     const ranking = [...STATION_KEYS].sort((a, b) => game.punkty[b] - game.punkty[a])
     const stage = (
-      <div className="final-end">
+      <div className={`final-end ${r.odslon ? 'is-reveal' : ''}`}>
         <p className={`final-end__title ${r.wynik === 'komplet' ? 'is-gold' : ''}`}>
           {r.wynik === 'komplet' ? 'MISTRZ EDYCJI!' : r.wynik === 'blad' ? 'Koniec finału' : 'Czas minął'}
         </p>
-        <FitText className="final-end__name" max={[9, 170]} min={40} widthRatio={0.86}>
+        <FitText className="final-end__name" max={r.odslon ? [4, 72] : [9, 170]} min={32} widthRatio={0.86}>
           {label(r.gracz)}
         </FitText>
         <p className="final-end__sum">
           {guessed}/{FINAL_SONGS} melodii · +{r.zdobyte} pkt{r.bonus ? ` (w tym bonus ${r.bonus})` : ''}
         </p>
-        <ol className="final-end__ranking">
-          {ranking.map((k, i) => (
-            <li key={k} className={k === r.gracz ? 'is-finalist' : ''}>
-              <span className="final-end__place">{i + 1}.</span>
-              <span className="final-end__class">{label(k)}</span>
-              <strong>{game.punkty[k]} pkt</strong>
-            </li>
-          ))}
-        </ol>
+        {r.odslon ? (
+          <FinalReveal utwory={r.utwory} variant="board" />
+        ) : (
+          <ol className="final-end__ranking">
+            {ranking.map((k, i) => (
+              <li key={k} className={k === r.gracz ? 'is-finalist' : ''}>
+                <span className="final-end__place">{i + 1}.</span>
+                <span className="final-end__class">{label(k)}</span>
+                <strong>{game.punkty[k]} pkt</strong>
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
     )
     return (
       <div className="r1 r1--show">
         <header className="r1__head">
-          <span className="r1__round">Finał</span>
+          <span className="r1__round">Finał{etapHead && <span className="r1__etap">{etapHead}</span>}</span>
           <span className="r1__logo">
             Jaka to <span className="accent">melodia?</span>
           </span>

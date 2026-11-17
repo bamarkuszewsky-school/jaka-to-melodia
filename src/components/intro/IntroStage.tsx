@@ -24,7 +24,7 @@ const NOTE_GLYPHS = ['♪', '♫', '♩', '♬']
  * Czołówka — cała klatka jest czystą funkcją czasu `t` (sekundy),
  * więc tablica i OBS pokazują dokładnie to samo w tej samej chwili.
  */
-export function IntroStage({ t }: { t: number }) {
+export function IntroStage({ t, etap }: { t: number; etap?: string }) {
   const scale = useFitScale()
 
   const groove = ramp(t, MOMENTS.drop - 0.05, MOMENTS.drop + 0.2) // 0 przed „dropem”, 1 po
@@ -134,6 +134,11 @@ export function IntroStage({ t }: { t: number }) {
         <p className="intro__subtitle" style={{ opacity: subtitle, transform: `translateY(${(1 - subtitle) * 20}px)` }}>
           Szkolny teleturniej muzyczny
         </p>
+        {etap && (
+          <p className="intro__etap" style={{ opacity: subtitle, transform: `translateY(${(1 - subtitle) * 30}px) scale(${1 + 0.04 * pulse})` }}>
+            {etap}
+          </p>
+        )}
 
         {/* Equalizer na dole */}
         <div className="intro__eq">

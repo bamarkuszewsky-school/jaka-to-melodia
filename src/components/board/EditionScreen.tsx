@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react'
 import { useServerOffset } from '../../lib/game/state'
-import type { Plansza } from '../../lib/library/db'
+import { formatDate, type Plansza } from '../../lib/library/db'
 import type { RankingEntry } from '../../lib/library/library'
 import { FitText } from '../FitText'
 import { RankingView } from '../RankingView'
@@ -26,14 +26,37 @@ export function EditionScreen({ plansza, lista, klasy }: { plansza: Plansza; lis
     return () => clearTimeout(t)
   }, [plansza.od, offset])
 
-  const showRanking = lista.length > 0 && doneFor !== plansza.od
+  // Rozpoczęcie sezonu — bez rankingu (jeszcze pusty).
+  const showRanking = lista.length > 0 && doneFor !== plansza.od && plansza.tryb !== 'sezon-start'
 
   if (showRanking) return <RankingView lista={lista} variant="board" />
+
+  if (plansza.tryb === 'sezon-start' || plansza.tryb === 'sezon-koniec') {
+    const start = plansza.tryb === 'sezon-start'
+    return (
+      <div className={`edition-screen is-${plansza.tryb}`}>
+        <p className="edition-screen__eyebrow">Jaka to melodia?</p>
+        <p className="edition-screen__lead">{start ? 'Rozpoczynamy' : 'Koniec sezonu'}</p>
+        <FitText className="edition-screen__name" max={[8, 160]} min={40} widthRatio={0.8}>
+          {plansza.nazwa}
+        </FitText>
+        {!start && plansza.mistrz && (
+          <p className="edition-screen__champion">
+            Mistrz sezonu: <strong>{plansza.mistrz}</strong>
+          </p>
+        )}
+        {!start && plansza.mistrzNauczycieli && (
+          <p className="edition-screen__date">Finał nauczycieli: {plansza.mistrzNauczycieli}</p>
+        )}
+        {plansza.data && <p className="edition-screen__date">{formatDate(plansza.data)}</p>}
+      </div>
+    )
+  }
 
   const names = plansza.tryb === 'koniec' && plansza.klasy?.length ? plansza.klasy : klasy
   return (
     <div className={`edition-screen is-${plansza.tryb}`}>
-      <p className="edition-screen__eyebrow">Jaka to melodia?</p>
+      <p className="edition-screen__eyebrow">Jaka to melodia?{plansza.etap ? ` · ${plansza.etap}` : ''}</p>
       <FitText className="edition-screen__name" max={[8, 160]} min={40} widthRatio={0.8}>
         {plansza.nazwa}
       </FitText>
@@ -48,6 +71,7 @@ export function EditionScreen({ plansza, lista, klasy }: { plansza: Plansza; lis
         </p>
       )}
       {plansza.tryb === 'koniec' && <p className="edition-screen__done">zakończona</p>}
+      {plansza.data && <p className="edition-screen__date">{formatDate(plansza.data)}</p>}
     </div>
   )
 }

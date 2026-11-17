@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { resetGame } from '../../lib/game/hostActions'
 import type { LoadedEdition } from '../../lib/game/questions'
-import { clockRun, clockStop, finalCorrect, finalSkip, finalWrong } from '../../lib/game/round4Actions'
+import { clockRun, clockStop, finalCorrect, finalSkip, finalWrong, revealFinalSongs } from '../../lib/game/round4Actions'
 import { ANSWER_MS, remaining, secondsLeft } from '../../lib/game/rules'
 import { clockLeft, FINAL_BONUS, FINAL_MS, FINAL_POINTS, formatClock, guessedCount } from '../../lib/game/rules4'
 import { useGame, useServerNow } from '../../lib/game/state'
 import { STATION_KEYS, type StationKey } from '../../lib/game/types'
 import { labelForKey, useStationNames } from '../../lib/stations'
+import type { Redraw } from './RoundControl'
 
 /** Prosty odtwarzacz finału: melodia gra od początku fragmentu, bez limitu 15 s (pilnuje zegar). */
 function useFinalPlayer() {
@@ -31,7 +32,7 @@ function useFinalPlayer() {
 }
 
 /** Panel prowadzącego — finał: 7 melodii w 30 sekund. */
-export function Round4Control({ edition }: { edition: LoadedEdition | null }) {
+export function Round4Control({ edition, onRedraw }: { edition: LoadedEdition | null; onRedraw?: Redraw }) {
   const game = useGame()
   const names = useStationNames()
   const label = useCallback((k: StationKey) => labelForKey(names, k), [names])
@@ -242,6 +243,18 @@ export function Round4Control({ edition }: { edition: LoadedEdition | null }) {
                   </li>
                 ))}
               </ol>
+              <div className="stage-host__actions">
+                <button
+                  type="button"
+                  className={`btn ${r.odslon ? 'btn--ghost' : 'btn--primary'}`}
+                  onClick={() => run(() => revealFinalSongs(!r.odslon))}
+                >
+                  {r.odslon ? 'Schowaj utwory finału' : 'Odsłoń 7 utworów finału'}
+                </button>
+                <span className="muted small">
+                  {r.odslon ? 'Tablica i live pokazują wszystkie tytuły.' : 'Tablica i live pokażą po kolei wszystkie tytuły z wynikiem.'}
+                </span>
+              </div>
             </>
           )}
         </div>
@@ -258,6 +271,21 @@ export function Round4Control({ edition }: { edition: LoadedEdition | null }) {
               </span>
               <span className="final-song__state">
                 {s?.stan === 'odgadnieta' ? '✓' : s?.stan === 'pominieta' ? '↷' : s?.stan === 'zla' ? '✗' : ''}
+                {onRedraw && s?.stan === 'czeka' && r.faza !== 'koniec' && (r.faza === 'gotowe' || i !== r.biezacy) && (
+                  <button
+                    type="button"
+                    className="btn btn--tiny btn--ghost"
+                    title="Przelosuj tę melodię"
+                    onClick={() =>
+                      run(async () => {
+                        const why = await onRedraw('final', i)
+                        if (why) setError(why)
+                      })
+                    }
+                  >
+                    ↻
+                  </button>
+                )}
               </span>
             </li>
           )

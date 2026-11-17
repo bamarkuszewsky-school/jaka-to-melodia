@@ -4601,3 +4601,665 @@ textarea.field__input {
   color: var(--text);
   box-shadow: inset 0 -2px 0 var(--gold);
 }
+
+/* ---------- v0.10: odsłonięcie 7 utworów po finale ---------- */
+.freveal {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9vh;
+  width: min(78vw, 1200px);
+}
+
+.freveal__row {
+  display: grid;
+  grid-template-columns: 2.2em 1fr 1.6em;
+  align-items: center;
+  gap: 1vw;
+  padding: 0.9vh 1.4vw;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgb(27 79 216 / 0.92), rgb(10 42 140 / 0.92));
+  border: 2px solid rgb(143 214 255 / 0.55);
+  font-size: clamp(18px, 2.1vw, 40px);
+  opacity: 0;
+  animation: freveal-in 0.45s ease forwards;
+}
+
+.freveal__row.is-ok {
+  background: linear-gradient(90deg, rgb(28 150 96 / 0.95), rgb(14 98 62 / 0.95));
+  border-color: rgb(61 220 151 / 0.8);
+}
+
+.freveal__row.is-miss,
+.freveal__row.is-bad {
+  filter: saturate(0.55);
+}
+
+.freveal__num {
+  display: grid;
+  place-items: center;
+  width: 1.8em;
+  height: 1.8em;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.16);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.freveal__row.is-ok .freveal__num {
+  background: #fff;
+  color: #0e6240;
+}
+
+.freveal__song {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+  min-width: 0;
+}
+
+.freveal__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.freveal__artist {
+  font-size: 0.7em;
+  color: rgb(255 255 255 / 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.freveal__mark {
+  font-weight: 800;
+  text-align: center;
+}
+
+.freveal__row.is-bad .freveal__mark {
+  color: var(--danger);
+}
+
+@keyframes freveal-in {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Live: panel na przezroczystym tle, po prawej (kamera na finalistę po lewej). */
+.stream-reveal {
+  position: absolute;
+  right: 72px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 900px;
+  display: grid;
+  gap: 14px;
+  animation: slide-in 0.35s ease both;
+}
+
+.stream-reveal__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 16px 28px;
+  border-radius: 18px;
+  background: var(--gold);
+  color: #1a1400;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.stream-reveal__head strong {
+  font-size: 38px;
+}
+
+.freveal--stream {
+  width: 100%;
+  gap: 10px;
+}
+
+.freveal--stream .freveal__row {
+  font-size: 34px;
+  padding: 12px 22px;
+}
+
+/* ---------- v0.10: przelosowanie utworu w trakcie gry ---------- */
+.tile-host-wrap {
+  position: relative;
+  display: grid;
+  min-width: 0;
+}
+
+.tile-host__redraw {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgb(6 8 32 / 0.6);
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tile-host__redraw:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+/* ---------- v0.10: iPad po zakończeniu edycji ---------- */
+.farewell {
+  min-height: 70vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 2vh;
+  padding: 4vw;
+  text-align: center;
+  animation: slide-in 0.5s ease both;
+}
+
+.farewell__class {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(22px, 4vw, 40px);
+  font-weight: 600;
+}
+
+.farewell__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(56px, 13vw, 150px);
+  color: var(--gold);
+  text-shadow: 0 0 40px rgb(245 197 66 / 0.45);
+}
+
+.farewell__text {
+  margin: 0;
+  max-width: 22ch;
+  font-size: clamp(26px, 5vw, 54px);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ---------- v0.10: drabinka sezonu (tablica i live) ---------- */
+.ladder {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  background:
+    radial-gradient(1100px 700px at 50% 30%, rgb(27 79 216 / 0.35), transparent 70%),
+    var(--bg-deep);
+}
+
+.ladder--stream {
+  background: transparent;
+}
+
+.ladder--stream .ladder__stage {
+  border-radius: 32px;
+  background: rgb(6 8 32 / 0.9);
+  border: 2px solid var(--gold);
+}
+
+.ladder__stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1920px;
+  height: 1080px;
+  padding: 40px 56px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 24px;
+  transform-origin: center;
+}
+
+.ladder__head {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+}
+
+.ladder__eyebrow {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ladder__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 54px;
+}
+
+.ladder__champion {
+  margin-left: auto;
+  padding: 8px 22px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #1a1400;
+  font-weight: 800;
+  font-size: 28px;
+}
+
+.ladder__grid {
+  display: grid;
+  grid-template-columns: 2.15fr 1fr 1fr 1fr;
+  gap: 28px;
+  min-height: 0;
+}
+
+.ladder__col {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 14px;
+  min-height: 0;
+  min-width: 0;
+}
+
+.ladder__stage-name {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--show-cyan, #8fd6ff);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ladder__note {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 17px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.ladder__elim {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 18px;
+  align-content: start;
+}
+
+.ladder__matches {
+  display: grid;
+  align-content: center;
+  gap: 18px;
+}
+
+.ladder__teachers {
+  display: grid;
+  gap: 14px;
+  margin-top: 36px;
+}
+
+.ladder__legend {
+  position: absolute;
+  right: 56px;
+  bottom: 26px;
+  display: flex;
+  gap: 22px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.ladder__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ladder__key::before {
+  content: '';
+  width: 26px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.ladder__key.is-awans::before {
+  background: var(--gold);
+}
+
+.ladder__key.is-dzika::before {
+  background: rgb(143 214 255 / 0.9);
+}
+
+.ladder__key.is-odpada::before {
+  height: 2px;
+  background: rgb(255 255 255 / 0.5);
+}
+
+.ladder-card {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgb(27 79 216 / 0.5), rgb(10 42 140 / 0.6));
+  border: 2px solid rgb(143 214 255 / 0.35);
+}
+
+.ladder-card.is-gra {
+  border-color: var(--gold);
+  box-shadow: 0 0 28px rgb(245 197 66 / 0.45);
+}
+
+.ladder-card.is-empty {
+  opacity: 0.45;
+  border-style: dashed;
+}
+
+.ladder-card__meta {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.ladder-card.is-gra .ladder-card__meta {
+  color: var(--gold);
+}
+
+.ladder-card__slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 24px;
+  font-weight: 700;
+  min-width: 0;
+}
+
+.ladder__elim.is-dense .ladder-card__slot {
+  font-size: 19px;
+  padding: 1px 8px;
+}
+
+.ladder-card__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ladder-card__pts {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8em;
+  color: rgb(255 255 255 / 0.8);
+}
+
+.ladder-card__slot.is-awans,
+.ladder-card__slot.is-mistrz {
+  background: var(--gold);
+  color: #1a1400;
+}
+
+.ladder-card__slot.is-awans .ladder-card__pts,
+.ladder-card__slot.is-mistrz .ladder-card__pts {
+  color: #3a2c00;
+}
+
+.ladder-card__slot.is-dzika {
+  background: rgb(143 214 255 / 0.9);
+  color: #04122e;
+}
+
+.ladder-card__slot.is-dzika .ladder-card__pts {
+  color: #0a2a5c;
+}
+
+.ladder-card__slot.is-odpada {
+  color: rgb(255 255 255 / 0.42);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.ladder-card__slot.is-niepewny {
+  color: rgb(255 255 255 / 0.75);
+}
+
+/* ---------- v0.10: plansze sezonu, data i etap ---------- */
+.edition-screen__lead {
+  margin: 0;
+  color: var(--show-cyan, #8fd6ff);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(28px, 4vw, 80px);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.edition-screen__champion {
+  margin: 0;
+  font-size: clamp(24px, 3.2vw, 64px);
+  font-weight: 600;
+}
+
+.edition-screen__champion strong {
+  color: var(--gold);
+}
+
+.edition-screen__date {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(16px, 1.8vw, 34px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.r1__etap {
+  margin-left: 0.8em;
+  padding: 0.15em 0.7em;
+  border-radius: 99px;
+  border: 1px solid currentColor;
+  font-size: 0.8em;
+  letter-spacing: 0.1em;
+}
+
+.intro__etap {
+  position: absolute;
+  left: 50%;
+  top: 860px;
+  margin: 0;
+  translate: -50% 0;
+  padding: 10px 36px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #1a1400;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.rintro__etap {
+  position: absolute;
+  top: 70px;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Odsłonięte utwory: 7 wierszy musi zmieścić się na tablicy 16:9 */
+.final-end.is-reveal {
+  gap: 0.8vh;
+}
+
+.final-end.is-reveal .final-end__title {
+  font-size: clamp(22px, min(2.6vw, 4.4vh), 56px);
+}
+
+.final-end.is-reveal .final-end__sum {
+  font-size: clamp(16px, min(1.7vw, 3vh), 34px);
+}
+
+.freveal--board {
+  gap: 0.8vh;
+}
+
+.freveal--board .freveal__row {
+  font-size: clamp(15px, min(2vw, 3.6vh), 40px);
+  padding: 0.6vh 1.2vw;
+}
+
+/* ---------- v0.10: panel drabinki (host) ---------- */
+.ladder-season {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.ladder-new__classes {
+  font-family: inherit;
+  resize: vertical;
+}
+
+.ladder-new__old {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ladder-matches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ladder-match {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.ladder-match.is-gra {
+  border-color: var(--gold);
+}
+
+.ladder-match__nr {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.08);
+  font-weight: 700;
+}
+
+.ladder-match__inputs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ladder-match__result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ladder-match__side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.ladder-match__link {
+  max-width: 260px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.ladder-slot {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.05);
+}
+
+.ladder-slot.is-awans,
+.ladder-slot.is-mistrz {
+  background: rgb(245 197 66 / 0.18);
+  outline: 1px solid rgb(245 197 66 / 0.6);
+}
+
+.ladder-slot.is-dzika {
+  background: rgb(143 214 255 / 0.16);
+  outline: 1px solid rgb(143 214 255 / 0.6);
+}
+
+.ladder-slot.is-odpada strong {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+@media (max-width: 800px) {
+  .ladder-season,
+  .ladder-match {
+    grid-template-columns: 1fr;
+  }
+}
+
+.intro__etap {
+  z-index: 3;
+}
+
+.draw__fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px minmax(0, 2fr);
+  gap: 12px;
+}

@@ -1,5 +1,6 @@
 import { useServerNow } from '../../lib/game/state'
 import type { IntroState } from '../../lib/game/types'
+import { etapLine, useEtap } from '../../lib/library/db'
 import { IntroStage } from './IntroStage'
 
 /**
@@ -11,8 +12,9 @@ const AUDIO_LEAD_MS = 120
 /** Czołówka na pełnym ekranie (tablica, OBS) — zsynchronizowana z podkładem u hosta. */
 export function IntroOverlay({ czolowka }: { czolowka: IntroState | undefined }) {
   const now = useServerNow(Boolean(czolowka))
+  const etap = etapLine(useEtap())
   if (!czolowka) return null
   const t = (now - czolowka.start + AUDIO_LEAD_MS) / 1000
   if (t < 0 || t > czolowka.dlugosc / 1000 + 0.3) return null
-  return <IntroStage t={t} />
+  return <IntroStage t={t} etap={etap} />
 }

@@ -249,6 +249,8 @@ export interface Round4State {
   zdobyte: number
   wynik?: FinalOutcome
   bonus?: number
+  /** Po finale host odsłania na tablicy i live wszystkie 7 tytułów. */
+  odslon?: boolean
 }
 
 /** Zapowiedź rundy (intro): numer rundy, czas startu (serwer) i długość podkładu. */

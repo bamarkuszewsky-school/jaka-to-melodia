@@ -3,6 +3,7 @@ import { BuzzOrder } from '../components/BuzzOrder'
 import { DevicesCard } from '../components/host/DevicesCard'
 import { EditionCard } from '../components/host/EditionCard'
 import { IntroCard } from '../components/host/IntroCard'
+import { LadderPanel } from '../components/host/LadderPanel'
 import { RankingPanel } from '../components/host/RankingPanel'
 import { Round3Control } from '../components/host/Round3Control'
 import { Round4Control } from '../components/host/Round4Control'
@@ -14,27 +15,32 @@ import { StationNamesCard } from '../components/StationNamesCard'
 import { resetBuzzes, useBuzzes } from '../lib/buzzTest'
 import { useGame } from '../lib/game/state'
 import {
+  applyLiveRedraw,
   applySongChanges,
   useCurrentEditionId,
+  useCurrentSeasonId,
   useEditions,
+  useLadderSync,
   usePokaz,
   useRankingSync,
+  useSeasons,
   useSongs,
 } from '../lib/library/db'
 import { buildEdition } from '../lib/library/edition'
-import { DRAW_KEYS, roundIntroFor, syncChanges } from '../lib/library/library'
+import { DRAW_KEYS, roundIntroFor, syncChanges, type DrawKey } from '../lib/library/library'
+import { planLiveRedraw } from '../lib/library/liveRedraw'
 import { useRoundIntroAudio } from '../lib/game/useRoundIntroAudio'
 import { useLibraryFolder } from '../lib/library/useLibraryFolder'
 import { usePresence, useStalePresenceCleanup } from '../lib/presence'
 import { useStationNames } from '../lib/stations'
 
-type Tab = 'gra' | 'baza' | 'ranking'
+type Tab = 'gra' | 'baza' | 'ranking' | 'drabinka'
 const TAB_KEY = 'jtm-host-tab'
 
 function readTab(): Tab {
   try {
     const t = localStorage.getItem(TAB_KEY)
-    return t === 'baza' || t === 'ranking' ? t : 'gra'
+    return t === 'baza' || t === 'ranking' || t === 'drabinka' ? t : 'gra'
   } catch {
     return 'gra'
   }
@@ -63,7 +69,11 @@ export function HostPage() {
   const editions = useEditions()
   const currentId = useCurrentEditionId()
   const pokaz = usePokaz()
-  useRankingSync(editions, pokaz)
+  const seasons = useSeasons()
+  const seasonId = useCurrentSeasonId()
+  const season = seasonId && seasons ? seasons[seasonId] : undefined
+  useRankingSync(editions, pokaz, seasonId, Boolean(season?.start))
+  useLadderSync(seasonId, season, editions, currentId, pokaz)
 
   // Po wczytaniu folderu: nowe utwory trafiają do bazy, zniknięte dostają „brak pliku”.
   const synced = useRef<typeof scan>(null)
@@ -86,6 +96,18 @@ export function HostPage() {
     // Przebudowa tylko, gdy zmieniły się utwory tej edycji (nie przy każdej zmianie w bazie).
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [editionKey, scan, urlFor],
+  )
+
+  // Przelosowanie utworu w trakcie gry (np. plik się nie odtwarza).
+  const redraw = useCallback(
+    async (key: DrawKey, index: number) => {
+      if (!current || !currentId || !songs) return 'Brak wylosowanej edycji.'
+      const plan = planLiveRedraw(game, currentId, current, songs, key, index)
+      if (!plan.ok) return plan.reason
+      await applyLiveRedraw(plan.updates)
+      return undefined
+    },
+    [current, currentId, songs, game],
   )
 
   const introUrl = useMemo(() => (scan?.intro ? urlFor(scan.intro) : undefined), [scan, urlFor])
@@ -122,6 +144,10 @@ export function HostPage() {
           Ranking
           {(pokaz?.tablica || pokaz?.stream) && <span className="host-tab__live">na ekranie</span>}
         </button>
+        <button type="button" className={`host-tab ${tab === 'drabinka' ? 'is-active' : ''}`} onClick={() => setTab('drabinka')}>
+          Drabinka
+          {(pokaz?.drabinkaTablica || pokaz?.drabinkaStream) && <span className="host-tab__live">na ekranie</span>}
+        </button>
       </nav>
 
       {tab === 'baza' && (
@@ -132,7 +158,13 @@ export function HostPage() {
 
       {tab === 'ranking' && (
         <div className="grid">
-          <RankingPanel editions={editions} pokaz={pokaz} />
+          <RankingPanel editions={editions} pokaz={pokaz} seasonId={seasonId} season={season} />
+        </div>
+      )}
+
+      {tab === 'drabinka' && (
+        <div className="grid">
+          <LadderPanel seasons={seasons} seasonId={seasonId} editions={editions} currentId={currentId} pokaz={pokaz} />
         </div>
       )}
 
@@ -149,13 +181,16 @@ export function HostPage() {
           game={game}
           names={names}
           edition={edition}
+          season={season}
+          seasonId={seasonId}
+          onRedraw={redraw}
         />
         {game.runda === 4 ? (
-          <Round4Control edition={edition} />
+          <Round4Control edition={edition} onRedraw={redraw} />
         ) : game.runda === 3 ? (
-          <Round3Control edition={edition} />
+          <Round3Control edition={edition} onRedraw={redraw} />
         ) : (
-          <RoundControl edition={edition} />
+          <RoundControl edition={edition} onRedraw={redraw} />
         )}
         <IntroCard url={introUrl} folder={Boolean(scan)} roundIntros={scan ? Object.keys(scan.roundIntros).length : 0} />
 

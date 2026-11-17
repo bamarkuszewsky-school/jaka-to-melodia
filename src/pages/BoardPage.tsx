@@ -5,6 +5,7 @@ import { IntroOverlay } from '../components/intro/IntroOverlay'
 import { RoundIntroOverlay } from '../components/intro/RoundIntro'
 import { RankingView } from '../components/RankingView'
 import { EditionScreen } from '../components/board/EditionScreen'
+import { LadderBoard } from '../components/board/LadderBoard'
 import { usePokaz } from '../lib/library/db'
 import { Shell } from '../components/Shell'
 import { useBuzzes } from '../lib/buzzTest'
@@ -23,6 +24,16 @@ export function BoardPage() {
   const names = useStationNames()
   const game = useGame()
   const pokaz = usePokaz()
+
+  if (pokaz?.drabinkaTablica && pokaz.drabinka) {
+    return (
+      <Shell title="Tablica" subtitle="Drabinka" hideBarInFullscreen>
+        <LadderBoard view={pokaz.drabinka} variant="board" />
+        <IntroOverlay czolowka={game.czolowka} />
+        <RoundIntroOverlay zapowiedz={game.zapowiedz} />
+      </Shell>
+    )
+  }
 
   if (pokaz?.tablica) {
     return (

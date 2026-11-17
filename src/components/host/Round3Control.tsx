@@ -14,6 +14,7 @@ import {
 } from '../../lib/game/round3Actions'
 import { ANSWER_MS, remaining, secondsLeft } from '../../lib/game/rules'
 import { RefrenButton } from './RefrenButton'
+import type { Redraw } from './RoundControl'
 import { startRound4 } from '../../lib/game/round4Actions'
 import { allowedBids, canPass, nut, opponent, poNutach, WINS_TO_FINAL } from '../../lib/game/rules3'
 import { useGame, useServerNow } from '../../lib/game/state'
@@ -21,7 +22,7 @@ import type { StationKey } from '../../lib/game/types'
 import { labelForKey, useStationNames } from '../../lib/stations'
 
 /** Panel prowadzącego dla rundy 3 — licytacja nut, gra do 3 wygranych. */
-export function Round3Control({ edition }: { edition: LoadedEdition | null }) {
+export function Round3Control({ edition, onRedraw }: { edition: LoadedEdition | null; onRedraw?: Redraw }) {
   const game = useGame()
   const names = useStationNames()
   const label = useCallback((k: StationKey) => labelForKey(names, k), [names])
@@ -300,24 +301,41 @@ export function Round3Control({ edition }: { edition: LoadedEdition | null }) {
               const question = questions[i]
               const done = t.stan !== 'ukryte'
               return (
-                <button
-                  key={i}
-                  type="button"
-                  className={`tile-host ${done ? 'is-done' : ''}`}
-                  disabled={done || busy}
-                  onClick={() => pick(i)}
-                >
-                  <span className="tile-host__num">
-                    {i + 1} · {question.wartosc} pkt
-                  </span>
-                  <span className="tile-host__haslo">{question.wykonawca}</span>
-                  <span className="tile-host__answer">{question.tytul}</span>
-                  {done && t.stanowisko && (
-                    <span className="tile-host__result">
-                      {t.trafil ? `${label(t.stanowisko)} zgadł` : `pudło → ${label(t.stanowisko)}`}
+                <div key={i} className="tile-host-wrap">
+                  <button
+                    type="button"
+                    className={`tile-host ${done ? 'is-done' : ''}`}
+                    disabled={done || busy}
+                    onClick={() => pick(i)}
+                  >
+                    <span className="tile-host__num">
+                      {i + 1} · {question.wartosc} pkt
                     </span>
+                    <span className="tile-host__haslo">{question.wykonawca}</span>
+                    <span className="tile-host__answer">{question.tytul}</span>
+                    {done && t.stanowisko && (
+                      <span className="tile-host__result">
+                        {t.trafil ? `${label(t.stanowisko)} zgadł` : `pudło → ${label(t.stanowisko)}`}
+                      </span>
+                    )}
+                  </button>
+                  {!done && onRedraw && (
+                    <button
+                      type="button"
+                      className="tile-host__redraw"
+                      title="Przelosuj tę zagadkę"
+                      disabled={busy}
+                      onClick={() =>
+                        run(async () => {
+                          const why = await onRedraw('runda3', i)
+                          if (why) setError(why)
+                        })
+                      }
+                    >
+                      ↻
+                    </button>
                   )}
-                </button>
+                </div>
               )
             })}
           </div>

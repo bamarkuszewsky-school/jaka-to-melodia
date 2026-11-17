@@ -18,6 +18,7 @@ import {
   undoAnnounceRound2,
 } from '../../lib/game/hostActions'
 import type { LoadedEdition } from '../../lib/game/questions'
+import type { DrawKey } from '../../lib/library/library'
 import { startRound3 } from '../../lib/game/round3Actions'
 import {
   ANSWER_MS,
@@ -38,9 +39,11 @@ import { labelForKey, useStationNames } from '../../lib/stations'
 import { RefrenButton } from './RefrenButton'
 
 type Run = (fn: () => Promise<unknown>) => Promise<void>
+/** Przelosowanie utworu w trakcie gry; zwraca powód, jeśli się nie da. */
+export type Redraw = (key: DrawKey, index: number) => Promise<string | undefined>
 
 /** Panel prowadzącego dla rund 1–2: tablica haseł, odtwarzanie, ocena odpowiedzi, punkty, eliminacja. */
-export function RoundControl({ edition }: { edition: LoadedEdition | null }) {
+export function RoundControl({ edition, onRedraw }: { edition: LoadedEdition | null; onRedraw?: Redraw }) {
   const game = useGame()
   const names = useStationNames()
   const { pytanie, zgloszenie } = game
@@ -105,6 +108,16 @@ export function RoundControl({ edition }: { edition: LoadedEdition | null }) {
     }
     await run(songStarted)
   }
+
+  // Przelosowanie (np. plik się nie odtwarza): muzyka staje, kafelek dostaje nowy utwór.
+  const redraw = onRedraw
+    ? (key: DrawKey, index: number) =>
+        run(async () => {
+          player.stop()
+          const why = await onRedraw(key, index)
+          if (why) setError(why)
+        })
+    : undefined
 
   const onWrong = () =>
     run(async () => {
@@ -193,11 +206,16 @@ export function RoundControl({ edition }: { edition: LoadedEdition | null }) {
             run(songTimedOut)
           }}
           audioUrl={edition.audio.get(question.plik)}
+          onRedraw={
+            redraw
+              ? () => redraw(pytanie.runda === 1 ? 'runda1' : pytanie.dogrywka ? 'dogrywka2' : 'runda2', pytanie.haslo)
+              : undefined
+          }
         />
       ) : pytanie ? (
         <p className="notice">Trwa hasło, ale brakuje go w edycji — wybierz folder z muzyką.</p>
       ) : (
-        <Between game={game} edition={edition} runda={runda} label={label} run={run} />
+        <Between game={game} edition={edition} runda={runda} label={label} run={run} redraw={redraw} />
       )}
 
       {error && <p className="error">{error}</p>}
@@ -263,9 +281,10 @@ interface StageProps {
   onWrong: () => void
   onStop: () => void
   audioUrl?: string
+  onRedraw?: () => void
 }
 
-function Stage({ game, question, label, run, onPlay, onWrong, onStop, audioUrl }: StageProps) {
+function Stage({ game, question, label, run, onPlay, onWrong, onStop, audioUrl, onRedraw }: StageProps) {
   const pytanie = game.pytanie!
   const live = pytanie.faza === 'gra' || pytanie.faza === 'odpowiedz'
   const now = useServerNow(live)
@@ -298,6 +317,11 @@ function Stage({ game, question, label, run, onPlay, onWrong, onStop, audioUrl }
               Wybierz inne hasło
             </button>
           )}
+          {blockedKeys.length === 0 && onRedraw && (
+            <button type="button" className="btn btn--ghost" onClick={onRedraw} title="Np. gdy plik się nie odtwarza">
+              ↻ Przelosuj utwór
+            </button>
+          )}
         </div>
       )}
 
@@ -313,9 +337,16 @@ function Stage({ game, question, label, run, onPlay, onWrong, onStop, audioUrl }
           )}
           <Progress ms={Math.max(0, SONG_MS - elapsed)} total={SONG_MS} />
           <p className="muted">Muzyka gra — czekamy na przycisk.</p>
-          <button type="button" className="btn btn--ghost" onClick={onStop}>
-            Zatrzymaj (nikt nie zgadł)
-          </button>
+          <div className="stage-host__actions">
+            <button type="button" className="btn btn--ghost" onClick={onStop}>
+              Zatrzymaj (nikt nie zgadł)
+            </button>
+            {blockedKeys.length === 0 && onRedraw && (
+              <button type="button" className="btn btn--ghost" onClick={onRedraw} title="Np. gdy plik się nie odtwarza">
+                ↻ Przelosuj utwór
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -380,9 +411,10 @@ interface BetweenProps {
   runda: RoundNo
   label: (k: StationKey) => string
   run: Run
+  redraw?: (key: DrawKey, index: number) => void
 }
 
-function Between({ game, edition, runda, label, run }: BetweenProps) {
+function Between({ game, edition, runda, label, run, redraw }: BetweenProps) {
   const chooser = currentChooser(game)
   const set = edition.set
 
@@ -414,7 +446,13 @@ function Between({ game, edition, runda, label, run }: BetweenProps) {
         <p className="muted">
           Wybiera <strong>{chooser ? label(chooser) : '—'}</strong>. Kliknij hasło, które wskaże.
         </p>
-        <TileGrid tiles={r1.hasla} questions={set.runda1} label={label} onPick={(i) => run(() => selectTile(1, i))} />
+        <TileGrid
+          tiles={r1.hasla}
+          questions={set.runda1}
+          label={label}
+          onPick={(i) => run(() => selectTile(1, i))}
+          onRedraw={redraw ? (i) => redraw('runda1', i) : undefined}
+        />
       </>
     )
   }
@@ -454,7 +492,13 @@ function Between({ game, edition, runda, label, run }: BetweenProps) {
           Wybiera <strong>{chooser ? label(chooser) : '—'}</strong>
           {r2.hasla.every((t) => t.stan === 'ukryte') && ' (najmniej punktów po rundzie 1)'}. Kliknij hasło, które wskaże.
         </p>
-        <TileGrid tiles={r2.hasla} questions={set.runda2} label={label} onPick={(i) => run(() => selectTile(2, i))} />
+        <TileGrid
+          tiles={r2.hasla}
+          questions={set.runda2}
+          label={label}
+          onPick={(i) => run(() => selectTile(2, i))}
+          onRedraw={redraw ? (i) => redraw('runda2', i) : undefined}
+        />
       </>
     )
   }
@@ -493,6 +537,7 @@ function Between({ game, edition, runda, label, run }: BetweenProps) {
               onPick={(i) =>
                 run(() => selectTile(2, i, { poza: STATION_KEYS.filter((k) => !e.contenders.includes(k)) }))
               }
+              onRedraw={redraw ? (i) => redraw('dogrywka2', i) : undefined}
             />
           ) : (
             <p className="error">
@@ -537,35 +582,43 @@ interface TileGridProps {
   questions: Question[]
   label: (k: StationKey) => string
   onPick?: (index: number) => void
+  /** ↻ przy nierozegranych hasłach — przelosowanie utworu. */
+  onRedraw?: (index: number) => void
 }
 
-function TileGrid({ tiles, questions, label, onPick }: TileGridProps) {
+function TileGrid({ tiles, questions, label, onPick, onRedraw }: TileGridProps) {
   return (
     <div className="tiles-host" style={{ gridTemplateColumns: `repeat(${Math.max(tiles.length, 3)}, minmax(0, 1fr))` }}>
       {tiles.map((t, i) => {
         const q = questions[i]
         const done = t.stan !== 'ukryte'
         return (
-          <button
-            key={i}
-            type="button"
-            className={`tile-host ${done ? 'is-done' : ''}`}
-            disabled={done || !onPick}
-            onClick={() => onPick?.(i)}
-          >
-            <span className="tile-host__num">{i + 1}</span>
-            <span className="tile-host__haslo">{t.haslo}</span>
-            <span className="tile-host__answer">{q ? `${q.tytul} — ${q.wykonawca}` : '?'}</span>
-            {done && (
-              <span className="tile-host__result">
-                {t.stan === 'pominiete'
-                  ? 'pominięte'
-                  : t.stan === 'odgadniete' && t.stanowisko
-                    ? `${label(t.stanowisko)} +${t.punkty}`
-                    : 'nikt'}
-              </span>
+          <div key={i} className="tile-host-wrap">
+            <button
+              type="button"
+              className={`tile-host ${done ? 'is-done' : ''}`}
+              disabled={done || !onPick}
+              onClick={() => onPick?.(i)}
+            >
+              <span className="tile-host__num">{i + 1}</span>
+              <span className="tile-host__haslo">{t.haslo}</span>
+              <span className="tile-host__answer">{q ? `${q.tytul} — ${q.wykonawca}` : '?'}</span>
+              {done && (
+                <span className="tile-host__result">
+                  {t.stan === 'pominiete'
+                    ? 'pominięte'
+                    : t.stan === 'odgadniete' && t.stanowisko
+                      ? `${label(t.stanowisko)} +${t.punkty}`
+                      : 'nikt'}
+                </span>
+              )}
+            </button>
+            {!done && onRedraw && (
+              <button type="button" className="tile-host__redraw" onClick={() => onRedraw(i)} title="Przelosuj ten utwór">
+                ↻
+              </button>
             )}
-          </button>
+          </div>
         )
       })}
     </div>

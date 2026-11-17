@@ -3,11 +3,14 @@ import { nut, opponent, poNutach, R3_BIG_VALUE, R3_VALUE, WINS_TO_FINAL } from '
 import { useServerNow } from '../../lib/game/state'
 import type { GameState, StationKey } from '../../lib/game/types'
 import { labelForKey, type StationNames } from '../../lib/stations'
+import { useEtap } from '../../lib/library/db'
 import { FitText } from '../FitText'
 import { ShowRows, type ShowRow } from './ShowRows'
 
 /** Tablica widowni w rundzie 3: numery zagadek, licytacja, odpowiedź, wynik, zwycięzca. */
 export function Round3Board({ game, names }: { game: GameState; names: StationNames }) {
+  // Etap drabinki w nagłówku planszy („Ćwierćfinał 2”).
+  const etapHead = useEtap()?.etap
   const r3 = game.runda3
   const p = game.pytanie3
   const now = useServerNow(p?.faza === 'odpowiedz')
@@ -121,7 +124,7 @@ export function Round3Board({ game, names }: { game: GameState; names: StationNa
   return (
     <div className="r1 r1--show">
       <header className="r1__head">
-        <span className="r1__round">Runda 3 · Licytacja</span>
+        <span className="r1__round">Runda 3 · Licytacja{etapHead && <span className="r1__etap">{etapHead}</span>}</span>
         <span className="r1__logo">
           Jaka to <span className="accent">melodia?</span>
         </span>

@@ -14,6 +14,7 @@ import {
 import { useServerNow } from '../../lib/game/state'
 import { STATION_KEYS, type GameState, type RoundNo, type StationKey } from '../../lib/game/types'
 import { labelForKey, type StationNames } from '../../lib/stations'
+import { useEtap } from '../../lib/library/db'
 import { FitText } from '../FitText'
 import { ShowRows, type ShowRow } from './ShowRows'
 
@@ -24,6 +25,8 @@ interface Props {
 
 /** Tablica widowni w rundach 1–2: lista haseł jak w teleturnieju, pasek stanu piosenki, dogrywka, wyniki. */
 export function RoundBoard({ game, names }: Props) {
+  // Etap drabinki w nagłówku planszy („Ćwierćfinał 2”).
+  const etapHead = useEtap()?.etap
   const runda: RoundNo = game.runda === 2 ? 2 : 1
   const r = roundState(game, runda)
   const label = (k: StationKey) => labelForKey(names, k)
@@ -89,7 +92,7 @@ export function RoundBoard({ game, names }: Props) {
   return (
     <div className="r1 r1--show">
       <header className="r1__head">
-        <span className="r1__round">Runda {runda}</span>
+        <span className="r1__round">Runda {runda}{etapHead && <span className="r1__etap">{etapHead}</span>}</span>
         <span className="r1__logo">
           Jaka to <span className="accent">melodia?</span>
         </span>

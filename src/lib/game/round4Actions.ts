@@ -134,3 +134,8 @@ export function finalWrong(game: GameState, questions: FinalQuestion[]): Promise
 export function finalistStop(stanowisko: StationKey): Promise<void> {
   return set(gra('stop4'), { stanowisko, czas: serverTimestamp(), k: KLIENT })
 }
+
+/** Po finale: pokaż (albo schowaj) na tablicy i live wszystkie 7 utworów z wynikiem. */
+export function revealFinalSongs(on: boolean): Promise<void> {
+  return set(gra('runda4/odslon'), on || null)
+}

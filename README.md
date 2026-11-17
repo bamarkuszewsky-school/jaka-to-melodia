@@ -4,7 +4,7 @@ Teleturniej muzyczny w przeglądarce: tablica dla widowni, panel hosta, przycisk
 
 Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Database**, logowanie ról przez **Firebase Authentication**, hosting na **GitHub Pages**.
 
-## Co już działa (wersja 0.9)
+## Co już działa (wersja 0.10)
 
 - Ekran startowy z wyborem roli: **Zawodnik, Host, Tech Support, Tablica**.
 - Logowanie hasłem — każda rola ma własne konto w Firebase.
@@ -22,6 +22,8 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 - **Ranking sezonu** z pokazem na tablicy i na live, **Zakończ rundę / Zakończ edycję**.
 - **iPady zgłaszają się przy stanowiskach**, a host przypisuje im stanowisko i klasę.
 - **Tablica w stylu teleturnieju:** w rundach 1–3 belki haseł z plakietką punktów (na żywo rośnie / maleje), w finale panel z numerami 1–7 i sześciokątnym zegarem z paskiem czasu, tabliczka finalisty; w OBS ten sam panel na przezroczystym tle (kamera).
+- **Sezon i drabinka:** eliminacje → ćwierćfinały → półfinały → finał + finał nauczycieli, kolejne etapy układają się same; pokaz drabinki na tablicy i live, „Rozpocznij sezon” / „Zakończ sezon” z datą, etap w czołówce i intro rund.
+- **Przelosowanie utworu w trakcie gry** (↻), **odsłonięcie 7 utworów po finale**, **„Dziękujemy!” na iPadach** po edycji.
 - **Plansza edycji:** przed rundą 1 i po „Zakończ edycję” tablica pokazuje 20 s rankingu, potem „Edycja 5 · 4BT VS 2AT VS 4B LO” (+ „zakończona”).
 
 ## Runda 3 — licytacja nut
@@ -101,13 +103,26 @@ Nazwa pliku to **„Tytuł - Wykonawca”**. Utwory mogą być całe — start f
 1. **Gra → Edycja → Wybierz folder z muzyką.** Nowe utwory same trafiają do bazy (Firebase, `/baza`, czyta tylko host).
 2. **Baza utworów:** przy każdym utworze **wykres głośności** — klikasz w niego i od razu ustawiasz **start** albo **refren**, bez słuchania (cisza na początku to płaska linia, refren zwykle jest najgłośniejszy; żółte pole to 15 s, które zagrają w rundach 1–2). Do tego „Graj od kreski”, „= teraz” i podgląd 15 s. Runda 2 — **hasło**, runda 3 — **anegdota**. Zmiany zapisują się od razu.
 3. **Pobierz CSV / Kopiuj listę** — lista do arkusza albo na czat (np. żeby wymyślić hasła). **Wczytaj CSV** — uzupełnia start, refren, hasła i anegdoty (po kolumnie `id`; czas jako `83,5` albo `1:23,5`). Wpisuje tylko do pustych pól — tego, co ustawiłeś w aplikacji, nigdy nie nadpisze, więc ten sam plik można wczytywać wiele razy.
-4. **Nowa edycja — losuj utwory:** 5 × runda 1 (na tablicy wykonawca zamiast hasła), 3 × runda 2 + 2 na dogrywkę, 6 × runda 3, 7 × finał. Losowane są tylko utwory gotowe i jeszcze niegrane; każdy można przelosować (↻).
+4. **Nowa edycja — losuj utwory:** 5 × runda 1 (na tablicy wykonawca zamiast hasła), 5 × runda 2 + 2 na dogrywkę, 6 × runda 3, 7 × finał. Losowane są tylko utwory gotowe i jeszcze niegrane; każdy można przelosować (↻).
 5. **Zakończ rundę** — przerywa bieżącą rundę (niezagrane hasła są pomijane i wracają do puli). **Zakończ edycję** — wyniki klas idą do rankingu, zagrane utwory dostają wpis w historii (edycja, odgadnięty / nie, przez kogo) i wypadają z losowania. W bazie można je odznaczyć.
 **Edycja testowa** (przycisk obok „Nowa edycja”) — do prób przy małej bazie: losuje spośród wszystkich utworów z plikiem, także zagranych i bez ustawionego startu (gra wtedy od początku, hasło = wykonawca). Gdy utworów jest za mało, bierze z innych rund i powtarza. Nie trafia do rankingu i nie oznacza utworów jako zagranych.
 **Zastąp bazę z CSV** — cała baza dokładnie taka jak w pliku (puste komórki czyszczą pole, utwory spoza pliku znikają; pliki, nuty i historia zagrań zostają). Przed zapisem pokazuje podsumowanie do potwierdzenia.
 6. **Ranking** — wszystkie klasy z zakończonych edycji; przyciski **Pokaż na tablicy** i **Pokaż na live**. Edycję testową usuniesz w Baza utworów → Edycje.
 
 Po odświeżeniu strony folder trzeba wybrać ponownie — edycja, punkty i stan gry zostają w bazie.
+
+## Sezon i drabinka (zakładka „Drabinka”)
+
+1. **Nowy sezon:** nazwa, lista wszystkich klas (jedna w linii) i 3 drużyny nauczycieli. Aplikacja dzieli klasy na edycje eliminacji po 3 (losowo albo po kolei; gdy się nie dzieli — ostatnie po 2).
+2. **Rozpocznij sezon** (z datą) — tablica i live pokazują „Rozpoczynamy · Sezon …”. Edycje rozegrane wcześniej można doliczyć do rankingu sezonu.
+3. **Nowa edycja** w zakładce „Gra” ma pola **Data** i **Mecz z drabinki** (domyślnie następny). Po zatwierdzeniu klasy meczu trafiają na stanowiska 1–3, a etap („Ćwierćfinał 2”) pojawia się w czołówce, intrach rund, nagłówkach plansz i na planszy edycji.
+4. Po „Zakończ edycję” drabinka uzupełnia się sama (kto wygrał, kto odpadł w rundzie 2 / 3). Gdy etap się skończy, następny układa się sam: **awansują zwycięzcy edycji, a wolne miejsca dostają klasy z największą liczbą punktów w etapie** (ćwierćfinały 12 klas, półfinały 6, finał 3). Rozstawienie według punktów — najlepsze klasy trafiają do różnych edycji.
+5. Drabinkę można zmieniać w każdej chwili (nierozegrane mecze): wpisać inne klasy, dodać / usunąć edycję, „Ułóż od nowa według punktów”, podpiąć edycję rozegraną przed założeniem drabinki.
+6. **Pokaż drabinkę na tablicy / na live** — jak ranking. **Zakończ sezon** (z datą) — plansza z mistrzem sezonu i zwycięzcami finału nauczycieli. Ranking liczy edycje bieżącego sezonu; finał nauczycieli nie wchodzi do rankingu klas.
+
+Po „Zakończ edycję” iPady pokazują **„Dziękujemy!”**: zwycięzca — „Do zobaczenia!”, pozostali — „Do zobaczenia w następnym sezonie!” (a gdy z etapu ktoś jeszcze wejdzie z rankingu — że o awansie zdecydują punkty). Napis znika, gdy host wpisze na stanowisko inną klasę.
+
+**W trakcie gry** ↻ przy haśle (i „↻ Przelosuj utwór” przy wybranym haśle) losuje inny utwór — np. gdy plik się nie odtwarza. Działa tylko dla utworów, na które nikt jeszcze nie odpowiadał. Po finale: **„Odsłoń 7 utworów finału”** — tablica i live pokazują po kolei wszystkie tytuły z wynikiem.
 
 ## iPady na stanowiskach
 
