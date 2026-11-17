@@ -288,6 +288,16 @@ export function missingFor(rec: SongRecord): Missing[] {
   return m
 }
 
+/** Rundy 1–2 i finał: brak ustawionego początku fragmentu. */
+export function needsStart(rec: SongRecord): boolean {
+  return rec.runda !== '3' && (rec.start === undefined || rec.start === null)
+}
+
+/** Rundy 1–2 i finał: brak ustawionego refrenu (przycisk „Refren” po odsłonięciu). */
+export function needsRefren(rec: SongRecord): boolean {
+  return rec.runda !== '3' && (rec.refren === undefined || rec.refren === null)
+}
+
 export function isPlayed(rec: SongRecord): boolean {
   return Boolean(rec.historia && Object.keys(rec.historia).length > 0 && !rec.odblokowany)
 }

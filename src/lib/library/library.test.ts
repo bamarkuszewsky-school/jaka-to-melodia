@@ -8,6 +8,8 @@ import {
   importCsv,
   isPlayed,
   missingFor,
+  needsRefren,
+  needsStart,
   parseRoundFolder,
   parseSongName,
   redrawOne,
@@ -123,6 +125,15 @@ function library(): Songs {
 }
 
 describe('gotowość i losowanie', () => {
+  it('filtry „do uzupełnienia: początek / refren” pomijają rundę 3', () => {
+    const [, a] = song('1', 1, { start: undefined, refren: undefined })
+    const [, b] = song('F', 2, { start: 0, refren: 45.2 })
+    const [, c] = song('3', 3, { start: undefined, refren: undefined })
+    expect([needsStart(a), needsRefren(a)]).toEqual([true, true])
+    expect([needsStart(b), needsRefren(b)]).toEqual([false, false])
+    expect([needsStart(c), needsRefren(c)]).toEqual([false, false])
+  })
+
   it('pokazuje, czego brakuje', () => {
     expect(missingFor({ runda: '1', tytul: 'a', wykonawca: 'b', plik: 'x' })).toEqual(['start'])
     expect(missingFor({ runda: '2', tytul: 'a', wykonawca: 'b', plik: 'x', start: 0 })).toEqual(['haslo'])

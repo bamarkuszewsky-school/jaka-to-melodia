@@ -12,6 +12,8 @@ import {
   LIB_ROUNDS,
   MISSING_LABEL,
   missingFor,
+  needsRefren,
+  needsStart,
   parseSeconds,
   replaceFromCsv,
   type CsvReplace,
@@ -32,13 +34,35 @@ interface Props {
 }
 
 type Tab = LibRound | 'edycje'
-type Filter = 'wszystkie' | 'braki' | 'gotowe' | 'zagrane'
+type Filter = 'wszystkie' | 'braki' | 'brak-start' | 'brak-refren' | 'gotowe' | 'zagrane'
 
 const FILTERS: Record<Filter, string> = {
   wszystkie: 'Wszystkie',
   braki: 'Do uzupełnienia',
+  'brak-start': 'Do uzupełnienia: początek',
+  'brak-refren': 'Do uzupełnienia: refren',
   gotowe: 'Gotowe do losowania',
   zagrane: 'Zagrane',
+}
+
+/** Niezagrane utwory bez ustawionego startu / refrenu — w rundzie 3 tych pól nie ma. */
+const NO_ROUND3: Filter[] = ['brak-start', 'brak-refren']
+
+function matches(filter: Filter, s: SongRecord): boolean {
+  switch (filter) {
+    case 'braki':
+      return missingFor(s).length > 0 && !isPlayed(s)
+    case 'brak-start':
+      return needsStart(s) && !isPlayed(s)
+    case 'brak-refren':
+      return needsRefren(s) && !isPlayed(s)
+    case 'gotowe':
+      return missingFor(s).length === 0 && !isPlayed(s)
+    case 'zagrane':
+      return isPlayed(s)
+    default:
+      return true
+  }
 }
 
 /** Zakładka „Baza utworów”: start, refren, hasła, anegdoty, historia i edycje. */
@@ -59,21 +83,13 @@ export function SongDatabase({ songs, editions, currentId, scan, urlFor }: Props
 
   const all = Object.entries(songs)
   const q = query.trim().toLowerCase()
+  const inTab = tab === 'edycje' ? [] : all.filter(([, s]) => s.runda === tab)
   const list =
     tab === 'edycje'
       ? []
-      : all
-          .filter(([, s]) => s.runda === tab)
+      : inTab
           .filter(([, s]) => !q || `${s.tytul} ${s.wykonawca} ${s.haslo ?? ''}`.toLowerCase().includes(q))
-          .filter(([, s]) =>
-            filter === 'braki'
-              ? missingFor(s).length > 0 && !isPlayed(s)
-              : filter === 'gotowe'
-                ? missingFor(s).length === 0 && !isPlayed(s)
-                : filter === 'zagrane'
-                  ? isPlayed(s)
-                  : true,
-          )
+          .filter(([, s]) => matches(filter, s))
           .sort(([, a], [, b]) => a.wykonawca.localeCompare(b.wykonawca, 'pl') || a.tytul.localeCompare(b.tytul, 'pl'))
 
   const download = () => {
@@ -216,11 +232,13 @@ export function SongDatabase({ songs, editions, currentId, scan, urlFor }: Props
               onChange={(e) => setQuery(e.target.value)}
             />
             <select className="field__input" value={filter} onChange={(e) => setFilter(e.target.value as Filter)}>
-              {(Object.keys(FILTERS) as Filter[]).map((f) => (
-                <option key={f} value={f}>
-                  {FILTERS[f]}
-                </option>
-              ))}
+              {(Object.keys(FILTERS) as Filter[])
+                .filter((f) => !(tab === '3' && NO_ROUND3.includes(f)) || f === filter)
+                .map((f) => (
+                  <option key={f} value={f}>
+                    {FILTERS[f]} ({inTab.filter(([, s]) => matches(f, s)).length})
+                  </option>
+                ))}
             </select>
           </div>
           {list.length === 0 && <p className="muted">Brak utworów{q || filter !== 'wszystkie' ? ' dla tego filtra' : ' — wczytaj folder z muzyką'}.</p>}
