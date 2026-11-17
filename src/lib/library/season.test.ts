@@ -7,6 +7,7 @@ import {
   parseClassList,
   playableMatches,
   qualifiers,
+  seasonProgress,
   seedMatches,
   splitIntoMatches,
   stageToAutoFill,
@@ -114,6 +115,35 @@ describe('drabinka sezonu', () => {
     const hasUndefined = (v: unknown): boolean =>
       v === undefined || (typeof v === 'object' && v !== null && Object.values(v).some(hasUndefined))
     expect(hasUndefined(ladderView(season, editions, 'x'))).toBe(false)
+  })
+
+  it('postęp sezonu: rozegrane, do końca i następni na scenę', () => {
+    const editions = { a: played(1, [['A1', 900], ['A2', 800], ['A3', 100]]) }
+    const season: Season = {
+      nazwa: 'S',
+      etapy: {
+        eliminacje: [
+          { klasy: ['A1', 'A2', 'A3'], edycja: 'a' },
+          { klasy: ['B1', 'B2', 'B3'], edycja: 'live' },
+          { klasy: ['C1', 'C2', 'C3'] },
+        ],
+        nauczyciele: [{ klasy: ['N1', 'N2', 'N3'] }],
+      },
+    }
+    const p = seasonProgress(ladderView(season, editions, 'live'))
+    expect(p.etapy.map((e) => [e.etap, e.rozegrane, e.wszystkie, e.szacunek])).toEqual([
+      ['eliminacje', 1, 3, false],
+      ['cwierc', 0, 4, true],
+      ['polfinal', 0, 2, true],
+      ['final', 0, 1, true],
+      ['nauczyciele', 0, 1, false],
+    ])
+    expect(p.doKonca).toBe(10)
+    expect(p.nastepne.map((m) => [m.nr, m.teraz, m.klasy[0]])).toEqual([
+      [2, true, 'B1'],
+      [3, false, 'C1'],
+      [1, false, 'N1'],
+    ])
   })
 
   it('napisy na iPadach po edycji', () => {

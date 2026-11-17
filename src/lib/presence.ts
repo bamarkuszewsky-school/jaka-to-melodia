@@ -8,7 +8,16 @@ import { BUILD_ID, KLIENT } from './version'
  * Klucze obecności w bazie (/obecnosc/<klucz>).
  * Reguły bazy pozwalają każdej roli zapisać tylko swoje klucze.
  */
-export type PresenceKey = 'host' | 'tablica' | 'tech' | 'stream' | 'muzyk' | 'stanowisko1' | 'stanowisko2' | 'stanowisko3'
+export type PresenceKey =
+  | 'host'
+  | 'tablica'
+  | 'tech'
+  | 'stream'
+  | 'muzyk'
+  | 'koordynator'
+  | 'stanowisko1'
+  | 'stanowisko2'
+  | 'stanowisko3'
 
 export const PRESENCE_LABELS: Record<PresenceKey, string> = {
   host: 'Host',
@@ -16,6 +25,7 @@ export const PRESENCE_LABELS: Record<PresenceKey, string> = {
   tech: 'Tech Support',
   stream: 'Widok /stream',
   muzyk: 'Muzyk',
+  koordynator: 'Koordynator',
   stanowisko1: 'Stanowisko 1',
   stanowisko2: 'Stanowisko 2',
   stanowisko3: 'Stanowisko 3',

@@ -5,7 +5,7 @@
     "obecnosc": {
       ".read": "auth != null",
       "$klucz": {
-        ".write": "auth != null && ((((auth.token.email === 'host@cyfroweszkoly.pl' && $klucz === 'host') || (auth.token.email === 'tablica@cyfroweszkoly.pl' && $klucz === 'tablica') || (auth.token.email === 'techsupport@cyfroweszkoly.pl' && ($klucz === 'tech' || $klucz === 'stream')) || (auth.token.email === 'muzyk@cyfroweszkoly.pl' && $klucz === 'muzyk') || (auth.token.email === 'zawodnik@cyfroweszkoly.pl' && ($klucz === 'stanowisko1' || $klucz === 'stanowisko2' || $klucz === 'stanowisko3')))) || (auth.token.email === 'host@cyfroweszkoly.pl' && !newData.exists()))",
+        ".write": "auth != null && ((((auth.token.email === 'host@cyfroweszkoly.pl' && $klucz === 'host') || (auth.token.email === 'tablica@cyfroweszkoly.pl' && $klucz === 'tablica') || (auth.token.email === 'techsupport@cyfroweszkoly.pl' && ($klucz === 'tech' || $klucz === 'stream')) || (auth.token.email === 'muzyk@cyfroweszkoly.pl' && $klucz === 'muzyk') || (auth.token.email === 'koordynator@cyfroweszkoly.pl' && $klucz === 'koordynator') || (auth.token.email === 'zawodnik@cyfroweszkoly.pl' && ($klucz === 'stanowisko1' || $klucz === 'stanowisko2' || $klucz === 'stanowisko3')))) || (auth.token.email === 'host@cyfroweszkoly.pl' && !newData.exists()))",
         ".validate": "!newData.exists() || (newData.child('k').isNumber() && newData.child('k').val() >= 2)"
       }
     },

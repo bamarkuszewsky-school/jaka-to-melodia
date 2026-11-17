@@ -24,6 +24,7 @@ import {
   usePokaz,
   useRankingSync,
   useSeasons,
+  useSongStatsSync,
   useSongs,
 } from '../lib/library/db'
 import { buildEdition } from '../lib/library/edition'
@@ -74,6 +75,7 @@ export function HostPage() {
   const season = seasonId && seasons ? seasons[seasonId] : undefined
   useRankingSync(editions, pokaz, seasonId, Boolean(season?.start))
   useLadderSync(seasonId, season, editions, currentId, pokaz)
+  useSongStatsSync(songs, pokaz)
 
   // Po wczytaniu folderu: nowe utwory trafiają do bazy, zniknięte dostają „brak pliku”.
   const synced = useRef<typeof scan>(null)

@@ -373,3 +373,56 @@ export function farewells(
   }
   return out
 }
+
+// ---------- Postęp sezonu (koordynator) ----------
+
+/** Ile edycji ma etap, zanim zostanie ułożony (ćwierćfinały 4, półfinały 2, finał 1, nauczyciele 1). */
+const EXPECTED_MATCHES: Partial<Record<StageKey, number>> = { cwierc: 4, polfinal: 2, final: 1, nauczyciele: 1 }
+
+export interface StageProgress {
+  etap: StageKey
+  nazwa: string
+  rozegrane: number
+  wszystkie: number
+  /** Etap jeszcze nieułożony — liczba edycji to przewidywanie. */
+  szacunek: boolean
+}
+
+export interface UpcomingMatch {
+  etap: StageKey
+  /** „Eliminacje 9”, „Ćwierćfinał 2”, „Wielki finał”. */
+  nazwa: string
+  nr: number
+  klasy: string[]
+  /** Ten mecz właśnie trwa. */
+  teraz: boolean
+}
+
+export interface SeasonProgress {
+  etapy: StageProgress[]
+  rozegrane: number
+  doKonca: number
+  /** Najbliższe mecze w kolejności etapów (najpierw ten, który trwa). */
+  nastepne: UpcomingMatch[]
+}
+
+export function seasonProgress(view: LadderView): SeasonProgress {
+  const etapy = view.etapy.map((s): StageProgress => {
+    const known = s.mecze.length
+    const wszystkie = known || EXPECTED_MATCHES[s.etap] || 0
+    return { etap: s.etap, nazwa: s.nazwa, rozegrane: s.mecze.filter((m) => m.stan === 'koniec').length, wszystkie, szacunek: known === 0 }
+  })
+  const nastepne: UpcomingMatch[] = []
+  for (const s of view.etapy) {
+    for (const m of s.mecze) {
+      if (m.stan === 'koniec' || m.klasy.length === 0) continue
+      const single = s.mecze.length === 1 || s.etap === 'final' || s.etap === 'nauczyciele'
+      const nazwa = single ? STAGE_NAME[s.etap] : `${STAGE_NAME[s.etap]} ${m.nr}`
+      nastepne.push({ etap: s.etap, nazwa, nr: m.nr, klasy: m.klasy.map((k) => k.klasa), teraz: m.stan === 'gra' })
+    }
+  }
+  nastepne.sort((a, b) => Number(b.teraz) - Number(a.teraz))
+  const rozegrane = etapy.reduce((n, e) => n + e.rozegrane, 0)
+  const doKonca = etapy.reduce((n, e) => n + e.wszystkie - e.rozegrane, 0)
+  return { etapy, rozegrane, doKonca, nastepne }
+}

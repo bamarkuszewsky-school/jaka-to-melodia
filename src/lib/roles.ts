@@ -1,7 +1,7 @@
-// Cztery role aplikacji. Każda rola = jedno konto w Firebase Authentication.
+// Role aplikacji. Każda rola = jedno konto w Firebase Authentication.
 // Adresy e-mail są zmyślone (domena example.pl) — użytkownik wpisuje tylko hasło.
 
-export type RoleId = 'zawodnik' | 'host' | 'tech' | 'tablica' | 'muzyk'
+export type RoleId = 'zawodnik' | 'host' | 'tech' | 'tablica' | 'muzyk' | 'koordynator'
 
 export interface Role {
   id: RoleId
@@ -46,6 +46,13 @@ export const ROLES: readonly Role[] = [
     description: 'Nuty do rundy 3 (przy pianinie)',
     email: 'muzyk@cyfroweszkoly.pl',
     path: '/muzyk',
+  },
+  {
+    id: 'koordynator',
+    label: 'Koordynator',
+    description: 'Panel za sceną (tablica multimedialna)',
+    email: 'koordynator@cyfroweszkoly.pl',
+    path: '/koordynator',
   },
 ]
 

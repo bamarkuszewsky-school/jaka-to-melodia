@@ -6,8 +6,8 @@ import type { LadderMatch, LadderStage, LadderView } from '../../lib/library/sea
  * Drabinka sezonu na tablicy i live: scena 1920×1080 skalowana do ekranu.
  * Eliminacje w dwóch kolumnach, dalej ćwierćfinały, półfinały, finał i finał nauczycieli.
  */
-export function LadderBoard({ view, variant }: { view: LadderView; variant: 'board' | 'stream' }) {
-  const scale = useFitScale()
+export function LadderBoard({ view, variant, reserveTop = 0 }: { view: LadderView; variant: 'board' | 'stream'; reserveTop?: number }) {
+  const scale = useFitScale(reserveTop)
   const stage = (k: string) => view.etapy.find((e) => e.etap === k)
   const elim = stage('eliminacje')
   const rest = ['cwierc', 'polfinal', 'final'].map(stage).filter((e): e is LadderStage => Boolean(e))
@@ -16,7 +16,7 @@ export function LadderBoard({ view, variant }: { view: LadderView; variant: 'boa
   const dense = (elim?.mecze.length ?? 0) > 12
 
   return (
-    <div className={`ladder ladder--${variant}`}>
+    <div className={`ladder ladder--${variant}`} style={reserveTop ? { top: reserveTop } : undefined}>
       <div className="ladder__stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
         <header className="ladder__head">
           <span className="ladder__eyebrow">Jaka to melodia?</span>

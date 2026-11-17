@@ -5,6 +5,8 @@ import { resetGame } from '../game/hostActions'
 import type { GameState, StationKey } from '../game/types'
 import {
   computeRanking,
+  isPlayed,
+  isReady,
   songOutcomes,
   stationResults,
   type DrawnSongs,
@@ -131,6 +133,15 @@ export interface EtapInfo {
   etap?: string
   edycja: string
   data?: string
+  /** Czas serwera, kiedy edycję wylosowano (koordynator liczy, ile trwa). */
+  od?: number
+}
+
+/** Liczby z bazy utworów dla koordynatora (tylko liczby — bez tytułów). */
+export interface SongStats {
+  /** Gotowe do losowania (niegrane) i zagrane, po rundach: '1', '2', '3', 'F'. */
+  gotowe: Record<string, number>
+  zagrane: Record<string, number>
 }
 
 export async function createEdition(nazwa: string, numer: number, utwory: DrawnSongs, opts: EditionOptions = {}): Promise<string> {
@@ -156,7 +167,7 @@ export async function createEdition(nazwa: string, numer: number, utwory: DrawnS
   const etap = m ? matchLabel(m, opts.season) : undefined
   await update(ref(db, 'pokaz'), {
     plansza: { tryb: 'start', nazwa, od: serverTimestamp(), etap: etap ?? null, data: opts.data || null },
-    etap: { edycja: nazwa, etap: etap ?? null, data: opts.data || null },
+    etap: { edycja: nazwa, etap: etap ?? null, data: opts.data || null, od: serverTimestamp() },
   })
   return id
 }
@@ -264,6 +275,7 @@ export interface Pokaz {
   drabinkaStream: boolean
   /** Etap i edycja, która trwa — do czołówki i intra rund. */
   etap?: EtapInfo
+  statystyki?: SongStats
 }
 
 const asPokaz = (v: unknown): Pokaz => {
@@ -277,6 +289,7 @@ const asPokaz = (v: unknown): Pokaz => {
     drabinkaTablica: Boolean(raw.drabinkaTablica),
     drabinkaStream: Boolean(raw.drabinkaStream),
     etap: raw.etap ?? undefined,
+    statystyki: raw.statystyki ?? undefined,
   }
 }
 
@@ -420,6 +433,22 @@ export function useLadderSync(
 }
 
 export { STAGE_NAME }
+
+/** Host publikuje liczby z bazy utworów (koordynator nie czyta /baza). */
+export function useSongStatsSync(songs: Songs | undefined, pokaz: Pokaz | undefined) {
+  useEffect(() => {
+    if (!songs || !pokaz) return
+    const gotowe: Record<string, number> = { '1': 0, '2': 0, '3': 0, F: 0 }
+    const zagrane: Record<string, number> = { '1': 0, '2': 0, '3': 0, F: 0 }
+    for (const s of Object.values(songs)) {
+      if (s.brak) continue
+      if (isPlayed(s)) zagrane[s.runda] = (zagrane[s.runda] ?? 0) + 1
+      else if (isReady(s)) gotowe[s.runda] = (gotowe[s.runda] ?? 0) + 1
+    }
+    const stats: SongStats = { gotowe, zagrane }
+    if (JSON.stringify(stats) !== JSON.stringify(pokaz.statystyki ?? null)) set(ref(db, 'pokaz/statystyki'), stats).catch(() => {})
+  }, [songs, pokaz])
+}
 
 export function clearPokaz(): Promise<void> {
   return remove(ref(db, 'pokaz/tablica')).then(() => remove(ref(db, 'pokaz/stream')))

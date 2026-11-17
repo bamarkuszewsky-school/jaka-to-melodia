@@ -4,7 +4,7 @@ Teleturniej muzyczny w przeglądarce: tablica dla widowni, panel hosta, przycisk
 
 Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Database**, logowanie ról przez **Firebase Authentication**, hosting na **GitHub Pages**.
 
-## Co już działa (wersja 0.10)
+## Co już działa (wersja 0.11)
 
 - Ekran startowy z wyborem roli: **Zawodnik, Host, Tech Support, Tablica**.
 - Logowanie hasłem — każda rola ma własne konto w Firebase.
@@ -24,6 +24,7 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 - **Tablica w stylu teleturnieju:** w rundach 1–3 belki haseł z plakietką punktów (na żywo rośnie / maleje), w finale panel z numerami 1–7 i sześciokątnym zegarem z paskiem czasu, tabliczka finalisty; w OBS ten sam panel na przezroczystym tle (kamera).
 - **Sezon i drabinka:** eliminacje → ćwierćfinały → półfinały → finał + finał nauczycieli, kolejne etapy układają się same; pokaz drabinki na tablicy i live, „Rozpocznij sezon” / „Zakończ sezon” z datą, etap w czołówce i intro rund.
 - **Przelosowanie utworu w trakcie gry** (↻), **odsłonięcie 7 utworów po finale**, **„Dziękujemy!” na iPadach** po edycji.
+- **Koordynator** (`#/koordynator`, tablica multimedialna za sceną): co dzieje się na scenie, kto gra następny, postęp edycji i sezonu, baza utworów, sprzęt; do tego drabinka i ranking pod przyciskami.
 - **Plansza edycji:** przed rundą 1 i po „Zakończ edycję” tablica pokazuje 20 s rankingu, potem „Edycja 5 · 4BT VS 2AT VS 4B LO” (+ „zakończona”).
 
 ## Runda 3 — licytacja nut
@@ -157,6 +158,7 @@ Przydatne komendy:
    - `zawodnik@example.com`
    - `tech@example.com`
    - `tablica@example.com`
+   - `koordynator@cyfroweszkoly.pl` (panel koordynatora za sceną)
 
 ## Publikacja na GitHub Pages
 
@@ -175,6 +177,7 @@ Przydatne komendy:
 | Tablica | `#/tablica` | tablica z Androidem |
 | Tech Support | `#/tech` | laptop z OBS |
 | Muzyk | `#/muzyk` | tablet przy pianinie (runda 3) |
+| Koordynator | `#/koordynator` | tablica multimedialna za sceną |
 | Nakładka OBS | `#/stream` | źródło przeglądarki w OBS / vMix, 1920×1080 |
 
 ## Ważne zasady

@@ -3,6 +3,7 @@ import { reloadTo, useAutoUpdate } from './lib/version'
 import { RequireRole } from './components/RequireRole'
 import { AuthProvider } from './lib/AuthContext'
 import { BoardPage } from './pages/BoardPage'
+import { CoordinatorPage } from './pages/CoordinatorPage'
 import { HostPage } from './pages/HostPage'
 import { LoginScreen } from './pages/LoginScreen'
 import { MusicianPage } from './pages/MusicianPage'
@@ -65,6 +66,14 @@ export default function App() {
             element={
               <RequireRole allow={['muzyk']}>
                 <MusicianPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/koordynator"
+            element={
+              <RequireRole allow={['koordynator']}>
+                <CoordinatorPage />
               </RequireRole>
             }
           />
