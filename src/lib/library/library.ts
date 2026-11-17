@@ -522,15 +522,27 @@ function editionsLabel(starty: RankingStart[]): string {
   return `Edycje ${nr.slice(0, -1).join(', ')} i ${nr[nr.length - 1]}`
 }
 
+/** Który sezon liczy ranking (bez tego — wszystkie edycje). */
+export interface RankingScope {
+  sezon: string
+  /** Edycje bez sezonu też się liczą (sezon jeszcze nie wystartował). */
+  zLuznymi?: boolean
+  /** Edycje dołączone do sezonu ręcznie (podpięte w drabince albo doliczone przy starcie). */
+  dolaczone?: ReadonlySet<string>
+  /** Edycje finału nauczycieli (nie wchodzą do rankingu klas). */
+  nauczyciele?: ReadonlySet<string>
+}
+
 /**
- * Ranking klas. Z `sezon` — tylko edycje tego sezonu (z `zLuznymi` także te bez sezonu, rozegrane
- * przed rozpoczęciem sezonu). Finał nauczycieli nie wchodzi do rankingu klas.
+ * Ranking klas. Ze `scope` — tylko edycje danego sezonu. Finał nauczycieli nie wchodzi do rankingu klas.
  */
-export function computeRanking(editions: Record<string, EditionRecord>, sezon?: string, zLuznymi = false): RankingEntry[] {
+export function computeRanking(editions: Record<string, EditionRecord>, scope?: RankingScope): RankingEntry[] {
   const byClass = new Map<string, RankingEntry>()
-  const inSeason = (e: EditionRecord) => !sezon || e.sezon === sezon || (zLuznymi && !e.sezon)
-  const done = Object.values(editions)
-    .filter((e) => e.zakonczono && e.wyniki && !e.test && e.etap !== 'nauczyciele' && inSeason(e))
+  const inSeason = (id: string, e: EditionRecord) =>
+    !scope || e.sezon === scope.sezon || Boolean(scope.dolaczone?.has(id)) || (Boolean(scope.zLuznymi) && !e.sezon)
+  const done = Object.entries(editions)
+    .filter(([id, e]) => e.zakonczono && e.wyniki && !e.test && e.etap !== 'nauczyciele' && !scope?.nauczyciele?.has(id) && inSeason(id, e))
+    .map(([, e]) => e)
     .sort((a, b) => a.numer - b.numer)
   for (const e of done) {
     for (const k of STATION_KEYS) {

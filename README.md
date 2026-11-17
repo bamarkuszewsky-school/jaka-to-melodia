@@ -24,7 +24,7 @@ Stos: **TypeScript + React + Vite**, stan gry na żywo w **Firebase Realtime Dat
 - **Tablica w stylu teleturnieju:** w rundach 1–3 belki haseł z plakietką punktów (na żywo rośnie / maleje), w finale panel z numerami 1–7 i sześciokątnym zegarem z paskiem czasu, tabliczka finalisty; w OBS ten sam panel na przezroczystym tle (kamera).
 - **Sezon i drabinka:** eliminacje → ćwierćfinały → półfinały → finał + finał nauczycieli, kolejne etapy układają się same; pokaz drabinki na tablicy i live, „Rozpocznij sezon” / „Zakończ sezon” z datą, etap w czołówce i intro rund.
 - **Przelosowanie utworu w trakcie gry** (↻), **odsłonięcie 7 utworów po finale**, **„Dziękujemy!” na iPadach** po edycji.
-- **Koordynator** (`#/koordynator`, tablica multimedialna za sceną): co dzieje się na scenie, kto gra następny, postęp edycji i sezonu, baza utworów, sprzęt; do tego drabinka i ranking pod przyciskami.
+- **Koordynator** (`#/koordynator`, tablica multimedialna za sceną): co dzieje się na scenie, kto gra następny, postęp edycji i sezonu, baza utworów, sprzęt; do tego drabinka i ranking pod przyciskami. Koordynator może też **układać drabinkę** (zakładka „Ułóż drabinkę” — to samo co u hosta): sezon, mecze, start / koniec sezonu, pokaz na tablicy i live. Wyniki edycji dostaje od hosta bez wylosowanych utworów, więc odpowiedzi zna tylko host.
 - **Plansza edycji:** przed rundą 1 i po „Zakończ edycję” tablica pokazuje 20 s rankingu, potem „Edycja 5 · 4BT VS 2AT VS 4B LO” (+ „zakończona”).
 
 ## Runda 3 — licytacja nut

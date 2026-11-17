@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { EditionRecord } from './library'
+import { computeRanking, type EditionRecord } from './library'
 import {
   buildNextStage,
   farewells,
@@ -7,6 +7,7 @@ import {
   parseClassList,
   playableMatches,
   qualifiers,
+  rankingScope,
   seasonProgress,
   seedMatches,
   splitIntoMatches,
@@ -144,6 +145,23 @@ describe('drabinka sezonu', () => {
       [3, false, 'C1'],
       [1, false, 'N1'],
     ])
+  })
+
+  it('ranking sezonu: edycje sezonu, podpięte w drabince i doliczone; bez finału nauczycieli', () => {
+    const editions: Record<string, EditionRecord> = {
+      wSezonie: { ...played(1, [['A', 500], ['B', 100]]), sezon: 's' },
+      podpieta: played(2, [['C', 400], ['D', 50]]),
+      doliczona: played(3, [['E', 300], ['F', 20]]),
+      obca: played(4, [['G', 999], ['H', 1]]),
+      nauczyciele: played(5, [['Humaniści', 2000], ['Języki', 10]]),
+    }
+    const season: Season = {
+      nazwa: 'S',
+      start: '2026-11-01',
+      dolicz: ['doliczona'],
+      etapy: { eliminacje: [{ klasy: ['C', 'D'], edycja: 'podpieta' }], nauczyciele: [{ klasy: [], edycja: 'nauczyciele' }] },
+    }
+    expect(computeRanking(editions, rankingScope('s', season)).map((r) => r.klasa)).toEqual(['A', 'C', 'E', 'B', 'D', 'F'])
   })
 
   it('napisy na iPadach po edycji', () => {

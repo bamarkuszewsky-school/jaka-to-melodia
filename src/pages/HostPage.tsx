@@ -19,6 +19,7 @@ import {
   applySongChanges,
   useCurrentEditionId,
   useCurrentSeasonId,
+  useEditionSummarySync,
   useEditions,
   useLadderSync,
   usePokaz,
@@ -73,7 +74,8 @@ export function HostPage() {
   const seasons = useSeasons()
   const seasonId = useCurrentSeasonId()
   const season = seasonId && seasons ? seasons[seasonId] : undefined
-  useRankingSync(editions, pokaz, seasonId, Boolean(season?.start))
+  useRankingSync(editions, pokaz, seasonId, season)
+  useEditionSummarySync(editions, currentId, pokaz)
   useLadderSync(seasonId, season, editions, currentId, pokaz)
   useSongStatsSync(songs, pokaz)
 

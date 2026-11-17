@@ -5273,6 +5273,7 @@ textarea.field__input {
   flex-direction: column;
   /* bez marginesów ramki — panel od krawędzi do krawędzi */
   margin: -24px -20px;
+  background: var(--bg-deep);
 }
 
 .coord {
@@ -5731,4 +5732,21 @@ textarea.field__input {
 
 .coord-ranking .ranking {
   min-height: auto;
+}
+
+/* Koordynator: edycja drabinki (te same karty co u hosta, większe pola dotyku) */
+.coord-edit {
+  padding: clamp(12px, 1.6vw, 32px);
+  align-content: start;
+}
+
+.coord-edit .field__input,
+.coord-edit .btn {
+  min-height: 48px;
+  font-size: 18px;
+}
+
+.coord-edit .btn--tiny {
+  min-height: 40px;
+  min-width: 40px;
 }

@@ -109,7 +109,15 @@
     },
     "baza": {
       ".read": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'",
-      ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'"
+      ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'",
+      "sezony": {
+        ".read": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || auth.token.email === 'koordynator@cyfroweszkoly.pl')",
+        ".write": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || auth.token.email === 'koordynator@cyfroweszkoly.pl')"
+      },
+      "sezon": {
+        ".read": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || auth.token.email === 'koordynator@cyfroweszkoly.pl')",
+        ".write": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || auth.token.email === 'koordynator@cyfroweszkoly.pl')"
+      }
     },
     "wyloguj": {
       ".read": "auth != null",
@@ -117,7 +125,28 @@
     },
     "pokaz": {
       ".read": "auth != null",
-      ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'"
+      ".write": "auth != null && auth.token.email === 'host@cyfroweszkoly.pl'",
+      "drabinka": {
+        ".write": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || auth.token.email === 'koordynator@cyfroweszkoly.pl')"
+      },
+      "drabinkaTablica": {
+        ".write": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || auth.token.email === 'koordynator@cyfroweszkoly.pl')"
+      },
+      "drabinkaStream": {
+        ".write": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || auth.token.email === 'koordynator@cyfroweszkoly.pl')"
+      },
+      "tablica": {
+        ".write": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || auth.token.email === 'koordynator@cyfroweszkoly.pl')"
+      },
+      "stream": {
+        ".write": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || auth.token.email === 'koordynator@cyfroweszkoly.pl')"
+      },
+      "lista": {
+        ".write": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || auth.token.email === 'koordynator@cyfroweszkoly.pl')"
+      },
+      "plansza": {
+        ".write": "auth != null && (auth.token.email === 'host@cyfroweszkoly.pl' || (auth.token.email === 'koordynator@cyfroweszkoly.pl' && newData.exists() && newData.child('tryb').isString() && newData.child('tryb').val().beginsWith('sezon')))"
+      }
     }
   }
 }

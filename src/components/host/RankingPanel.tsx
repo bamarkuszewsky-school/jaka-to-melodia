@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { replayPlansza, setPokaz, type Pokaz } from '../../lib/library/db'
 import { computeRanking, type EditionRecord } from '../../lib/library/library'
-import type { Season } from '../../lib/library/season'
+import { rankingScope, type Season } from '../../lib/library/season'
 
 /** Zakładka „Ranking”: wyniki klas ze wszystkich zakończonych edycji + pokaz na tablicy i w OBS. */
 export function RankingPanel({
@@ -18,9 +18,15 @@ export function RankingPanel({
   const [error, setError] = useState<string | null>(null)
   const seasonName = season?.nazwa
   const loose = !season?.start
-  const lista = computeRanking(editions ?? {}, seasonId ?? undefined, loose)
-  const finished = Object.values(editions ?? {}).filter(
-    (e) => e.zakonczono && !e.test && e.etap !== 'nauczyciele' && (!seasonId || e.sezon === seasonId || (loose && !e.sezon)),
+  const scope = seasonId && season ? rankingScope(seasonId, season) : undefined
+  const lista = computeRanking(editions ?? {}, scope)
+  const finished = Object.entries(editions ?? {}).filter(
+    ([id, e]) =>
+      e.zakonczono &&
+      !e.test &&
+      e.etap !== 'nauczyciele' &&
+      !scope?.nauczyciele?.has(id) &&
+      (!scope || e.sezon === scope.sezon || scope.dolaczone?.has(id) || (loose && !e.sezon)),
   ).length
 
   const toggle = async (target: 'tablica' | 'stream') => {

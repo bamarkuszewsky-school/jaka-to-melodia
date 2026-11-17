@@ -33,6 +33,7 @@ import {
   buildNextStage,
   stageToAutoFill,
   nextStage,
+  rankingScope,
 } from './season'
 
 /**
@@ -276,6 +277,9 @@ export interface Pokaz {
   /** Etap i edycja, która trwa — do czołówki i intra rund. */
   etap?: EtapInfo
   statystyki?: SongStats
+  /** Wyniki edycji bez utworów (dla koordynatora) i id edycji, która trwa. */
+  edycje?: Record<string, Omit<EditionRecord, 'utwory'>>
+  biezaca?: string | null
 }
 
 const asPokaz = (v: unknown): Pokaz => {
@@ -290,6 +294,8 @@ const asPokaz = (v: unknown): Pokaz => {
     drabinkaStream: Boolean(raw.drabinkaStream),
     etap: raw.etap ?? undefined,
     statystyki: raw.statystyki ?? undefined,
+    edycje: raw.edycje ?? undefined,
+    biezaca: raw.biezaca ?? null,
   }
 }
 
@@ -325,14 +331,50 @@ export function useRankingSync(
   editions: Record<string, EditionRecord> | undefined,
   pokaz: Pokaz | undefined,
   sezon?: string | null,
-  sezonTrwa = false,
+  season?: Season,
 ) {
   useEffect(() => {
     if (!editions || !pokaz) return
     // Dopóki sezon nie wystartował, wcześniejsze edycje (bez sezonu) też są w rankingu.
-    const lista = computeRanking(editions, sezon ?? undefined, !sezonTrwa)
+    const lista = computeRanking(editions, sezon && season ? rankingScope(sezon, season) : undefined)
     if (JSON.stringify(lista) !== JSON.stringify(pokaz.lista)) set(ref(db, 'pokaz/lista'), lista).catch(() => {})
-  }, [editions, pokaz, sezon, sezonTrwa])
+  }, [editions, pokaz, sezon, season])
+}
+
+/**
+ * Wyniki edycji dla koordynatora: ta sama lista co /baza/edycje, ale bez wylosowanych utworów
+ * (koordynator układa drabinkę, a odpowiedzi zna tylko host).
+ */
+export function editionSummaries(editions: Record<string, EditionRecord>): Record<string, Omit<EditionRecord, 'utwory'>> {
+  const out: Record<string, Omit<EditionRecord, 'utwory'>> = {}
+  for (const [id, e] of Object.entries(editions)) {
+    const { utwory: _skip, ...rest } = e
+    void _skip
+    out[id] = JSON.parse(JSON.stringify(rest)) as Omit<EditionRecord, 'utwory'>
+  }
+  return out
+}
+
+export function useEditionSummarySync(
+  editions: Record<string, EditionRecord> | undefined,
+  currentId: string | null | undefined,
+  pokaz: Pokaz | undefined,
+) {
+  useEffect(() => {
+    if (!editions || !pokaz || currentId === undefined) return
+    const summary = editionSummaries(editions)
+    const changes: Record<string, unknown> = {}
+    if (JSON.stringify(summary) !== JSON.stringify(pokaz.edycje ?? {})) changes.edycje = Object.keys(summary).length ? summary : null
+    if ((pokaz.biezaca ?? null) !== currentId) changes.biezaca = currentId
+    if (Object.keys(changes).length) update(ref(db, 'pokaz'), changes).catch(() => {})
+  }, [editions, currentId, pokaz])
+}
+
+/** Koordynator: wyniki edycji z /pokaz (bez utworów) w kształcie potrzebnym drabince. */
+export function editionsFromPokaz(pokaz: Pokaz | undefined): Record<string, EditionRecord> | undefined {
+  if (!pokaz) return undefined
+  const empty = { runda1: [], runda2: [], dogrywka2: [], runda3: [], final: [] }
+  return Object.fromEntries(Object.entries(pokaz.edycje ?? {}).map(([id, e]) => [id, { ...e, utwory: empty }]))
 }
 
 // ---------- Sezon i drabinka ----------
@@ -370,9 +412,8 @@ export function saveStage(id: string, etap: StageKey, matches: Match[]): Promise
  * Edycje rozegrane wcześniej bez sezonu (`dolicz`) trafiają do tego sezonu (do rankingu).
  */
 export async function startSeason(id: string, season: Season, data: string, dolicz: string[]): Promise<void> {
-  const changes: Record<string, unknown> = { [`sezony/${id}/start`]: data, [`sezony/${id}/koniec`]: null }
-  for (const e of dolicz) changes[`edycje/${e}/sezon`] = id
-  await update(ref(db, 'baza'), changes)
+  // Doliczone edycje zapisujemy w sezonie (nie w /baza/edycje) — może to zrobić także koordynator.
+  await update(ref(db, `baza/sezony/${id}`), { start: data, koniec: null, dolicz: dolicz.length ? dolicz : null })
   await set(ref(db, 'pokaz/plansza'), { tryb: 'sezon-start', nazwa: season.nazwa, data, od: serverTimestamp() })
 }
 
@@ -391,14 +432,10 @@ export async function endSeason(id: string, season: Season, data: string, editio
 
 /** Podpięcie już rozegranej edycji pod mecz (np. eliminacje grane przed założeniem drabinki). */
 export function linkEdition(seasonId: string, m: MatchRef, editionId: string | null, klasy?: string[]): Promise<void> {
-  const changes: Record<string, unknown> = { [`sezony/${seasonId}/etapy/${m.etap}/${m.mecz}/edycja`]: editionId }
-  if (klasy) changes[`sezony/${seasonId}/etapy/${m.etap}/${m.mecz}/klasy`] = klasy
-  if (editionId) {
-    changes[`edycje/${editionId}/sezon`] = seasonId
-    changes[`edycje/${editionId}/etap`] = m.etap
-    changes[`edycje/${editionId}/mecz`] = m.mecz
-  }
-  return update(ref(db, 'baza'), changes)
+  // Tylko w sezonie: ranking i drabinka rozpoznają podpiętą edycję po meczu (koordynator też może).
+  const changes: Record<string, unknown> = { edycja: editionId }
+  if (klasy) changes.klasy = klasy
+  return update(ref(db, `baza/sezony/${seasonId}/etapy/${m.etap}/${m.mecz}`), changes)
 }
 
 /**

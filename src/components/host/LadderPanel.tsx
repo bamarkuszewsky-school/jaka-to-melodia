@@ -211,7 +211,10 @@ function SeasonHeader({
   const [confirm, setConfirm] = useState<'start' | 'koniec' | null>(null)
 
   // Edycje rozegrane przed założeniem sezonu (bez przypisanego sezonu) — mogą wejść do rankingu tego sezonu.
-  const loose = Object.entries(editions).filter(([, e]) => e.zakonczono && !e.test && !e.sezon).map(([eid]) => eid)
+  const linked = new Set(ALL_STAGES.flatMap((k) => stageMatches(season, k).map((m) => m.edycja).filter(Boolean)))
+  const loose = Object.entries(editions)
+    .filter(([eid, e]) => e.zakonczono && !e.test && !e.sezon && !linked.has(eid))
+    .map(([eid]) => eid)
   const view = ladderView(season, editions)
   const status = season.koniec
     ? `zakończony ${formatDate(season.koniec)}`
@@ -516,6 +519,8 @@ function MatchRow({
   canEdit: boolean
 }) {
   const e = match.edycja ? editions[match.edycja] : undefined
+  // Odpięcie rozegranej edycji — dwa dotknięcia (łatwo trafić przypadkiem na ekranie dotykowym).
+  const [unlink, setUnlink] = useState(false)
   return (
     <li className={`ladder-match is-${live?.stan ?? 'czeka'}`}>
       <span className="ladder-match__nr">{nr}</span>
@@ -566,11 +571,21 @@ function MatchRow({
             </button>
           </>
         )}
-        {e?.zakonczono && (
-          <button type="button" className="btn btn--tiny btn--ghost" onClick={() => onLink(null)} title="Odepnij edycję od meczu">
-            Odepnij
-          </button>
-        )}
+        {e?.zakonczono &&
+          (unlink ? (
+            <>
+              <button type="button" className="btn btn--tiny btn--danger" onClick={() => onLink(null)}>
+                Tak, odepnij
+              </button>
+              <button type="button" className="btn btn--tiny btn--ghost" onClick={() => setUnlink(false)}>
+                Nie
+              </button>
+            </>
+          ) : (
+            <button type="button" className="btn btn--tiny btn--ghost" onClick={() => setUnlink(true)} title="Odepnij edycję od meczu">
+              Odepnij
+            </button>
+          ))}
       </div>
     </li>
   )

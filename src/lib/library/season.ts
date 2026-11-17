@@ -1,6 +1,6 @@
 import type { StationKey } from '../game/types'
 import { STATION_KEYS } from '../game/types'
-import { classKey, type EditionRecord } from './library'
+import { classKey, type EditionRecord, type RankingScope } from './library'
 
 /**
  * SEZON I DRABINKA — czysta logika (bez Firebase).
@@ -50,6 +50,8 @@ export interface Season {
   /** Daty RRRR-MM-DD wpisane przy „Rozpocznij sezon” / „Zakończ sezon”. */
   start?: string
   koniec?: string
+  /** Edycje rozegrane przed startem sezonu, doliczone do jego rankingu. */
+  dolicz?: string[]
   etapy: Partial<Record<StageKey, Match[]>>
 }
 
@@ -78,7 +80,8 @@ export function normalizeSeason(raw: unknown): Season | undefined {
       return { klasy: klasy.map((x) => (typeof x === 'string' ? x : '')), ...(mm.edycja ? { edycja: mm.edycja } : {}) }
     })
   }
-  return { nazwa: r.nazwa ?? 'Sezon', utworzono: r.utworzono, start: r.start, koniec: r.koniec, etapy }
+  const dolicz = Array.isArray(r.dolicz) ? r.dolicz : r.dolicz ? Object.values(r.dolicz as Record<string, string>) : undefined
+  return { nazwa: r.nazwa ?? 'Sezon', utworzono: r.utworzono, start: r.start, koniec: r.koniec, ...(dolicz ? { dolicz } : {}), etapy }
 }
 
 // ---------- Eliminacje: podział wpisanych klas na edycje ----------
@@ -313,6 +316,19 @@ export function ladderView(season: Season, editions: Record<string, EditionRecor
     etapy.push({ etap: k, nazwa: STAGE_LABEL[k], mecze, ...(dzikie > 0 ? { dzikie } : {}) })
   }
   return { sezon: season.nazwa, etapy, ...(mistrz ? { mistrz } : {}), ...(mistrzNauczycieli ? { mistrzNauczycieli } : {}) }
+}
+
+/** Zakres rankingu dla sezonu: jego edycje, edycje podpięte w drabince i doliczone przy starcie. */
+export function rankingScope(id: string, season: Season): RankingScope {
+  const dolaczone = new Set<string>(season.dolicz ?? [])
+  const nauczyciele = new Set<string>()
+  for (const k of ALL_STAGES)
+    for (const m of stageMatches(season, k)) {
+      if (!m.edycja) continue
+      dolaczone.add(m.edycja)
+      if (k === 'nauczyciele') nauczyciele.add(m.edycja)
+    }
+  return { sezon: id, zLuznymi: !season.start, dolaczone, nauczyciele }
 }
 
 // ---------- Mecz do następnej edycji ----------

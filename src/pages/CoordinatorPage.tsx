@@ -1,18 +1,29 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { LadderBoard } from '../components/board/LadderBoard'
+import { LadderPanel } from '../components/host/LadderPanel'
 import { RankingView } from '../components/RankingView'
 import { Shell } from '../components/Shell'
 import { editionSteps, stageStatus } from '../lib/game/progress'
 import { useGame, useServerOffset } from '../lib/game/state'
 import { STATION_KEYS, type GameState, type StationKey } from '../lib/game/types'
-import { formatDate, usePokaz, type Pokaz } from '../lib/library/db'
+import {
+  editionsFromPokaz,
+  formatDate,
+  useCurrentSeasonId,
+  useLadderSync,
+  usePokaz,
+  useSeasons,
+  type Pokaz,
+} from '../lib/library/db'
 import { DRAW_COUNT } from '../lib/library/library'
 import { seasonProgress, type SeasonProgress } from '../lib/library/season'
 import { PRESENCE_LABELS, usePresence, usePresenceList, type PresenceKey } from '../lib/presence'
 import { useFullscreen, useWakeLock } from '../lib/screen'
 import { labelForKey, useStationNames, type StationNames } from '../lib/stations'
 
-type View = 'panel' | 'drabinka' | 'ranking'
+type View = 'panel' | 'drabinka' | 'edycja' | 'ranking'
+
+const VIEW_LABEL: Record<View, string> = { panel: 'Panel', drabinka: 'Drabinka', edycja: 'Ułóż drabinkę', ranking: 'Ranking' }
 
 /** Ile utworów każdej rundy zużywa jedna edycja. */
 const PER_EDITION: Record<string, number> = {
@@ -48,6 +59,12 @@ export function CoordinatorPage() {
   const names = useStationNames()
   const online = usePresenceList()
   const [view, setView] = useState<View>('panel')
+  // Drabinkę może układać także koordynator (sezon i mecze; wyniki edycji — bez utworów — z /pokaz).
+  const seasons = useSeasons()
+  const seasonId = useCurrentSeasonId()
+  const season = seasonId && seasons ? seasons[seasonId] : undefined
+  const editions = useMemo(() => editionsFromPokaz(pokaz), [pokaz])
+  useLadderSync(seasonId, season, editions, pokaz?.biezaca, pokaz)
   const { isFullscreen, supported, toggle } = useFullscreen()
   // Drabinka to scena 1920×1080 na całe okno: zostawiamy miejsce na pasek u góry i przyciski na dole.
   const reserveTop = isFullscreen ? 0 : 76
@@ -59,6 +76,10 @@ export function CoordinatorPage() {
         <div className="coord-view">
           {view === 'drabinka' && pokaz?.drabinka ? (
             <LadderBoard view={pokaz.drabinka} variant="board" reserveTop={reserveTop} reserveBottom={reserveBottom} />
+          ) : view === 'edycja' ? (
+            <div className="coord-edit grid">
+              <LadderPanel seasons={seasons} seasonId={seasonId} editions={editions} currentId={pokaz?.biezaca} pokaz={pokaz} />
+            </div>
           ) : view === 'ranking' ? (
             <div className="coord-ranking">
               <RankingView lista={pokaz?.lista ?? []} variant="board" />
@@ -68,7 +89,7 @@ export function CoordinatorPage() {
           )}
         </div>
         <nav className="coord-tabs" aria-label="Widok koordynatora">
-          {(['panel', 'drabinka', 'ranking'] as View[]).map((v) => (
+          {(['panel', 'drabinka', 'edycja', 'ranking'] as View[]).map((v) => (
             <button
               key={v}
               type="button"
@@ -76,7 +97,7 @@ export function CoordinatorPage() {
               onClick={() => setView(v)}
               disabled={v === 'drabinka' && !pokaz?.drabinka}
             >
-              {v === 'panel' ? 'Panel' : v === 'drabinka' ? 'Drabinka' : 'Ranking'}
+              {VIEW_LABEL[v]}
             </button>
           ))}
           {supported && (
