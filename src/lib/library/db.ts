@@ -412,8 +412,10 @@ export function useLadderSync(
       saveStage(seasonId, next, built).catch(() => {})
       return // po zapisie sezon wróci tu jeszcze raz z nowym etapem
     }
-    const view = ladderView(season, editions, currentEdition)
-    if (JSON.stringify(view) !== JSON.stringify(pokaz.drabinka ?? null)) set(ref(db, 'pokaz/drabinka'), view).catch(() => {})
+    // JSON w obie strony wycina pola `undefined` (Firebase ich nie przyjmuje).
+    const view = JSON.parse(JSON.stringify(ladderView(season, editions, currentEdition))) as LadderView
+    if (JSON.stringify(view) !== JSON.stringify(pokaz.drabinka ?? null))
+      set(ref(db, 'pokaz/drabinka'), view).catch((e) => console.error('Drabinka:', e))
   }, [seasonId, season, editions, currentEdition, pokaz])
 }
 

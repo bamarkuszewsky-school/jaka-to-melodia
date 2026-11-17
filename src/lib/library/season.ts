@@ -276,7 +276,8 @@ export function ladderView(season: Season, editions: Record<string, EditionRecor
     const mecze = matches.map((m, i): LadderMatch => {
       const e = m.edycja ? editions[m.edycja] : undefined
       const res = matchResult(m, editions)
-      const base = { nr: i + 1, edycja: e?.nazwa, data: e?.data }
+      // Bez pól `undefined` — Firebase odrzuca cały zapis, gdy trafi na takie pole.
+      const base = { nr: i + 1, ...(e?.nazwa ? { edycja: e.nazwa } : {}), ...(e?.data ? { data: e.data } : {}) }
       if (!res) {
         const playing = Boolean(m.edycja && m.edycja === currentEdition)
         return {

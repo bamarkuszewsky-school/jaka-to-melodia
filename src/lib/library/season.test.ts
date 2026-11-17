@@ -105,6 +105,17 @@ describe('drabinka sezonu', () => {
     expect(playableMatches(season)).toEqual([{ etap: 'eliminacje', mecz: 1, klasy: ['B1', 'B2', 'B3'] }])
   })
 
+  it('widok drabinki nie ma pól undefined (Firebase odrzuciłby zapis)', () => {
+    const editions = { a: played(1, [['A1', 900], ['A2', 800], ['A3', 100]]) }
+    const season: Season = {
+      nazwa: 'S',
+      etapy: { eliminacje: [{ klasy: ['A1', 'A2', 'A3'], edycja: 'a' }, { klasy: ['B1', 'B2', 'B3'] }], nauczyciele: [{ klasy: ['', '', ''] }] },
+    }
+    const hasUndefined = (v: unknown): boolean =>
+      v === undefined || (typeof v === 'object' && v !== null && Object.values(v).some(hasUndefined))
+    expect(hasUndefined(ladderView(season, editions, 'x'))).toBe(false)
+  })
+
   it('napisy na iPadach po edycji', () => {
     const wyniki = { '1': { klasa: 'A', punkty: 900, miejsce: 1 }, '2': { klasa: 'B', punkty: 300, miejsce: 2 } }
     const f = farewells(wyniki, 'polfinal', 0)
